@@ -34,10 +34,10 @@ describe( "populate", () => {
     } )
 } )
 
-describe( "checkChangeContentValidity", () => {
+describe( "validateChangeContent", () => {
     it( "should return true if all poles is passed valid", () => {
         const data = {
-            attachments: "photo227667805_457239951_d18b007165cb0d264e",
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: "text"
         }
 
@@ -57,7 +57,7 @@ describe( "checkChangeContentValidity", () => {
     } )
     it( "should return true if only attachments is passed and it's valid", () => {
         const data = {
-            attachments: "photo227667805_457239951_d18b007165cb0d264e"
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ]
         }
 
         const result = DataBase.validateChangeContent( data );
@@ -82,7 +82,7 @@ describe( "checkChangeContentValidity", () => {
             text: "text"
         }
         const data2 = {
-            attachments: "photo227667805_457239951_d18b007165cb0d264e",
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: 1
         }
 
@@ -95,7 +95,7 @@ describe( "checkChangeContentValidity", () => {
 
     it( "should return false if attachments is string but not valid", () => {
         const data = {
-            attachments: "not valid"
+            attachments: [ "not valid" ]
         }
 
         const result = DataBase.validateChangeContent( data );
@@ -113,7 +113,7 @@ describe( "checkChangeContentValidity", () => {
 
     it( "should return false if passed more than 2 poles", () => {
         const data = {
-            attachments: "photo227667805_457239951_d18b007165cb",
+            attachments: [ "photo227667805_457239951_d18b007165cb" ],
             text: "text",
             somethingElse: ""
         }
@@ -125,7 +125,7 @@ describe( "checkChangeContentValidity", () => {
 
     it( "should return false if passed valid amount of poles but it's not valid", () => {
         const data = {
-            attachments: "photo227667805_457239951_d18b007165cb",
+            attachments: [ "photo227667805_457239951_d18b007165cb" ],
             notText: "text",
         }
 
@@ -142,6 +142,120 @@ describe( "checkChangeContentValidity", () => {
         const result1 = DataBase.validateChangeContent( data1 );
         const result2 = DataBase.validateChangeContent( data2 );
         const result3 = DataBase.validateChangeContent( data3 );
+
+        expect( result1 ).toBe( false );
+        expect( result2 ).toBe( false );
+        expect( result3 ).toBe( false );
+    } )
+} )
+describe( "validateHomeworkContent", () => {
+    it( "should return true if all poles is passed valid", () => {
+        const data = {
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            task: "task"
+        }
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( true );
+    } )
+
+    it( "should return true if only task is passed and it's valid", () => {
+        const data = {
+            task: "task"
+        }
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( true );
+    } )
+    it( "should return true if only attachments is passed and it's valid", () => {
+        const data = {
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ]
+        }
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( true );
+    } )
+
+    it( "should return false if all poles is passed and all of them is not valid", () => {
+        const data = {
+            attachments: 1,
+            task: {}
+        }
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( false );
+    } )
+
+    it( "should return false if all poles is passed and one of them is not valid", () => {
+        const data1 = {
+            attachments: 1,
+            task: "task"
+        }
+        const data2 = {
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            task: 1
+        }
+
+        const result1 = DataBase.validateHomeworkContent( data1 );
+        const result2 = DataBase.validateHomeworkContent( data2 );
+
+        expect( result1 ).toBe( false );
+        expect( result2 ).toBe( false );
+    } )
+
+    it( "should return false if attachments is string but not valid", () => {
+        const data = {
+            attachments: [ "not valid" ]
+        }
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( false );
+    } )
+
+    it( "should return false if no poles passed", () => {
+        const data = {}
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( false );
+    } )
+
+    it( "should return false if passed more than 2 poles", () => {
+        const data = {
+            attachments: [ "photo227667805_457239951_d18b007165cb" ],
+            task: "task",
+            somethingElse: ""
+        }
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( false );
+    } )
+
+    it( "should return false if passed valid amount of poles but it's not valid", () => {
+        const data = {
+            attachments: [ "photo227667805_457239951_d18b007165cb" ],
+            nottask: "task",
+        }
+
+        const result = DataBase.validateHomeworkContent( data );
+
+        expect( result ).toBe( false );
+    } )
+
+    it( "should return false if passed object but not plain (array, promise, null)", () => {
+        const data1 = null;
+        const data2 = new Promise( () => { } );
+        const data3 = []
+
+        const result1 = DataBase.validateHomeworkContent( data1 );
+        const result2 = DataBase.validateHomeworkContent( data2 );
+        const result3 = DataBase.validateHomeworkContent( data3 );
 
         expect( result1 ).toBe( false );
         expect( result2 ).toBe( false );

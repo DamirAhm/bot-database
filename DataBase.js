@@ -165,17 +165,17 @@ class DataBase {
     //! Classes
 
     //* Homework
-    static async addHomework ( className, lesson, task, studentVkId, expirationDate ) {
+    static async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
             if ( className && typeof className === "string" ) {
                 if ( lesson && Lessons.includes( lesson ) ) {
-                    if ( task.trim() && typeof task === "string" ) {
+                    if ( this.validateHomeworkContent( content ) ) {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             if ( Class.schedule.flat().includes( lesson ) ) {
                                 const newHomework = {
                                     lesson,
-                                    task,
+                                    task: content,
                                     _id: new mongoose.Types.ObjectId()
                                 };
                                 if ( studentVkId ) {
@@ -221,6 +221,7 @@ class DataBase {
             return null;
         }
     }; //Добавляет жомашнее задание в класс
+
     static async removeHomework ( className, homeworkId ) {
         try {
             if ( typeof homeworkId === "object" && isObjectId( homeworkId ) ) homeworkId = homeworkId.toString();
@@ -689,15 +690,47 @@ class DataBase {
             return null;
         }
     } //
+    static validateHomeworkContent ( content ) {
+        if ( typeof content === "object" && content !== null && content.toString() === "[object Object]" ) {
+            if (
+                Object.keys( content ).length === 0 ||
+                Object.keys( content ).length > 2 ||
+                Object.keys( content ).some( key => ![ "attachments", "task" ].includes( key ) )
+            ) {
+                return false;
+            }
+
+            if ( content.task && typeof content.task !== "string" ) { return false };
+
+            if (
+                content.attachments &&
+                (
+                    !Array.isArray( content.attachments ) ||
+                    content.attachments.some( at => !this.validateAttachment( at ) )
+                )
+            ) {
+                return false;
+            };
+
+            return true;
+
+        } else {
+            return false;
+        }
+    }
     static validateChangeContent ( content ) {
         if ( content ) {
             if ( content !== null && content.toString() === "[object Object]" ) {
-                if ( Object.keys( content ).length > 0 && Object.keys( content ).length <= 2 && Object.keys( content ).every( key => [ "attachments", "text" ].includes( key ) ) ) {
-                    if ( content.attachments && content.attachments.every( at => this.validateAttachment( at ) ) ) {
-                        throw new TypeError( "Attachments must be an array of attachments" )
+                if (
+                    Object.keys( content ).length > 0 &&
+                    Object.keys( content ).length <= 2 &&
+                    Object.keys( content ).every( key => [ "attachments", "text" ].includes( key ) )
+                ) {
+                    if ( content.attachments && ( !Array.isArray( content.attachments ) || content.attachments.some( at => !this.validateAttachment( at ) ) ) ) {
+                        return false;
                     }
                     if ( content.text && typeof content.text !== "string" ) {
-                        throw new TypeError( "Text must be a string" )
+                        return false;
                     }
                     return true;
                 } else {
@@ -710,7 +743,7 @@ class DataBase {
         return false;
     } //
     static validateAttachment ( attachment ) {
-        return typeof attachment !== "string" || !/[a-z]+\d+_\d+_.+/.test( attachment );
+        return typeof attachment === "string" && /[a-z]+\d+_\d+_.+/.test( attachment );
     } //
 }
 
