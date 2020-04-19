@@ -52,7 +52,7 @@ const classSchema = mongoose.Schema( {
                         message: "Homework 'to' can`t be in future"
                     }
                 },
-                attachments: String,
+                attachments: [ String ],
                 createdBy: {
                     required: true,
                     type: Number,
@@ -90,10 +90,13 @@ const classSchema = mongoose.Schema( {
     changes: {
         type: [ {
             text: String,
-            attachments: String,
+            attachments: [ String ],
             to: Date,
             createdBy: Number,
-            _id: false
+            _id: {
+                type: mongoose.Schema.Types.ObjectId,
+                default: new mongoose.Types.ObjectId()
+            }
         } ],
         default: []
     },

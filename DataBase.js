@@ -5,16 +5,16 @@ const _Student = require( "./Models/StudentModel" );
 const _Class = require( "./Models/ClassModel" );
 const uuid4 = require( "uuid4" );
 const {
-    // isObjectId,
     findNextDayWithLesson,
     findNextLessonDate,
     findNotifiedStudents,
     lessonsIndexesToLessonsNames,
-    checkIsToday,
-    isObjectId
+    checkIsToday
 } = require( "./utils/functions" );
 const mongoose = require( "mongoose" );
 const config = require( "config" );
+
+const isObjectId = mongoose.Types.ObjectId
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
@@ -76,16 +76,20 @@ class DataBase {
     }; //Возвращает класс по его имени
     static async getClassBy_Id ( _id ) {
         try {
-            if ( typeof _id === "object" && isObjectId( _id ) ) _id = _id.toString();
-            if ( _id && typeof _id === "string" ) {
-                const Class = await _Class.findById( _id );
-                if ( Class ) {
-                    return Class;
+            if ( isObjectId( _id ) ) {
+                if ( typeof _id === "object" ) _id = _id.toString();
+                if ( _id && typeof _id === "string" ) {
+                    const Class = await _Class.findById( _id );
+                    if ( Class ) {
+                        return Class;
+                    } else {
+                        return null;
+                    }
                 } else {
-                    return null;
+                    throw new TypeError( "_id must be string" );
                 }
             } else {
-                throw new TypeError( "_id must be string" );
+                throw new TypeError( "_id must be an objectId" )
             }
         } catch ( e ) {
             if ( e instanceof TypeError ) throw e;
@@ -338,18 +342,19 @@ class DataBase {
                         const newChange = {
                             to: toDate,
                             createdBy: vkId,
-                            ...content
+                            ...content,
+                            _id: new mongoose.Types.ObjectId()
                         };
                         if ( toAll ) {
                             const classes = await _Class.find( {} );
                             for ( const _class of classes ) {
                                 await _class.updateOne( { changes: [ ..._class.changes, newChange ] } )
                             }
-                            return true;
+                            return newChange._id;
                         } else {
                             if ( Student.class ) {
                                 await Student.class.updateOne( { changes: [ ...Student.class.changes, newChange ] } );
-                                return true;
+                                return newChange._id;
                             } else {
                                 return false; //Не состоя в классе вы можете добавлять изменения только всем классам
                             }
@@ -686,11 +691,11 @@ class DataBase {
         if ( content ) {
             if ( content !== null && content.toString() === "[object Object]" ) {
                 if ( Object.keys( content ).length > 0 && Object.keys( content ).length <= 2 && Object.keys( content ).every( key => [ "attachments", "text" ].includes( key ) ) ) {
-                    if ( content.attachments && this.validateAttachment( content.attachments ) ) {
-                        return false;
+                    if ( content.attachments && content.attachments.every( at => this.validateAttachment( at ) ) ) {
+                        throw new TypeError( "Attachments must be an array of attachments" )
                     }
                     if ( content.text && typeof content.text !== "string" ) {
-                        return false;
+                        throw new TypeError( "Text must be a string" )
                     }
                     return true;
                 } else {
@@ -699,7 +704,7 @@ class DataBase {
             } else {
                 return false;
             }
-        };
+        }
         return false;
     } //
     static validateAttachment ( attachment ) {
