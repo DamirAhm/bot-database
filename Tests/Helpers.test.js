@@ -1,6 +1,6 @@
-const ClassModel = require( "../../Models/ClassModel" );
+const ClassModel = require( "../Models/ClassModel" );
 
-const StudentModel = require( "../../Models/StudentModel" );
+const StudentModel = require( "../Models/StudentModel" );
 
 const { getUniqueClassName, createTestData } = require( "../utils/functions" );
 const { DataBase } = require( "../DataBase" );

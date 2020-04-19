@@ -1,8 +1,8 @@
-// @ts-nocheck
-const { Roles, Lessons } = require( "../Models/utils" );
 
-const _Student = require( "../Models/StudentModel" );
-const _Class = require( "../Models/ClassModel" );
+const { Roles, Lessons } = require( "./Models/utils" );
+
+const _Student = require( "./Models/StudentModel" );
+const _Class = require( "./Models/ClassModel" );
 const uuid4 = require( "uuid4" );
 const {
     // isObjectId,

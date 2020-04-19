@@ -3,8 +3,8 @@ const { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
 const
     { DataBase } = require( '../DataBase' ),
     mongoose = require( "mongoose" ),
-    Class = require( '../../Models/ClassModel' ),
-    Student = require( "../../Models/StudentModel" ),
+    Class = require( '../Models/ClassModel' ),
+    Student = require( "../Models/StudentModel" ),
     { toObject, createTestData } = require( '../utils/functions' );
 
 describe( "addChanges", () => {

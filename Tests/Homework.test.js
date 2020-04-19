@@ -1,8 +1,8 @@
 const
     { DataBase } = require( '../DataBase' ),
     mongoose = require( "mongoose" ),
-    Class = require( '../../Models/ClassModel' ),
-    Student = require( "../../Models/StudentModel" );
+    Class = require( '../Models/ClassModel' ),
+    Student = require( "../Models/StudentModel" );
 const { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
 
 //TODO remove this sheat

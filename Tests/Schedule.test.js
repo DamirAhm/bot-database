@@ -1,7 +1,7 @@
 const
     { DataBase } = require( '../DataBase' ),
     mongoose = require( "mongoose" ),
-    Class = require( '../../Models/ClassModel' ),
+    Class = require( '../Models/ClassModel' ),
     { lessonsIndexesToLessonsNames } = require( '../utils/functions' );
 const { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
 

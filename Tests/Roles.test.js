@@ -1,9 +1,9 @@
 const
     mongoose = require( "mongoose" ),
-    Student = require( "../../Models/StudentModel" ),
-    Class = require( "../../Models/ClassModel" ),
+    Student = require( "../Models/StudentModel" ),
+    Class = require( "../Models/ClassModel" ),
     { DataBase } = require( "../DataBase" ),
-    { Roles } = require( "../../Models/utils" ),
+    { Roles } = require( "../Models/utils" ),
     uuid4 = require( "uuid4" );
 const { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
 

@@ -1,7 +1,7 @@
 // @ts-nocheck
-const StudentModel = require( "../../Models/StudentModel" );
+const StudentModel = require( "../Models/StudentModel" );
 
-const ClassModel = require( "../../Models/ClassModel" );
+const ClassModel = require( "../Models/ClassModel" );
 
 const { findNextDayWithLesson, findNextLessonDate, findNotifiedStudents, lessonsIndexesToLessonsNames, createTestData } = require( "../utils/functions" );
 const config = require( "config" );
