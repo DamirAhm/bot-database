@@ -17,9 +17,9 @@ const createTestData = async ( studentVkIds, isAddHomework = true ) => {
     } );
 
     if ( isAddHomework ) {
-        await DataBase.addHomework( MockClass.name, -1, "Русский", "1", new Date( 2020, 0, 2 ) );
-        await DataBase.addHomework( MockClass.name, -1, "Математика", "2", new Date( 2020, 0, 2 ) );
-        await DataBase.addHomework( MockClass.name, -1, "Математика", "2", new Date( 2019, 0, 2 ) ); //Не должен добавляться
+        await DataBase.addHomework( MockClass.name, "Русский", "1", -1, new Date( 2020, 0, 2 ) );
+        await DataBase.addHomework( MockClass.name, "Математика", "2", -1, new Date( 2020, 0, 2 ) );
+        await DataBase.addHomework( MockClass.name, "Математика", "2", -1, new Date( 2019, 0, 2 ) ); //Не должен добавляться
     }
 
     for ( let id of studentVkIds ) {
@@ -54,7 +54,7 @@ describe( "addHomework", () => {
                 [ "Русский", "Английский", "Обществознание" ]
             ]
         } )
-        await DataBase.addHomework( MockClass.name, -1, "Математика", "task" );
+        await DataBase.addHomework( MockClass.name, "Математика", "task", -1 );
         MockClass = await DataBase.getClassBy_Id( MockClass._id );
     } );
     afterAll( async () => {
@@ -66,7 +66,7 @@ describe( "addHomework", () => {
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
 
-        const result = await DataBase.addHomework( MockClass.name, studentVkId, lesson, task );
+        const result = await DataBase.addHomework( MockClass.name, lesson, task, studentVkId );
 
         const updatedHomework = await DataBase.getClassBy_Id( MockClass._id ).then( c => c.homework );
         expect( typeof result ).toBe( "object" );
@@ -79,7 +79,7 @@ describe( "addHomework", () => {
         const studentVkId = getUniqueVkId();
         const initialLength = MockClass.homework.length;
 
-        await DataBase.addHomework( MockClass.name, studentVkId, lesson, task, new Date( 2020, 2, 18 ) );
+        await DataBase.addHomework( MockClass.name, lesson, task, studentVkId, new Date( 2020, 2, 18 ) );
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
         const homework = updatedClass.homework.find( dz => dz.task === task );
 
@@ -94,7 +94,7 @@ describe( "addHomework", () => {
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
 
-        await DataBase.addHomework( MockClass.name, studentVkId, lesson, task, new Date( 2019, 9, 22 ) );
+        await DataBase.addHomework( MockClass.name, lesson, task, studentVkId, new Date( 2019, 9, 22 ) );
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
         const homework = updatedClass.homework.find( dz => dz.task === task );
 
@@ -108,13 +108,13 @@ describe( "removeHomework", () => {
     beforeAll( async () => {
         MockClass = await DataBase.createClass( getUniqueClassName() );
         await DataBase.setSchedule( MockClass.name, [ [ 0 ] ] );
-        homeworkId = await DataBase.addHomework( MockClass.name, -1, "Математика", "task" );
+        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", "task", -1 );
     } )
     afterEach( async () => {
         await Class.deleteMany( {} );
         MockClass = await DataBase.createClass( getUniqueClassName() );
         await DataBase.setSchedule( MockClass.name, [ [ 0 ] ] );
-        homeworkId = await DataBase.addHomework( MockClass.name, -1, "Математика", "task" );
+        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", "task", -1 );
     } )
 
     it( "should return true if all is ok", async () => {
@@ -139,9 +139,9 @@ describe( "getHomework", () => {
             ]
         } );
 
-        await DataBase.addHomework( MockClass.name, -1, "Русский", "Пошалить )" );
-        await DataBase.addHomework( MockClass.name, -1, "Математика", "Да" );
-        await DataBase.addHomework( MockClass.name, -1, "Английский", "Нет", new Date( 2020, 0, 1 ) );
+        await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
+        await DataBase.addHomework( MockClass.name, "Английский", "Нет", -1, new Date( 2020, 0, 1 ) );
     } );
     afterAll( async () => {
         await Class.deleteMany( {} )
@@ -156,9 +156,9 @@ describe( "getHomework", () => {
             ]
         } );
 
-        await DataBase.addHomework( MockClass.name, -1, "Русский", "Пошалить )" );
-        await DataBase.addHomework( MockClass.name, -1, "Математика", "Да" );
-        await DataBase.addHomework( MockClass.name, -1, "Английский", "Нет", new Date( 2020, 0, 1 ) );
+        await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
+        await DataBase.addHomework( MockClass.name, "Английский", "Нет", -1, new Date( 2020, 0, 1 ) );
     } )
     it( "should return list of homework", async () => {
         const result = await DataBase.getHomework( MockClass.name );
@@ -219,8 +219,8 @@ describe( "removeHomework", () => {
             ]
         } );
 
-        homeworkId1 = await DataBase.addHomework( MockClass.name, -1, "Русский", "Пошалить )" );
-        homeworkId2 = await DataBase.addHomework( MockClass.name, -1, "Математика", "Да" );
+        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
     } );
     afterEach( async () => {
         await Class.deleteMany( {} );
@@ -232,8 +232,8 @@ describe( "removeHomework", () => {
             ]
         } );
 
-        homeworkId1 = await DataBase.addHomework( MockClass.name, -1, "Русский", "Пошалить )" );
-        homeworkId2 = await DataBase.addHomework( MockClass.name, -1, "Математика", "Да" );
+        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
     } )
 
     it( "should return true if all is ok", async () => {

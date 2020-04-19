@@ -165,50 +165,52 @@ class DataBase {
     //! Classes
 
     //* Homework
-    static async addHomework ( className, studentVkId, lesson, task, expirationDate ) {
+    static async addHomework ( className, lesson, task, studentVkId, expirationDate ) {
         try {
             if ( className && typeof className === "string" ) {
-                if ( studentVkId && typeof studentVkId === "number" ) {
-                    if ( lesson && Lessons.includes( lesson ) ) {
-                        if ( task.trim() && typeof task === "string" ) {
-                            const Class = await this.getClassByName( className );
-                            if ( Class ) {
-                                if ( Class.schedule.flat().includes( lesson ) ) {
-                                    const newHomework = {
-                                        lesson,
-                                        task,
-                                        createdBy: studentVkId,
-                                        _id: new mongoose.Types.ObjectId()
-                                    };
-                                    if ( expirationDate ) {
-                                        if ( expirationDate instanceof Date && Date.now() - expirationDate.getTime() > 0 ) {
-                                            newHomework.to = expirationDate;
-                                            await Class.updateOne( { homework: Class.homework.concat( [ newHomework ] ) } );
-                                            return newHomework._id;
-                                        } else {
-                                            throw new TypeError( "Expiration date must be Date in the future" );
-                                        }
+                if ( lesson && Lessons.includes( lesson ) ) {
+                    if ( task.trim() && typeof task === "string" ) {
+                        const Class = await this.getClassByName( className );
+                        if ( Class ) {
+                            if ( Class.schedule.flat().includes( lesson ) ) {
+                                const newHomework = {
+                                    lesson,
+                                    task,
+                                    _id: new mongoose.Types.ObjectId()
+                                };
+                                if ( studentVkId ) {
+                                    if ( studentVkId && typeof studentVkId === "number" ) {
+                                        newHomework.createdBy = studentVkId
                                     } else {
-                                        const nextLessonWeekDay = findNextDayWithLesson( Class.schedule, lesson, ( new Date() ).getDay() || 7 ); // 1 - 7
-                                        const nextLessonDate = findNextLessonDate( nextLessonWeekDay );
-                                        newHomework.to = nextLessonDate;
+                                        throw new TypeError( "if vkid is passed it must be a number" )
+                                    }
+                                };
+                                if ( expirationDate ) {
+                                    if ( expirationDate instanceof Date && Date.now() - expirationDate.getTime() > 0 ) {
+                                        newHomework.to = expirationDate;
                                         await Class.updateOne( { homework: Class.homework.concat( [ newHomework ] ) } );
                                         return newHomework._id;
+                                    } else {
+                                        throw new TypeError( "Expiration date must be Date in the future" );
                                     }
                                 } else {
-                                    return null;
+                                    const nextLessonWeekDay = findNextDayWithLesson( Class.schedule, lesson, ( new Date() ).getDay() || 7 ); // 1 - 7
+                                    const nextLessonDate = findNextLessonDate( nextLessonWeekDay );
+                                    newHomework.to = nextLessonDate;
+                                    await Class.updateOne( { homework: Class.homework.concat( [ newHomework ] ) } );
+                                    return newHomework._id;
                                 }
                             } else {
                                 return null;
                             }
                         } else {
-                            throw new TypeError( "Task must be non empty string" );
+                            return null;
                         }
                     } else {
-                        throw new TypeError( "Lesson must be in lessons list" );
+                        throw new TypeError( "Task must be non empty string" );
                     }
                 } else {
-                    throw new TypeError( "Student vkId must by number" )
+                    throw new TypeError( "Lesson must be in lessons list" );
                 }
             } else {
                 throw new TypeError( "ClassName must be string" );
