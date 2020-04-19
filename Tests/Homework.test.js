@@ -1,3 +1,4 @@
+// @ts-nocheck
 const
     { DataBase } = require( '../DataBase' ),
     mongoose = require( "mongoose" ),
@@ -204,4 +205,48 @@ describe( "parseHomeworkToNotifications", () => {
         expect( notificationArray1[ 0 ].length ).toBe( 2 ); //students amt
         expect( notificationArray1[ 1 ].length ).toBe( 2 ); //homework amt
     } )
-} ); 
+} );
+
+describe( "removeHomework", () => {
+    let MockClass;
+    let homeworkId1;
+    let homeworkId2;
+    beforeAll( async () => {
+        MockClass = await DataBase.createClass( getUniqueClassName() );
+        await MockClass.updateOne( {
+            schedule: [
+                [ "Математика", "Русский", "Английский" ]
+            ]
+        } );
+
+        homeworkId1 = await DataBase.addHomework( MockClass.name, -1, "Русский", "Пошалить )" );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, -1, "Математика", "Да" );
+    } );
+    afterEach( async () => {
+        await Class.deleteMany( {} );
+        await Student.deleteMany( {} );
+        MockClass = await DataBase.createClass( getUniqueClassName() );
+        await MockClass.updateOne( {
+            schedule: [
+                [ "Математика", "Русский", "Английский" ]
+            ]
+        } );
+
+        homeworkId1 = await DataBase.addHomework( MockClass.name, -1, "Русский", "Пошалить )" );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, -1, "Математика", "Да" );
+    } )
+
+    it( "should return true if all is ok", async () => {
+        const result = await DataBase.removeHomework( MockClass.name, homeworkId1 );
+
+        expect( result ).toBe( true );
+    } )
+    it( "should remove homework from class", async () => {
+        await DataBase.removeHomework( MockClass.name, homeworkId1 );
+
+        const updatedClass = await DataBase.getClassByName( MockClass.name );
+
+        expect( updatedClass.homework.length ).toBe( 1 );
+        expect( updatedClass.homework.every( hw => hw._id.toString() !== homeworkId1.toString() ) ).toBe( true );
+    } )
+} )

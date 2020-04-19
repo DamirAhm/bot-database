@@ -10,18 +10,11 @@ const {
     findNextLessonDate,
     findNotifiedStudents,
     lessonsIndexesToLessonsNames,
-    checkIsToday
+    checkIsToday,
+    isObjectId
 } = require( "./utils/functions" );
 const mongoose = require( "mongoose" );
 const config = require( "config" );
-
-const isObjectId = id => {
-    if ( typeof id === "object" && !Array.isArray( id ) && id !== null ) {
-        return id.toString() !== "[object Object]";
-    } else {
-        return false
-    }
-};
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
@@ -229,7 +222,7 @@ class DataBase {
                 if ( homeworkId && typeof homeworkId === "string" ) {
                     const Class = await this.getClassByName( className );
                     if ( Class ) {
-                        await ( await Class ).updateOne( { homework: Class.homework.filter( hw => hw._id !== homeworkId ) } );
+                        await Class.updateOne( { homework: Class.homework.filter( hw => hw._id.toString() !== homeworkId ) } );
                         return true;
                     } else {
                         return false;
