@@ -3,6 +3,8 @@ const mongoose = require( "mongoose" );
 const uuid4 = require( "uuid4" );
 const { Lessons } = require( "./utils" );
 
+const isLesson = str => Lessons.includes( str );
+
 const classSchema = mongoose.Schema( {
     students: {
         type: [ {
@@ -33,7 +35,10 @@ const classSchema = mongoose.Schema( {
                 lesson: {
                     required: true,
                     type: String,
-                    enum: Lessons
+                    validate: {
+                        validator: isLesson,
+                        message: "Lesson must be one of existing"
+                    }
                 },
                 task: {
                     required: true,
@@ -70,7 +75,10 @@ const classSchema = mongoose.Schema( {
                 [
                     {
                         type: String,
-                        enum: Lessons
+                        validate: {
+                            validator: isLesson,
+                            message: "Lesson must be one of existing"
+                        }
                     }
                 ]
             ],
