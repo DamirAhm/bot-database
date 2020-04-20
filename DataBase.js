@@ -1,5 +1,4 @@
 const { Roles, Lessons } = require( "./Models/utils" );
-
 const _Student = require( "./Models/StudentModel" );
 const _Class = require( "./Models/ClassModel" );
 const uuid4 = require( "uuid4" );
@@ -168,6 +167,7 @@ class DataBase {
 
     //! Classes
 
+
     //* Homework
     static async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
@@ -272,6 +272,34 @@ class DataBase {
             return null
         }
     }; //
+
+    static async updateHomework ( className, homeworkId, updates ) {
+        try {
+            if ( className && typeof className === "string" ) {
+                if ( homeworkId && isObjectId( homeworkId ) ) {
+                    if ( isPartialOf( [ "attachments", "task", "lesson", "to" ], updates ) ) {
+                        const Class = await this.getClassByName( className );
+                        const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
+
+                        await Class.updateOne( { changes: updatedHomework } );
+
+                        return updatedHomework;
+                    } else {
+                        throw new TypeError( "updates must be object containing poles of change" )
+                    }
+                } else {
+                    throw new TypeError( "HomeworkId must be objectId" )
+                }
+            } else {
+                throw new TypeError( "ClassName must be string" )
+            }
+        } catch ( e ) {
+            if ( e instanceof TypeError ) { throw e };
+            console.log( e );
+            return null;
+        }
+    }
+
     //TODO refactor returning data from array to object
     static async parseHomeworkToNotifications ( currentDateForTest ) {
         const classes = await _Class.find( {} );

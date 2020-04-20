@@ -1,13 +1,14 @@
 // @ts-nocheck
 const
-    { DataBase } = require( '../DataBase' ),
     mongoose = require( "mongoose" ),
     Class = require( '../Models/ClassModel' ),
-    Student = require( "../Models/StudentModel" );
-const { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
+    Student = require( "../Models/StudentModel" ),
+    { DataBase } = require( '../DataBase' ),
+    { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
+
 
 //TODO remove this sheat
-const createTestData = async ( studentVkIds, isAddHomework = true ) => {
+const createTestData = async ( studentVkIds, isAddHomework = false ) => {
     let MockClass = await DataBase.createClass( getUniqueClassName() );
 
     await MockClass.updateOne( {
@@ -25,8 +26,7 @@ const createTestData = async ( studentVkIds, isAddHomework = true ) => {
     for ( let id of studentVkIds ) {
         await DataBase.createStudent( id, MockClass._id );
     }
-
-    return MockClass;
+    return await DataBase.getClassByName( MockClass.name );
 };
 
 describe( "addHomework", () => {
@@ -109,33 +109,6 @@ describe( "addHomework", () => {
     } )
 } );
 
-describe( "removeHomework", () => {
-    let MockClass;
-    let homeworkId;
-    beforeAll( async () => {
-        MockClass = await DataBase.createClass( getUniqueClassName() );
-        await DataBase.setSchedule( MockClass.name, [ [ 0 ] ] );
-        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", { task: "task" }, -1 );
-    } )
-    afterEach( async () => {
-        await Class.deleteMany( {} );
-        MockClass = await DataBase.createClass( getUniqueClassName() );
-        await DataBase.setSchedule( MockClass.name, [ [ 0 ] ] );
-        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", { task: "task" }, -1 );
-    } )
-
-    it( "should return true if all is ok", async () => {
-        const result = await DataBase.removeHomework( MockClass.name, homeworkId );
-
-        expect( result ).toBe( true );
-    } )
-    it( "should return false if class is not exists", async () => {
-        const result = await DataBase.removeHomework( "not a name", homeworkId );
-
-        expect( result ).toBe( false );
-    } )
-} )
-
 describe( "getHomework", () => {
     let MockClass;
     beforeAll( async () => {
@@ -183,18 +156,16 @@ describe( "getHomework", () => {
 } );
 
 describe( "parseHomeworkToNotifications", () => {
-    let MockClass1;
-    let MockClass2;
     let studentVkIds1 = [ getUniqueVkId(), getUniqueVkId() ];
     let studentVkIds2 = [ getUniqueVkId(), getUniqueVkId() ];
     beforeAll( async () => {
-        MockClass1 = await createTestData( studentVkIds1 );
+        MockClass1 = await createTestData( studentVkIds1, true );
         MockClass2 = await createTestData( studentVkIds2, false );
     } );
     afterEach( async () => {
         await Class.deleteMany( {} )
         await Student.deleteMany( {} )
-        MockClass1 = await createTestData( studentVkIds1 );
+        MockClass1 = await createTestData( studentVkIds1, true );
         MockClass2 = await createTestData( studentVkIds2, false );
     } )
     it( "should return array of arrays where first element is array of vkIds and second is array of homework for them", async () => {
@@ -202,7 +173,6 @@ describe( "parseHomeworkToNotifications", () => {
 
         expect( notificationArray1 instanceof Array ).toBe( true ); //[vkIds, homework]
         expect( notificationArray2 ).toBeUndefined(); //Потому что дз нету
-
         expect( notificationArray1[ 0 ] instanceof Array ).toBe( true );
         expect( notificationArray1[ 1 ] instanceof Array ).toBe( true );
 
@@ -217,7 +187,6 @@ describe( "parseHomeworkToNotifications", () => {
 describe( "removeHomework", () => {
     let MockClass;
     let homeworkId1;
-    let homeworkId2;
     beforeAll( async () => {
         MockClass = await DataBase.createClass( getUniqueClassName() );
         await MockClass.updateOne( {
@@ -255,5 +224,64 @@ describe( "removeHomework", () => {
 
         expect( updatedClass.homework.length ).toBe( 1 );
         expect( updatedClass.homework.every( hw => hw._id.toString() !== homeworkId1.toString() ) ).toBe( true );
+    } )
+    it( "should return false if class is not exists", async () => {
+        const result = await DataBase.removeHomework( "not a name", homeworkId1 );
+
+        expect( result ).toBe( false );
+    } )
+} )
+
+describe( "updateHomework", () => {
+    const content1 = {
+        attachments: [ "photo111_111_as41" ],
+        task: "changes1"
+    };
+    const content2 = {
+        attachments: [ "photo222_222_as41" ],
+        task: "changes2"
+    };
+    let chId1;
+    let chId2;
+    let className;
+
+    beforeAll( async () => {
+        const c = await createTestData( [] );
+        className = c.name;
+        chId1 = await DataBase.addHomework( className, "Математика", content1 );
+        chId2 = await DataBase.addHomework( className, "Математика", content2 );
+    } );
+    afterAll( async () => {
+        await Class.deleteMany( {} );
+        await Student.deleteMany( {} );
+    } )
+    afterEach( async () => {
+        await Student.deleteMany( {} );
+        await Class.deleteMany( {} );
+        const c = await createTestData( [] );
+        className = c.name;
+        chId1 = await DataBase.addHomework( className, "Математика", content1 );
+        chId2 = await DataBase.addHomework( className, "Математика", content2 );
+    } )
+
+    it( "should return array of updated changes", async () => {
+        const updateHomeworks = await DataBase.updateHomework( className, chId1, { task: "new text" } );
+
+        expect( updateHomeworks.length ).toBe( 2 );
+
+        expect( updateHomeworks.find( ch => ch._id.toString() === chId1.toString() ) ).toBeDefined();
+        expect( updateHomeworks.find( ch => ch._id.toString() === chId2.toString() ) ).toBeDefined();
+    } )
+
+    it( "should updated change with given id", async () => {
+        const updateHomework = await DataBase.updateHomework( className, chId1, { task: "new text" } );
+        expect( updateHomework.find( ch => ch._id.toString() === chId1.toString() ).task ).toBe( "new text" );
+    } )
+
+    it( "should not update other changes", async () => {
+        const textBeforeUpdate = ( await DataBase.getClassByName( className ) ).homework.find( ch => ch._id.toString() === chId2.toString() ).task;
+        const updateHomework = await DataBase.updateHomework( className, chId1, { task: "new text" } );
+
+        expect( updateHomework.find( ch => ch._id.toString() === chId2.toString() ).task ).toEqual( textBeforeUpdate );
     } )
 } )
