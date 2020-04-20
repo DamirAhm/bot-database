@@ -47,14 +47,9 @@ const classSchema = mongoose.Schema( {
                 to: {
                     type: Date,
                     default: new Date( Date.now() + 1000 * 60 * 60 * 24 * 7 ),
-                    validate: {
-                        validator: date => Date.now() - date >= 0,
-                        message: "Homework 'to' can`t be in future"
-                    }
                 },
                 attachments: [ String ],
-                createdBy: {
-                    required: true,
+                createdBy: {            
                     type: Number,
                     validate: {
                         validator: Number.isInteger,
