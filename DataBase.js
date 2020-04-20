@@ -175,7 +175,7 @@ class DataBase {
                             if ( Class.schedule.flat().includes( lesson ) ) {
                                 const newHomework = {
                                     lesson,
-                                    task: content,
+                                    ...content,
                                     _id: new mongoose.Types.ObjectId()
                                 };
                                 if ( studentVkId ) {

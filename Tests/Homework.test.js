@@ -17,9 +17,9 @@ const createTestData = async ( studentVkIds, isAddHomework = true ) => {
     } );
 
     if ( isAddHomework ) {
-        await DataBase.addHomework( MockClass.name, "Русский", "1", -1, new Date( 2020, 0, 2 ) );
-        await DataBase.addHomework( MockClass.name, "Математика", "2", -1, new Date( 2020, 0, 2 ) );
-        await DataBase.addHomework( MockClass.name, "Математика", "2", -1, new Date( 2019, 0, 2 ) ); //Не должен добавляться
+        await DataBase.addHomework( MockClass.name, "Русский", { task: "1" }, -1, new Date( 2020, 0, 2 ) );
+        await DataBase.addHomework( MockClass.name, "Математика", { task: "2" }, -1, new Date( 2020, 0, 2 ) );
+        await DataBase.addHomework( MockClass.name, "Математика", { task: "2" }, -1, new Date( 2019, 0, 2 ) ); //Не должен добавляться
     }
 
     for ( let id of studentVkIds ) {
@@ -54,7 +54,7 @@ describe( "addHomework", () => {
                 [ "Русский", "Английский", "Обществознание" ]
             ]
         } )
-        await DataBase.addHomework( MockClass.name, "Математика", "task", -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", { task: "task" }, -1 );
         MockClass = await DataBase.getClassBy_Id( MockClass._id );
     } );
     afterAll( async () => {
@@ -66,7 +66,7 @@ describe( "addHomework", () => {
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
 
-        const result = await DataBase.addHomework( MockClass.name, lesson, task, studentVkId );
+        const result = await DataBase.addHomework( MockClass.name, lesson, { task }, studentVkId );
 
         const updatedHomework = await DataBase.getClassBy_Id( MockClass._id ).then( c => c.homework );
         expect( typeof result ).toBe( "object" );
@@ -75,26 +75,33 @@ describe( "addHomework", () => {
     } );
     it( "should add one homework with right params", async () => {
         const task = "Сделай дз уже блять сука блять";
+        const attachments = [ "photo123_123_as41" ]
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
         const initialLength = MockClass.homework.length;
 
-        await DataBase.addHomework( MockClass.name, lesson, task, studentVkId, new Date( 2020, 2, 18 ) );
+        const id = await DataBase.addHomework( MockClass.name, lesson, { task, attachments }, studentVkId, new Date( 2020, 2, 18 ) );
+
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
-        const homework = updatedClass.homework.find( dz => dz.task === task );
+
+        expect( updatedClass.homework.find( hw => hw._id.toString() === id.toString() ) ).not.toBeUndefined();
+
+        const homework = updatedClass.homework.find( hw => hw._id.toString() === id.toString() );
 
         expect( updatedClass.homework.length - 1 ).toBe( initialLength );
-        expect( homework ).toBeTruthy();
         expect( homework.lesson ).toBe( lesson );
         expect( homework.to ).toEqual( new Date( 2020, 2, 18 ) );
-        expect( homework.createdBy ).toEqual( studentVkId );
+        expect( homework.createdBy ).toBe( studentVkId );
+        expect( homework.task ).toBe( task );
+        expect( homework._id ).toEqual( id );
+        expect( Array.from( homework.attachments ) ).toEqual( attachments );
     } );
     it( "should set homework's 'to' to given date if it passes", async () => {
         const task = "Сделай дз уже блять сука блять";
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
 
-        await DataBase.addHomework( MockClass.name, lesson, task, studentVkId, new Date( 2019, 9, 22 ) );
+        await DataBase.addHomework( MockClass.name, lesson, { task }, studentVkId, new Date( 2019, 9, 22 ) );
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
         const homework = updatedClass.homework.find( dz => dz.task === task );
 
@@ -108,13 +115,13 @@ describe( "removeHomework", () => {
     beforeAll( async () => {
         MockClass = await DataBase.createClass( getUniqueClassName() );
         await DataBase.setSchedule( MockClass.name, [ [ 0 ] ] );
-        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", "task", -1 );
+        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", { task: "task" }, -1 );
     } )
     afterEach( async () => {
         await Class.deleteMany( {} );
         MockClass = await DataBase.createClass( getUniqueClassName() );
         await DataBase.setSchedule( MockClass.name, [ [ 0 ] ] );
-        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", "task", -1 );
+        homeworkId = await DataBase.addHomework( MockClass.name, "Математика", { task: "task" }, -1 );
     } )
 
     it( "should return true if all is ok", async () => {
@@ -139,9 +146,9 @@ describe( "getHomework", () => {
             ]
         } );
 
-        await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
-        await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
-        await DataBase.addHomework( MockClass.name, "Английский", "Нет", -1, new Date( 2020, 0, 1 ) );
+        await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Английский", { task: "Нет" }, -1, new Date( 2020, 0, 1 ) );
     } );
     afterAll( async () => {
         await Class.deleteMany( {} )
@@ -156,9 +163,9 @@ describe( "getHomework", () => {
             ]
         } );
 
-        await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
-        await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
-        await DataBase.addHomework( MockClass.name, "Английский", "Нет", -1, new Date( 2020, 0, 1 ) );
+        await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Английский", { task: "Нет" }, -1, new Date( 2020, 0, 1 ) );
     } )
     it( "should return list of homework", async () => {
         const result = await DataBase.getHomework( MockClass.name );
@@ -219,8 +226,8 @@ describe( "removeHomework", () => {
             ]
         } );
 
-        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
-        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
+        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
     } );
     afterEach( async () => {
         await Class.deleteMany( {} );
@@ -232,8 +239,8 @@ describe( "removeHomework", () => {
             ]
         } );
 
-        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", "Пошалить )", -1 );
-        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", "Да", -1 );
+        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
     } )
 
     it( "should return true if all is ok", async () => {
