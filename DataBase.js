@@ -400,6 +400,34 @@ class DataBase {
         }
     }; //
 
+    static async removeChanges ( className, changeId ) {
+        try {
+            if ( className && typeof className === "string" ) {
+                if ( changeId && isObjectId( changeId ) ) {
+                    const Class = await this.getClassByName( className );
+                    if ( Class ) {
+                        const changes = Class.changes;
+                        const updatedChanges = changes.filter( ch => ch._id.toString() !== changeId.toString() );
+
+                        await Class.updateOne( { changes: updatedChanges } );
+
+                        return updatedChanges;
+                    } else {
+                        return null;
+                    }
+                } else {
+                    throw new TypeError( "ChangeId must be objectId" )
+                }
+            } else {
+                throw new TypeError( "ClassName must be string" )
+            }
+        } catch ( e ) {
+            if ( e instanceof TypeError ) { throw e };
+            console.log( e );
+            return null;
+        }
+    }
+
     //! Students
 
     //* Settings

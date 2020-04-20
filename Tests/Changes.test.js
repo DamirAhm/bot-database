@@ -158,3 +158,46 @@ describe( "getChanges", () => {
         expect( updatedClass.changes.find( change => change._id.toString() === chId2.toString() ) ).not.toBeUndefined();
     } );
 } );
+
+describe( "removeChanges", () => {
+    const content1 = {
+        attachments: [ "photo111_111_as41" ],
+        text: "changes1"
+    };
+    const content2 = {
+        attachments: [ "photo222_222_as41" ],
+        text: "changes2"
+    };
+    let chId1;
+    let chId2;
+    let className;
+    let vkId;
+
+    beforeAll( async () => {
+        const { Class: c, Student: s } = await createTestData();
+        className = c.name;
+        chId1 = await DataBase.addChanges( s.vkId, content1 );
+        chId2 = await DataBase.addChanges( s.vkId, content2 );
+        vkId = s.vkId;
+    } );
+    afterAll( async () => {
+        await Class.deleteMany( {} );
+        await Student.deleteMany( {} );
+    } )
+    afterEach( async () => {
+        await Student.deleteMany( {} );
+        await Class.deleteMany( {} );
+        const { Class: c, Student: s } = await createTestData();
+        className = c.name;
+        await DataBase.addChanges( s.vkId, content1 );
+        await DataBase.addChanges( s.vkId, content2 );
+    } )
+
+    it( "should return array of changes only without given change", async () => {
+        const updatedChanges = await DataBase.removeChanges( className, chId1 );
+
+        expect( updatedChanges.length ).toBe( 1 );
+
+        expect( updatedChanges.find( ch => ch._id.toString() === chId2.toString() ) ).toBeDefined();
+    } )
+} )
