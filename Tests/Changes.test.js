@@ -1,11 +1,8 @@
-const { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
-
-const
-    { isObjectId, createTestData } = require( '../utils/functions' ),
-    { DataBase } = require( '../DataBase' ),
-    mongoose = require( "mongoose" ),
-    Class = require( '../Models/ClassModel' ),
-    Student = require( "../Models/StudentModel" );
+const { isObjectId, createTestData, getUniqueClassName, getUniqueVkId } = require( '../utils/functions' );
+const { DataBase } = require( '../DataBase' );
+const mongoose = require( "mongoose" );
+const Class = require( '../Models/ClassModel' );
+const Student = require( "../Models/StudentModel" );
 
 describe( "addChanges", () => {
     let MockClass;
@@ -194,10 +191,68 @@ describe( "removeChanges", () => {
     } )
 
     it( "should return array of changes only without given change", async () => {
-        const updatedChanges = await DataBase.removeChanges( className, chId1 );
+        const updateChanges = await DataBase.removeChanges( className, chId1 );
 
-        expect( updatedChanges.length ).toBe( 1 );
+        expect( updateChanges.length ).toBe( 1 );
 
-        expect( updatedChanges.find( ch => ch._id.toString() === chId2.toString() ) ).toBeDefined();
+        expect( updateChanges.find( ch => ch._id.toString() === chId2.toString() ) ).toBeDefined();
+    } )
+} )
+
+describe( "updateChanges", () => {
+    describe( "removeChanges", () => {
+        const content1 = {
+            attachments: [ "photo111_111_as41" ],
+            text: "changes1"
+        };
+        const content2 = {
+            attachments: [ "photo222_222_as41" ],
+            text: "changes2"
+        };
+        let chId1;
+        let chId2;
+        let className;
+        let vkId;
+
+        beforeAll( async () => {
+            const { Class: c, Student: s } = await createTestData();
+            className = c.name;
+            chId1 = await DataBase.addChanges( s.vkId, content1 );
+            chId2 = await DataBase.addChanges( s.vkId, content2 );
+            vkId = s.vkId;
+        } );
+        afterAll( async () => {
+            await Class.deleteMany( {} );
+            await Student.deleteMany( {} );
+        } )
+        afterEach( async () => {
+            await Student.deleteMany( {} );
+            await Class.deleteMany( {} );
+            const { Class: c, Student: s } = await createTestData();
+            className = c.name;
+            chId1 = await DataBase.addChanges( s.vkId, content1 );
+            chId2 = await DataBase.addChanges( s.vkId, content2 );
+        } )
+
+        it( "should return array of updated changes", async () => {
+            const updateChanges = await DataBase.updateChange( className, chId1, { text: "new text" } );
+
+            expect( updateChanges.length ).toBe( 2 );
+
+            expect( updateChanges.find( ch => ch._id.toString() === chId1.toString() ) ).toBeDefined();
+            expect( updateChanges.find( ch => ch._id.toString() === chId2.toString() ) ).toBeDefined();
+        } )
+
+        it( "should updated change with given id", async () => {
+            const updateChange = await DataBase.updateChange( className, chId1, { text: "new text" } );
+            expect( updateChange.find( ch => ch._id.toString() === chId1.toString() ).text ).toBe( "new text" );
+        } )
+
+        it( "should not update other changes", async () => {
+            const textBeforeUpdate = ( await DataBase.getClassByName( className ) ).changes.find( ch => ch._id.toString() === chId2.toString() ).text;
+            const updateChange = await DataBase.updateChange( className, chId1, { text: "new text" } );
+
+            expect( updateChange.find( ch => ch._id.toString() === chId2.toString() ).text ).toEqual( textBeforeUpdate );
+        } )
     } )
 } )

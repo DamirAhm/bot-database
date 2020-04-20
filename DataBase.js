@@ -1,4 +1,3 @@
-
 const { Roles, Lessons } = require( "./Models/utils" );
 
 const _Student = require( "./Models/StudentModel" );
@@ -15,6 +14,11 @@ const mongoose = require( "mongoose" );
 const config = require( "config" );
 
 const isObjectId = mongoose.Types.ObjectId
+const isPartialOf = ( object, instance ) => {
+    if ( Array.isArray( object ) ) return Object.keys( instance ).every( key => object.includes( key ) );
+    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( instance ).every( key => object.hasOwnProperty( key ) );
+    throw new TypeError( "object must be an object or an array of properties" );
+}
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
@@ -432,9 +436,16 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( changeId && isObjectId( changeId ) ) {
-                    if ( isPartitialOf() ) { }
-                    const Class = await this.getClassByName( className );
+                    if ( isPartialOf( [ "attachments", "text", "to" ], updates ) ) {
+                        const Class = await this.getClassByName( className );
+                        const updatedChanges = Class.changes.map( ch => ch._id.toString() === changeId.toString() ? { ...ch.toObject(), ...updates } : ch );
 
+                        await Class.updateOne( { changes: updatedChanges } );
+
+                        return updatedChanges;
+                    } else {
+                        throw new TypeError( "updates must be object containing poles of change" )
+                    }
                 } else {
                     throw new TypeError( "ChangeId must be objectId" )
                 }

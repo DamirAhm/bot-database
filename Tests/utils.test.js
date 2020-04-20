@@ -9,7 +9,7 @@ const {
     findNotifiedStudents,
     lessonsIndexesToLessonsNames,
     createTestData,
-    isPartitialOf
+    isPartialOf
 } = require( "../utils/functions" );
 const config = require( "config" );
 
@@ -175,43 +175,43 @@ describe( "createTestData", () => {
     } )
 } )
 
-describe( "isPartitialOf", () => {
+describe( "isPartialOf", () => {
     it( "should return true if all poles of object is existing in checking object", () => {
-        const result = isPartitialOf( { a: 1, b: 2 }, { a: 2, b: 1 } );
+        const result = isPartialOf( { a: 1, b: 2 }, { a: 2, b: 1 } );
 
         expect( result ).toBe( true );
     } )
     it( "should return true if some poles of object is existing in checking object", () => {
-        const result = isPartitialOf( { a: 1, b: 2 }, { b: 1 } );
+        const result = isPartialOf( { a: 1, b: 2 }, { b: 1 } );
 
         expect( result ).toBe( true );
     } )
 
     it( "should return false if some poles of object isn't existing in checking object", () => {
-        const result = isPartitialOf( { a: 1, b: 2 }, { b: 1, c: 2 } );
+        const result = isPartialOf( { a: 1, b: 2 }, { b: 1, c: 2 } );
 
         expect( result ).toBe( false );
     } )
 
     it( "should return true if all poles of object is existing in checking array", () => {
-        const result = isPartitialOf( [ "a", "b" ], { a: 2, b: 1 } );
+        const result = isPartialOf( [ "a", "b" ], { a: 2, b: 1 } );
 
         expect( result ).toBe( true );
     } )
     it( "should return true if some poles of object is existing in checking array", () => {
-        const result = isPartitialOf( [ "a", "b" ], { b: 1 } );
+        const result = isPartialOf( [ "a", "b" ], { b: 1 } );
 
         expect( result ).toBe( true );
     } )
 
     it( "should return false if some poles of object isn't existing in checking array", () => {
-        const result = isPartitialOf( [ "a", "b" ], { b: 1, c: 2 } );
+        const result = isPartialOf( [ "a", "b" ], { b: 1, c: 2 } );
 
         expect( result ).toBe( false );
     } )
 
     it( "should return false if object is empty", () => {
-        const result = isPartitialOf( { a: 1, b: 2 }, {} );
+        const result = isPartialOf( { a: 1, b: 2 }, {} );
 
         expect( result ).toBe( false );
     } )
