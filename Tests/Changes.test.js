@@ -40,7 +40,7 @@ describe( "addChanges", () => {
             text: "changes"
         };
 
-        const result = await DataBase.addChanges( MockStudent.vkId, content );
+        const result = await DataBase.addChanges( MockClass.name, content );
 
         return expect( isObjectId( result ) ).toBe( true );
     } );
@@ -50,7 +50,7 @@ describe( "addChanges", () => {
             text: "changes"
         };
 
-        const id = await DataBase.addChanges( MockStudent.vkId, content );
+        const id = await DataBase.addChanges( MockClass.name, content );
 
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
 
@@ -63,7 +63,7 @@ describe( "addChanges", () => {
             text: "changes"
         };
 
-        const id = await DataBase.addChanges( MockStudent.vkId, content, undefined, true );
+        const id = await DataBase.addChanges( MockClass.name, content, undefined, true );
 
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
         const updatedClass1 = await DataBase.getClassBy_Id( ClassWithoutStudent._id );
@@ -73,35 +73,18 @@ describe( "addChanges", () => {
         expect( updatedClass1.changes.length ).toBe( 1 );
         expect( updatedClass1.changes.find( change => change._id.toString() === id.toString() ) ).not.toBeUndefined();
     } );
-    it( "shouldn't add changes if student is not in any class and toAll prop isn't passed", async () => {
+    it( "shouldn't add createdBy prop if student vkId is passed", async () => {
         const content = {
             attachments: [ "photo123_123_as41" ],
             text: "changes"
         };
 
-        const result = await DataBase.addChanges( StudentWithoutClass.vkId, content );
+        const result = await DataBase.addChanges( MockClass.name, content, undefined, undefined, MockStudent.vkId );
 
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
 
-        expect( result ).toBe( false );
-        expect( updatedClass.changes.length ).toBe( 0 );
-    } );
-
-    it( "should add changes if student is not in any class and toAll prop is passed", async () => {
-        const content = {
-            attachments: [ "photo123_123_as41" ],
-            text: "changes"
-        };
-
-        const id = await DataBase.addChanges( StudentWithoutClass.vkId, content, undefined, true );
-
-        const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
-        const updatedClass1 = await DataBase.getClassBy_Id( ClassWithoutStudent._id );
-
-        expect( updatedClass.changes.length ).toBe( 1 );
-        expect( updatedClass.changes.find( change => change._id.toString() === id.toString() ) ).not.toBeUndefined();
-        expect( updatedClass1.changes.length ).toBe( 1 );
-        expect( updatedClass1.changes.find( change => change._id.toString() === id.toString() ) ).not.toBeUndefined();
+        expect( isObjectId( result ) ).toBe( true );
+        expect( updatedClass.changes.find( change => change._id.toString() === result.toString() ).createdBy ).toBe( MockStudent.vkId );
     } );
 } );
 
@@ -122,8 +105,8 @@ describe( "getChanges", () => {
     beforeAll( async () => {
         const { Class: c, Student: s } = await createTestData();
         className = c.name;
-        chId1 = await DataBase.addChanges( s.vkId, content1 );
-        chId2 = await DataBase.addChanges( s.vkId, content2 );
+        chId1 = await DataBase.addChanges( c.name, content1 );
+        chId2 = await DataBase.addChanges( c.name, content2 );
         vkId = s.vkId;
     } );
     afterAll( async () => {
@@ -135,8 +118,8 @@ describe( "getChanges", () => {
         await Class.deleteMany( {} );
         const { Class: c, Student: s } = await createTestData();
         className = c.name;
-        await DataBase.addChanges( s.vkId, content1 );
-        await DataBase.addChanges( s.vkId, content2 );
+        await DataBase.addChanges( c.name, content1 );
+        await DataBase.addChanges( c.name, content2 );
     } )
     it( "should return array of changes for that class", async () => {
         const result = await DataBase.getChanges( className );
@@ -145,7 +128,7 @@ describe( "getChanges", () => {
             text: "changes"
         };
 
-        const id = await DataBase.addChanges( vkId, content, undefined, true );
+        const id = await DataBase.addChanges( className, content );
 
         const updatedClass = await DataBase.getClassByName( className );
 
@@ -173,8 +156,8 @@ describe( "removeChanges", () => {
     beforeAll( async () => {
         const { Class: c, Student: s } = await createTestData();
         className = c.name;
-        chId1 = await DataBase.addChanges( s.vkId, content1 );
-        chId2 = await DataBase.addChanges( s.vkId, content2 );
+        chId1 = await DataBase.addChanges( c.name, content1 );
+        chId2 = await DataBase.addChanges( c.name, content2 );
         vkId = s.vkId;
     } );
     afterAll( async () => {
@@ -186,8 +169,8 @@ describe( "removeChanges", () => {
         await Class.deleteMany( {} );
         const { Class: c, Student: s } = await createTestData();
         className = c.name;
-        await DataBase.addChanges( s.vkId, content1 );
-        await DataBase.addChanges( s.vkId, content2 );
+        await DataBase.addChanges( c.name, content1 );
+        await DataBase.addChanges( c.name, content2 );
     } )
 
     it( "should return array of changes only without given change", async () => {
@@ -217,8 +200,8 @@ describe( "updateChanges", () => {
         beforeAll( async () => {
             const { Class: c, Student: s } = await createTestData();
             className = c.name;
-            chId1 = await DataBase.addChanges( s.vkId, content1 );
-            chId2 = await DataBase.addChanges( s.vkId, content2 );
+            chId1 = await DataBase.addChanges( c.name, content1 );
+            chId2 = await DataBase.addChanges( c.name, content2 );
             vkId = s.vkId;
         } );
         afterAll( async () => {
@@ -230,8 +213,8 @@ describe( "updateChanges", () => {
             await Class.deleteMany( {} );
             const { Class: c, Student: s } = await createTestData();
             className = c.name;
-            chId1 = await DataBase.addChanges( s.vkId, content1 );
-            chId2 = await DataBase.addChanges( s.vkId, content2 );
+            chId1 = await DataBase.addChanges( c.name, content1 );
+            chId2 = await DataBase.addChanges( c.name, content2 );
         } )
 
         it( "should return array of updated changes", async () => {

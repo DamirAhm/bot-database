@@ -368,15 +368,14 @@ class DataBase {
     }
 
     //*Changes
-    static async addChanges ( vkId, content, toDate = new Date(), toAll = false ) {
+    static async addChanges ( className, content, toDate = new Date(), toAll = false, vkId ) {
         try {
-            if ( vkId !== undefined && typeof vkId === 'number' ) {
+            if ( className !== undefined && typeof className === 'string' ) {
                 if ( this.validateChangeContent( content ) ) {
                     if ( toDate && toDate instanceof Date ) {
-                        const Student = await this.populate( await this.getStudentByVkId( vkId ) );
+                        const Class = await this.getClassByName( className );
                         const newChange = {
                             to: toDate,
-                            createdBy: vkId,
                             ...content,
                             _id: new mongoose.Types.ObjectId()
                         };
@@ -387,12 +386,11 @@ class DataBase {
                             }
                             return newChange._id;
                         } else {
-                            if ( Student.class ) {
-                                await Student.class.updateOne( { changes: [ ...Student.class.changes, newChange ] } );
-                                return newChange._id;
-                            } else {
-                                return false; //Не состоя в классе вы можете добавлять изменения только всем классам
+                            if ( vkId ) {
+                                newChange.createdBy = vkId
                             }
+                            await Class.updateOne( { changes: [ ...Class.changes, newChange ] } );
+                            return newChange._id;
                         }
                     } else {
                         throw new TypeError( "toDate must be date" );
@@ -401,7 +399,7 @@ class DataBase {
                     throw new TypeError( "Contents must be object with poles attachments and text" )
                 }
             } else {
-                throw new TypeError( "VkId must be number" );
+                throw new TypeError( "ClassName must be string" );
             }
         } catch ( e ) {
             if ( e instanceof TypeError ) throw e;
