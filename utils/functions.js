@@ -122,7 +122,9 @@ const getUniqueVkId = () => {
 }
 
 const isPartitialOf = ( object, instance ) => {
-    return Object.keys( instance ).length !== 0 && Object.keys( instance ).every( key => object.hasOwnProperty( key ) );
+    if ( Array.isArray( object ) ) return Object.keys( instance ).every( key => object.includes( key ) );
+    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( instance ).every( key => object.hasOwnProperty( key ) );
+    throw new TypeError( "object must be an object or an array of properties" );
 }
 
 module.exports = {

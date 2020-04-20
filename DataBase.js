@@ -428,6 +428,26 @@ class DataBase {
         }
     }
 
+    static async updateChange ( className, changeId, updates ) {
+        try {
+            if ( className && typeof className === "string" ) {
+                if ( changeId && isObjectId( changeId ) ) {
+                    if ( isPartitialOf() ) { }
+                    const Class = await this.getClassByName( className );
+
+                } else {
+                    throw new TypeError( "ChangeId must be objectId" )
+                }
+            } else {
+                throw new TypeError( "ClassName must be string" )
+            }
+        } catch ( e ) {
+            if ( e instanceof TypeError ) { throw e };
+            console.log( e );
+            return null;
+        }
+    }
+
     //! Students
 
     //* Settings
