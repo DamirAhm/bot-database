@@ -121,7 +121,9 @@ const getUniqueVkId = () => {
     return id;
 }
 
-
+const isPartitialOf = ( object, instance ) => {
+    return Object.keys( instance ).length !== 0 && Object.keys( instance ).every( key => object.hasOwnProperty( key ) );
+}
 
 module.exports = {
     toObject,
@@ -133,7 +135,8 @@ module.exports = {
     lessonsIndexesToLessonsNames,
     checkIsToday,
     getUniqueClassName,
-    getUniqueVkId
+    getUniqueVkId,
+    isPartitialOf
 };
 
 
