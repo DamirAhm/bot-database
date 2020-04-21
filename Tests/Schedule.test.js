@@ -1,3 +1,4 @@
+// @ts-nocheck
 const
     { DataBase } = require( '../DataBase' ),
     mongoose = require( "mongoose" ),
@@ -56,3 +57,67 @@ describe( "setSchedule", () => {
         return expect( result ).toBe( false );
     } );
 } );
+
+describe( "changeDay", () => {
+    let MockClass;
+    let schedule
+    beforeAll( async () => {
+        const _class = await DataBase.createClass( getUniqueClassName() );
+        schedule = [
+            [ "Математика", "Русский", "История" ],
+            [ "Математика", "ОБЖ", "Английский" ],
+            [ "Информатика", "Обзествознание", "Физика" ],
+            [ "Физкультура", "Биология", "Химия" ],
+            [ "Классный час", "Русский", "Английский" ],
+            [ "Математика", "Русский", "Астрономия" ],
+        ]
+        await _class.updateOne( { schedule } );
+
+        MockClass = await DataBase.getClassBy_Id( _class._id );
+    } )
+    afterEach( async () => {
+        Class.deleteMany( {} );
+        const _class = await DataBase.createClass( getUniqueClassName() );
+        schedule = [
+            [ "Математика", "Русский", "История" ],
+            [ "Математика", "ОБЖ", "Английский" ],
+            [ "Информатика", "Обществознание", "Физика" ],
+            [ "Физкультура", "Биология", "Химия" ],
+            [ "Классный час", "Русский", "Английский" ],
+            [ "Математика", "Русский", "Астрономия" ],
+        ]
+        await _class.updateOne( { schedule } );
+
+        MockClass = await DataBase.getClassBy_Id( _class._id );
+    } )
+
+    it( "should return updated schedule", async () => {
+        const index = 1;
+        const newDay = [ "Ничего", "Ничего", "Ничего" ];
+
+        const newSchedule = await DataBase.changeDay( MockClass.name, index, newDay );
+
+        expect( newSchedule ).toBeInstanceOf( Array );
+        expect( newSchedule.length ).toBe( 6 );
+    } )
+    it( "should return update class' schedule", async () => {
+        const index = 1;
+        const newDay = [ "Ничего", "Ничего", "Ничего" ];
+
+        const newSchedule = await DataBase.changeDay( MockClass.name, index, newDay );
+
+        const actualSchedule = await DataBase.getClassByName( MockClass.name ).then( c => c.schedule );
+
+        expect( newSchedule ).toBeInstanceOf( Array );
+        expect( newSchedule.length ).toBe( 6 );
+        expect( JSON.stringify( newSchedule ) ).toBe( JSON.stringify( actualSchedule ) );
+    } )
+    it( "should return update day at index to new day", async () => {
+        const index = 1;
+        const newDay = [ "Ничего", "Ничего", "Ничего" ];
+
+        const newSchedule = await DataBase.changeDay( MockClass.name, index, newDay );
+
+        expect( newSchedule.every( ( d, i ) => i === index ? d === newDay : d === schedule[ i ] ) )
+    } )
+} )

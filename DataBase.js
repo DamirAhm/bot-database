@@ -343,26 +343,27 @@ class DataBase {
             if ( className && typeof className === "string" ) {
                 if ( dayIndex && typeof dayIndex === "number" && dayIndex < 6 && dayIndex >= 0 ) {
                     if ( newDay && Array.isArray( newDay ) && newDay.every( lesson => typeof lesson === "string" && Lessons.includes( lesson ) ) ) {
-                        const Class = this.getClassByName( className );
+                        const Class = await this.getClassByName( className );
                         if ( Class ) {
-                            const schedule = { ...Class.schedule };
-                            schedule[ index ] = newDay;
+                            const schedule = [ ...Class.schedule ];
+                            schedule[ dayIndex ] = newDay;
                             await Class.updateOne( { schedule } );
                             return schedule;
                         } else {
                             return false;
                         }
                     } else {
-                        throw new TypeError( "new day must be array of lessons" );
+                        throw new TypeError( "new day must be array of lessons but you pass: " + newDay.filter( l => !Lessons.includes( l ) ).join( "," ) );
                     }
                 } else {
-                    throw new TypeError( "day index must be number less than 6" )
+                    throw new TypeError( "day index must be number less than 6 and greater than 0" )
                 }
             } else {
                 throw new TypeError( "Class name must be string" )
             }
         } catch ( e ) {
             if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return false;
         }
     }
