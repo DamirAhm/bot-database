@@ -368,6 +368,25 @@ class DataBase {
         }
     }
 
+    static async getSchedule ( className ) {
+        try {
+            if ( className && typeof className === "string" ) {
+                const Class = await this.getClassByName( className );
+                if ( Class ) {
+                    return Class.schedule;
+                } else {
+                    return [];
+                }
+            } else {
+                throw new TypeError( "Class name must be string" )
+            }
+        } catch ( e ) {
+            if ( e instanceof TypeError ) { throw e };
+            console.log( e );
+            return [];
+        }
+    }
+
     //*Changes
     static async addChanges ( className, content, toDate = new Date(), toAll = false, vkId ) {
         try {

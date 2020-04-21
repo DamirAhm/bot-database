@@ -5,7 +5,7 @@ const
     Class = require( '../Models/ClassModel' ),
     { lessonsIndexesToLessonsNames } = require( '../utils/functions' );
 const { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
-
+const { Lessons } = require( "../Models/utils" );
 describe( "setSchedule", () => {
     let MockClass;
     beforeAll( async () => {
@@ -58,6 +58,49 @@ describe( "setSchedule", () => {
     } );
 } );
 
+describe( "getSchedule", () => {
+    let MockClass;
+    let schedule
+    beforeAll( async () => {
+        const _class = await DataBase.createClass( getUniqueClassName() );
+        schedule = [
+            [ "Математика", "Русский", "История" ],
+            [ "Математика", "ОБЖ", "Английский" ],
+            [ "Информатика", "Обществознание", "Физика" ],
+            [ "Физкультура", "Биология", "Химия" ],
+            [ "Классный час", "Русский", "Английский" ],
+            [ "Математика", "Русский", "Астрономия" ],
+        ]
+        await _class.updateOne( { schedule } );
+
+        MockClass = await DataBase.getClassBy_Id( _class._id );
+    } )
+    afterEach( async () => {
+        Class.deleteMany( {} );
+        const _class = await DataBase.createClass( getUniqueClassName() );
+        schedule = [
+            [ "Математика", "Русский", "История" ],
+            [ "Математика", "ОБЖ", "Английский" ],
+            [ "Информатика", "Обществознание", "Физика" ],
+            [ "Физкультура", "Биология", "Химия" ],
+            [ "Классный час", "Русский", "Английский" ],
+            [ "Математика", "Русский", "Астрономия" ],
+        ]
+        await _class.updateOne( { schedule } );
+
+        MockClass = await DataBase.getClassBy_Id( _class._id );
+    } )
+
+    it( "should return array of arrays of lessons", async () => {
+        const sch = await DataBase.getSchedule( MockClass.name );
+
+        expect( Array.isArray( sch ) ).toBe( true );
+        expect( sch.length ).toBe( 6 );
+        expect( sch.every( Array.isArray ) ).toBe( true );
+        expect( sch.every( e => e.every( e => Lessons.includes( e ) ) ) ).toBe( true );
+    } )
+} )
+
 describe( "changeDay", () => {
     let MockClass;
     let schedule
@@ -66,7 +109,7 @@ describe( "changeDay", () => {
         schedule = [
             [ "Математика", "Русский", "История" ],
             [ "Математика", "ОБЖ", "Английский" ],
-            [ "Информатика", "Обзествознание", "Физика" ],
+            [ "Информатика", "Обществознание", "Физика" ],
             [ "Физкультура", "Биология", "Химия" ],
             [ "Классный час", "Русский", "Английский" ],
             [ "Математика", "Русский", "Астрономия" ],
