@@ -152,7 +152,7 @@ describe( "validateHomeworkContent", () => {
     it( "should return true if all poles is passed valid", () => {
         const data = {
             attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
-            task: "task"
+            text: "text"
         }
 
         const result = DataBase.validateHomeworkContent( data );
@@ -160,9 +160,9 @@ describe( "validateHomeworkContent", () => {
         expect( result ).toBe( true );
     } )
 
-    it( "should return true if only task is passed and it's valid", () => {
+    it( "should return true if only text is passed and it's valid", () => {
         const data = {
-            task: "task"
+            text: "text"
         }
 
         const result = DataBase.validateHomeworkContent( data );
@@ -182,7 +182,7 @@ describe( "validateHomeworkContent", () => {
     it( "should return false if all poles is passed and all of them is not valid", () => {
         const data = {
             attachments: 1,
-            task: {}
+            text: {}
         }
 
         const result = DataBase.validateHomeworkContent( data );
@@ -193,11 +193,11 @@ describe( "validateHomeworkContent", () => {
     it( "should return false if all poles is passed and one of them is not valid", () => {
         const data1 = {
             attachments: 1,
-            task: "task"
+            text: "text"
         }
         const data2 = {
             attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
-            task: 1
+            text: 1
         }
 
         const result1 = DataBase.validateHomeworkContent( data1 );
@@ -228,7 +228,7 @@ describe( "validateHomeworkContent", () => {
     it( "should return false if passed more than 2 poles", () => {
         const data = {
             attachments: [ "photo227667805_457239951_d18b007165cb" ],
-            task: "task",
+            text: "text",
             somethingElse: ""
         }
 
@@ -240,7 +240,7 @@ describe( "validateHomeworkContent", () => {
     it( "should return false if passed valid amount of poles but it's not valid", () => {
         const data = {
             attachments: [ "photo227667805_457239951_d18b007165cb" ],
-            nottask: "task",
+            nottext: "text",
         }
 
         const result = DataBase.validateHomeworkContent( data );

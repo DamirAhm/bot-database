@@ -211,7 +211,7 @@ class DataBase {
                             return null;
                         }
                     } else {
-                        throw new TypeError( "Task must be non empty string" );
+                        throw new TypeError( "text must be non empty string" );
                     }
                 } else {
                     throw new TypeError( "Lesson must be in lessons list" );
@@ -277,7 +277,7 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
-                    if ( isPartialOf( [ "attachments", "task", "lesson", "to" ], updates ) ) {
+                    if ( isPartialOf( [ "attachments", "text", "lesson", "to" ], updates ) ) {
                         const Class = await this.getClassByName( className );
                         const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
 
@@ -800,12 +800,12 @@ class DataBase {
             if (
                 Object.keys( content ).length === 0 ||
                 Object.keys( content ).length > 2 ||
-                Object.keys( content ).some( key => ![ "attachments", "task" ].includes( key ) )
+                Object.keys( content ).some( key => ![ "attachments", "text" ].includes( key ) )
             ) {
                 return false;
             }
 
-            if ( content.task && typeof content.task !== "string" ) { return false };
+            if ( content.text && typeof content.text !== "string" ) { return false };
 
             if (
                 content.attachments &&

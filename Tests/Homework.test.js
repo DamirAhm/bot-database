@@ -18,9 +18,9 @@ const createTestData = async ( studentVkIds, isAddHomework = false ) => {
     } );
 
     if ( isAddHomework ) {
-        await DataBase.addHomework( MockClass.name, "Русский", { task: "1" }, -1, new Date( 2020, 0, 2 ) );
-        await DataBase.addHomework( MockClass.name, "Математика", { task: "2" }, -1, new Date( 2020, 0, 2 ) );
-        await DataBase.addHomework( MockClass.name, "Математика", { task: "2" }, -1, new Date( 2019, 0, 2 ) ); //Не должен добавляться
+        await DataBase.addHomework( MockClass.name, "Русский", { text: "1" }, -1, new Date( 2020, 0, 2 ) );
+        await DataBase.addHomework( MockClass.name, "Математика", { text: "2" }, -1, new Date( 2020, 0, 2 ) );
+        await DataBase.addHomework( MockClass.name, "Математика", { text: "2" }, -1, new Date( 2019, 0, 2 ) ); //Не должен добавляться
     }
 
     for ( let id of studentVkIds ) {
@@ -54,7 +54,7 @@ describe( "addHomework", () => {
                 [ "Русский", "Английский", "Обществознание" ]
             ]
         } )
-        await DataBase.addHomework( MockClass.name, "Математика", { task: "task" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", { text: "text" }, -1 );
         MockClass = await DataBase.getClassBy_Id( MockClass._id );
     } );
     afterAll( async () => {
@@ -62,11 +62,11 @@ describe( "addHomework", () => {
     } );
 
     it( "should return homework id if all is ok", async () => {
-        const task = "Сделай дз уже блять сука блять";
+        const text = "Сделай дз уже блять сука блять";
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
 
-        const result = await DataBase.addHomework( MockClass.name, lesson, { task }, studentVkId );
+        const result = await DataBase.addHomework( MockClass.name, lesson, { text }, studentVkId );
 
         const updatedHomework = await DataBase.getClassBy_Id( MockClass._id ).then( c => c.homework );
         expect( typeof result ).toBe( "object" );
@@ -74,13 +74,13 @@ describe( "addHomework", () => {
 
     } );
     it( "should add one homework with right params", async () => {
-        const task = "Сделай дз уже блять сука блять";
+        const text = "Сделай дз уже блять сука блять";
         const attachments = [ "photo123_123_as41" ]
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
         const initialLength = MockClass.homework.length;
 
-        const id = await DataBase.addHomework( MockClass.name, lesson, { task, attachments }, studentVkId, new Date( 2020, 2, 18 ) );
+        const id = await DataBase.addHomework( MockClass.name, lesson, { text, attachments }, studentVkId, new Date( 2020, 2, 18 ) );
 
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
 
@@ -92,18 +92,18 @@ describe( "addHomework", () => {
         expect( homework.lesson ).toBe( lesson );
         expect( homework.to ).toEqual( new Date( 2020, 2, 18 ) );
         expect( homework.createdBy ).toBe( studentVkId );
-        expect( homework.task ).toBe( task );
+        expect( homework.text ).toBe( text );
         expect( homework._id ).toEqual( id );
         expect( Array.from( homework.attachments ) ).toEqual( attachments );
     } );
     it( "should set homework's 'to' to given date if it passes", async () => {
-        const task = "Сделай дз уже блять сука блять";
+        const text = "Сделай дз уже блять сука блять";
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
 
-        await DataBase.addHomework( MockClass.name, lesson, { task }, studentVkId, new Date( 2019, 9, 22 ) );
+        await DataBase.addHomework( MockClass.name, lesson, { text }, studentVkId, new Date( 2019, 9, 22 ) );
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
-        const homework = updatedClass.homework.find( dz => dz.task === task );
+        const homework = updatedClass.homework.find( dz => dz.text === text );
 
         expect( homework.to ).toEqual( new Date( 2019, 9, 22 ) );
     } )
@@ -119,9 +119,9 @@ describe( "getHomework", () => {
             ]
         } );
 
-        await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
-        await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
-        await DataBase.addHomework( MockClass.name, "Английский", { task: "Нет" }, -1, new Date( 2020, 0, 1 ) );
+        await DataBase.addHomework( MockClass.name, "Русский", { text: "Пошалить )" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", { text: "Да" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Английский", { text: "Нет" }, -1, new Date( 2020, 0, 1 ) );
     } );
     afterAll( async () => {
         await Class.deleteMany( {} )
@@ -136,9 +136,9 @@ describe( "getHomework", () => {
             ]
         } );
 
-        await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
-        await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
-        await DataBase.addHomework( MockClass.name, "Английский", { task: "Нет" }, -1, new Date( 2020, 0, 1 ) );
+        await DataBase.addHomework( MockClass.name, "Русский", { text: "Пошалить )" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Математика", { text: "Да" }, -1 );
+        await DataBase.addHomework( MockClass.name, "Английский", { text: "Нет" }, -1, new Date( 2020, 0, 1 ) );
     } )
     it( "should return list of homework", async () => {
         const result = await DataBase.getHomework( MockClass.name );
@@ -177,7 +177,7 @@ describe( "parseHomeworkToNotifications", () => {
         expect( notificationArray1[ 1 ] instanceof Array ).toBe( true );
 
         expect( notificationArray1[ 0 ].every( vkId => studentVkIds1.includes( vkId ) ) ).toBe( true );
-        expect( notificationArray1[ 1 ].find( e => e.task === "1" ) !== undefined && notificationArray1[ 1 ].find( e => e.task === "2" ) !== undefined ).toBe( true );
+        expect( notificationArray1[ 1 ].find( e => e.text === "1" ) !== undefined && notificationArray1[ 1 ].find( e => e.text === "2" ) !== undefined ).toBe( true );
 
         expect( notificationArray1[ 0 ].length ).toBe( 2 ); //students amt
         expect( notificationArray1[ 1 ].length ).toBe( 2 ); //homework amt
@@ -195,8 +195,8 @@ describe( "removeHomework", () => {
             ]
         } );
 
-        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
-        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
+        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", { text: "Пошалить )" }, -1 );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", { text: "Да" }, -1 );
     } );
     afterEach( async () => {
         await Class.deleteMany( {} );
@@ -208,8 +208,8 @@ describe( "removeHomework", () => {
             ]
         } );
 
-        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", { task: "Пошалить )" }, -1 );
-        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", { task: "Да" }, -1 );
+        homeworkId1 = await DataBase.addHomework( MockClass.name, "Русский", { text: "Пошалить )" }, -1 );
+        homeworkId2 = await DataBase.addHomework( MockClass.name, "Математика", { text: "Да" }, -1 );
     } )
 
     it( "should return true if all is ok", async () => {
@@ -235,11 +235,11 @@ describe( "removeHomework", () => {
 describe( "updateHomework", () => {
     const content1 = {
         attachments: [ "photo111_111_as41" ],
-        task: "changes1"
+        text: "changes1"
     };
     const content2 = {
         attachments: [ "photo222_222_as41" ],
-        task: "changes2"
+        text: "changes2"
     };
     let chId1;
     let chId2;
@@ -265,7 +265,7 @@ describe( "updateHomework", () => {
     } )
 
     it( "should return array of updated changes", async () => {
-        const updateHomeworks = await DataBase.updateHomework( className, chId1, { task: "new text" } );
+        const updateHomeworks = await DataBase.updateHomework( className, chId1, { text: "new text" } );
 
         expect( updateHomeworks.length ).toBe( 2 );
 
@@ -274,14 +274,14 @@ describe( "updateHomework", () => {
     } )
 
     it( "should updated change with given id", async () => {
-        const updateHomework = await DataBase.updateHomework( className, chId1, { task: "new text" } );
-        expect( updateHomework.find( ch => ch._id.toString() === chId1.toString() ).task ).toBe( "new text" );
+        const updateHomework = await DataBase.updateHomework( className, chId1, { text: "new text" } );
+        expect( updateHomework.find( ch => ch._id.toString() === chId1.toString() ).text ).toBe( "new text" );
     } )
 
     it( "should not update other changes", async () => {
-        const textBeforeUpdate = ( await DataBase.getClassByName( className ) ).homework.find( ch => ch._id.toString() === chId2.toString() ).task;
-        const updateHomework = await DataBase.updateHomework( className, chId1, { task: "new text" } );
+        const textBeforeUpdate = ( await DataBase.getClassByName( className ) ).homework.find( ch => ch._id.toString() === chId2.toString() ).text;
+        const updateHomework = await DataBase.updateHomework( className, chId1, { text: "new text" } );
 
-        expect( updateHomework.find( ch => ch._id.toString() === chId2.toString() ).task ).toEqual( textBeforeUpdate );
+        expect( updateHomework.find( ch => ch._id.toString() === chId2.toString() ).text ).toEqual( textBeforeUpdate );
     } )
 } )

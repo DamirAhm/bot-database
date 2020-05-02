@@ -40,7 +40,7 @@ const classSchema = mongoose.Schema( {
                         message: "Lesson must be one of existing"
                     }
                 },
-                task: {
+                text: {
                     required: true,
                     type: String
                 },
@@ -49,7 +49,7 @@ const classSchema = mongoose.Schema( {
                     default: new Date( Date.now() + 1000 * 60 * 60 * 24 * 7 ),
                 },
                 attachments: [ String ],
-                createdBy: {            
+                createdBy: {
                     type: Number,
                     validate: {
                         validator: Number.isInteger,
