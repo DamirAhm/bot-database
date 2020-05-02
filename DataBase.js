@@ -167,7 +167,6 @@ class DataBase {
 
     //! Classes
 
-
     //* Homework
     static async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
@@ -279,11 +278,15 @@ class DataBase {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
                     if ( isPartialOf( [ "attachments", "text", "lesson", "to" ], updates ) ) {
                         const Class = await this.getClassByName( className );
-                        const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
+                        if ( Class ) {
+                            const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
 
-                        await Class.updateOne( { changes: updatedHomework } );
+                            await Class.updateOne( { homework: updatedHomework } );
 
-                        return updatedHomework;
+                            return updatedHomework;
+                        } else {
+                            return [];
+                        }
                     } else {
                         throw new TypeError( "updates must be object containing poles of change" )
                     }
