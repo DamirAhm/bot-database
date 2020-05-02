@@ -14,8 +14,8 @@ const config = require( "config" );
 
 const isObjectId = mongoose.Types.ObjectId
 const isPartialOf = ( object, instance ) => {
-    if ( Array.isArray( object ) ) return Object.keys( instance ).every( key => object.includes( key ) );
-    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( instance ).every( key => object.hasOwnProperty( key ) );
+    if ( Array.isArray( object ) ) return object.every( key => instance.hasOwnProperty( key ) );
+    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( object ).every( key => instance.hasOwnProperty( key ) );
     throw new TypeError( "object must be an object or an array of properties" );
 }
 
@@ -277,7 +277,7 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
-                    if ( isPartialOf( [ "attachments", "text", "lesson", "to" ], updates ) ) {
+                    if ( isPartialOf( [ "attachments", "text", "lesson", "to", "createdBy", "_id" ], updates ) ) {
                         const Class = await this.getClassByName( className );
                         const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
 
@@ -285,7 +285,7 @@ class DataBase {
 
                         return updatedHomework;
                     } else {
-                        throw new TypeError( "updates must be object containing poles of change" )
+                        throw new TypeError( "updates must be object containing poles of homework" )
                     }
                 } else {
                     throw new TypeError( "HomeworkId must be objectId" )
