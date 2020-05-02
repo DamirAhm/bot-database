@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const { Roles, Lessons } = require( "./Models/utils" );
 const _Student = require( "./Models/StudentModel" );
 const _Class = require( "./Models/ClassModel" );
@@ -856,6 +855,8 @@ class DataBase {
 module.exports.DataBase = DataBase;
 
 =======
+=======
+>>>>>>> parent of b40983d... Изменил функцию isPartialOf что бы она работала правильно (до этого проверяла на то что 2 аргумент родитель первого, хот язадумавалось наоборот ;3
 const { Roles, Lessons } = require( "./Models/utils" );
 const _Student = require( "./Models/StudentModel" );
 const _Class = require( "./Models/ClassModel" );
@@ -1025,6 +1026,10 @@ class DataBase {
 
     //! Classes
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of b40983d... Изменил функцию isPartialOf что бы она работала правильно (до этого проверяла на то что 2 аргумент родитель первого, хот язадумавалось наоборот ;3
     //* Homework
     static async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
@@ -1136,6 +1141,7 @@ class DataBase {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
                     if ( isPartialOf( [ "attachments", "text", "lesson", "to" ], updates ) ) {
                         const Class = await this.getClassByName( className );
+<<<<<<< HEAD
                         if ( Class ) {
                             const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
 
@@ -1145,6 +1151,13 @@ class DataBase {
                         } else {
                             return [];
                         }
+=======
+                        const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
+
+                        await Class.updateOne( { changes: updatedHomework } );
+
+                        return updatedHomework;
+>>>>>>> parent of b40983d... Изменил функцию isPartialOf что бы она работала правильно (до этого проверяла на то что 2 аргумент родитель первого, хот язадумавалось наоборот ;3
                     } else {
                         throw new TypeError( "updates must be object containing poles of change" )
                     }
@@ -1714,5 +1727,3 @@ class DataBase {
 }
 
 module.exports.DataBase = DataBase;
-
->>>>>>> 7d8c6412075025b1ca860d20355a4652baa15f41
