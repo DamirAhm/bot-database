@@ -170,6 +170,7 @@ class DataBase {
 
     //! Classes
 
+
     //* Homework
     static async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
@@ -291,7 +292,7 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
-                    if ( isPartialOf( [ "attachments", "text", "lesson", "to" ], updates ) ) {
+                    if ( isPartialOf( [ "attachments", "text", "lesson", "to", "createdBy", "_id" ], updates ) ) {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
@@ -303,7 +304,7 @@ class DataBase {
                             return [];
                         }
                     } else {
-                        throw new TypeError( "updates must be object containing poles of change" )
+                        throw new TypeError( "updates must be object containing poles of homework" )
                     }
                 } else {
                     throw new TypeError( "HomeworkId must be objectId" )
@@ -513,11 +514,15 @@ class DataBase {
                 if ( changeId && isObjectId( changeId ) ) {
                     if ( isPartialOf( [ "attachments", "text", "to" ], updates ) ) {
                         const Class = await this.getClassByName( className );
-                        const updatedChanges = Class.changes.map( ch => ch._id.toString() === changeId.toString() ? { ...ch.toObject(), ...updates } : ch );
+                        if ( Class ) {
+                            const updatedChanges = Class.changes.map( ch => ch._id.toString() === changeId.toString() ? { ...ch.toObject(), ...updates } : ch );
 
-                        await Class.updateOne( { changes: updatedChanges } );
+                            await Class.updateOne( { changes: updatedChanges } );
 
-                        return updatedChanges;
+                            return updatedChanges;
+                        } else {
+                            return [];
+                        }
                     } else {
                         throw new TypeError( "updates must be object containing poles of change" )
                     }
