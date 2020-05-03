@@ -12,13 +12,13 @@ const {
 const mongoose = require( "mongoose" );
 const config = require( "config" );
 
-const isObjectId = mongoose.Types.ObjectId
+const isObjectId = mongoose.Types.ObjectId;
+
 const isPartialOf = ( object, instance ) => {
-    if ( Array.isArray( object ) ) return Object.keys( instance ).every( key => object.includes( key ) );
-    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( instance ).every( key => object.hasOwnProperty( key ) );
+    if ( Array.isArray( object ) ) return object.some( key => instance.hasOwnProperty( key ) );
+    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( object ).some( key => instance.hasOwnProperty( key ) );
     throw new TypeError( "object must be an object or an array of properties" );
 }
-
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
     //! Getters
