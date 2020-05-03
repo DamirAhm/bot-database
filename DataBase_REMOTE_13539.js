@@ -11,16 +11,13 @@ const {
 } = require( "./utils/functions" );
 const mongoose = require( "mongoose" );
 const config = require( "config" );
-const VK_API = require( "./VkAPI/VK_API" );
-const isObjectId = mongoose.Types.ObjectId;
 
+const isObjectId = mongoose.Types.ObjectId
 const isPartialOf = ( object, instance ) => {
-    if ( Array.isArray( object ) ) return object.some( key => instance.hasOwnProperty( key ) );
-    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( object ).some( key => instance.hasOwnProperty( key ) );
+    if ( Array.isArray( object ) ) return Object.keys( instance ).every( key => object.includes( key ) );
+    if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( instance ).every( key => object.hasOwnProperty( key ) );
     throw new TypeError( "object must be an object or an array of properties" );
 }
-
-const VK = new VK_API( config.get( "VK_API_KEY" ) );
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
@@ -170,7 +167,6 @@ class DataBase {
 
     //! Classes
 
-
     //* Homework
     static async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
@@ -180,21 +176,9 @@ class DataBase {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             if ( Class.schedule.flat().includes( lesson ) ) {
-                                let parsedContent = {
-                                    text: content.text || ""
-                                };
-                                if ( content.attachments && content.attachments.length > 0 ) {
-                                    parsedContent.attachments = [];
-                                    for ( const at of content.attachments ) {
-                                        parsedContent.attachments.push( {
-                                            value: at,
-                                            url: await VK.getPhotoUrl( at )
-                                        } )
-                                    }
-                                }
                                 const newHomework = {
                                     lesson,
-                                    ...parsedContent,
+                                    ...content,
                                     _id: new mongoose.Types.ObjectId()
                                 };
                                 if ( studentVkId ) {
@@ -292,7 +276,7 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
-                    if ( isPartialOf( [ "attachments", "text", "lesson", "to", "createdBy", "_id" ], updates ) ) {
+                    if ( isPartialOf( [ "attachments", "text", "lesson", "to" ], updates ) ) {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
@@ -304,7 +288,7 @@ class DataBase {
                             return [];
                         }
                     } else {
-                        throw new TypeError( "updates must be object containing poles of homework" )
+                        throw new TypeError( "updates must be object containing poles of change" )
                     }
                 } else {
                     throw new TypeError( "HomeworkId must be objectId" )
@@ -413,20 +397,9 @@ class DataBase {
                 if ( this.validateChangeContent( content ) ) {
                     if ( toDate && toDate instanceof Date ) {
                         const Class = await this.getClassByName( className );
-                        let parsedContent = {};
-                        parsedContent.text = content.text || "";
-                        if ( content.attachments !== undefined && content.attachments.length > 0 ) {
-                            parsedContent.attachments = [];
-                            for ( const at of content.attachments ) {
-                                await parsedContent.attachments.push( {
-                                    value: at,
-                                    url: await VK.getPhotoUrl( at )
-                                } );
-                            }
-                        }
                         const newChange = {
                             to: toDate,
-                            ...parsedContent,
+                            ...content,
                             _id: new mongoose.Types.ObjectId()
                         };
                         if ( toAll ) {
@@ -514,15 +487,11 @@ class DataBase {
                 if ( changeId && isObjectId( changeId ) ) {
                     if ( isPartialOf( [ "attachments", "text", "to" ], updates ) ) {
                         const Class = await this.getClassByName( className );
-                        if ( Class ) {
-                            const updatedChanges = Class.changes.map( ch => ch._id.toString() === changeId.toString() ? { ...ch.toObject(), ...updates } : ch );
+                        const updatedChanges = Class.changes.map( ch => ch._id.toString() === changeId.toString() ? { ...ch.toObject(), ...updates } : ch );
 
-                            await Class.updateOne( { changes: updatedChanges } );
+                        await Class.updateOne( { changes: updatedChanges } );
 
-                            return updatedChanges;
-                        } else {
-                            return [];
-                        }
+                        return updatedChanges;
                     } else {
                         throw new TypeError( "updates must be object containing poles of change" )
                     }
@@ -659,14 +628,16 @@ class DataBase {
                 } else {
                     return false
                 }
-            } else if ( classOrClassName instanceof mongoose.Document && classOrClassName.roleUpCodes !== undefined ) {
-                if ( uuid4.valid( code ) ) {
-                    return classOrClassName.roleUpCodes.includes( code );
-                } else {
-                    return false;
-                }
             } else {
-                console.log( "awdakufbnAJKFGGNE" )
+                if ( classOrClassName instanceof mongoose.Document ) {
+                    if ( classOrClassName.roleUpCodes ) {
+                        if ( uuid4.valid( code ) ) {
+                            return classOrClassName.roleUpCodes.includes( code );
+                        } else {
+                            return false;
+                        }
+                    }
+                }
                 throw new TypeError( "className must be a string or Document" )
             }
         } catch ( e ) {
@@ -723,7 +694,7 @@ class DataBase {
     static async addStudentToClass ( StudentVkId, className ) {
         try {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
-                if ( className && typeof className === "string" ) {
+                if ( newClassName && typeof newClassName === "string" ) {
                     const Class = await this.getClassByName( className );
                     const Student = await this.getStudentByVkId( StudentVkId );
                     if ( Class && Student ) {
@@ -772,31 +743,18 @@ class DataBase {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
                 if ( newClassName && typeof newClassName === "string" ) {
                     const Student = await this.populate( await this.getStudentByVkId( StudentVkId ) );
-                    const newClass = await this.getClassByName( newClassName );
-                    console.log( Student, newClass );
-                    if ( Student !== null ) {
-                        if ( newClass !== null ) {
-                            if ( Student.class !== null ) {
-                                if ( Student.class.name !== newClassName ) {
-                                    const removed = await this.removeStudentFromClass( StudentVkId );
-                                    if ( removed ) {
-                                        await Student.updateOne( { class: newClass._id } );
-                                        newClass.students.push( Student._id );
-                                        await newClass.save();
-                                        await Student.save();
-                                        return true;
-                                    } else {
-                                        return false;
-                                    }
-                                } else {
-                                    return false;
-                                }
-                            } else {
+                    if ( Student.class.name !== newClassName ) {
+                        const newClass = await this.getClassByName( newClassName );
+                        if ( newClass && Student ) {
+                            const removed = await this.removeStudentFromClass( StudentVkId );
+                            if ( removed ) {
                                 await Student.updateOne( { class: newClass._id } );
                                 newClass.students.push( Student._id );
                                 await newClass.save();
                                 await Student.save();
                                 return true;
+                            } else {
+                                return false;
                             }
                         } else {
                             return false;
