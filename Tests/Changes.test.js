@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { isObjectId, createTestData, getUniqueClassName, getUniqueVkId } = require( '../utils/functions' );
 const { DataBase } = require( '../DataBase' );
 const mongoose = require( "mongoose" );
@@ -36,7 +37,7 @@ describe( "addChanges", () => {
 
     it( "should return change id if all is ok", async () => {
         const content = {
-            attachments: [ "photo123_123_as41" ],
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: "changes"
         };
 
@@ -46,7 +47,7 @@ describe( "addChanges", () => {
     } );
     it( "should add all changes to class", async () => {
         const content = {
-            attachments: [ "photo123_123_as41" ],
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: "changes"
         };
 
@@ -59,7 +60,7 @@ describe( "addChanges", () => {
     } );
     it( "should add changes to all classes if toAll prop passed", async () => {
         const content = {
-            attachments: [ "photo123_123_as41" ],
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: "changes"
         };
 
@@ -73,9 +74,9 @@ describe( "addChanges", () => {
         expect( updatedClass1.changes.length ).toBe( 1 );
         expect( updatedClass1.changes.find( change => change._id.toString() === id.toString() ) ).not.toBeUndefined();
     } );
-    it( "shouldn't add createdBy prop if student vkId is passed", async () => {
+    it( "shouldn add createdBy prop if student vkId is passed", async () => {
         const content = {
-            attachments: [ "photo123_123_as41" ],
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: "changes"
         };
 
@@ -83,18 +84,36 @@ describe( "addChanges", () => {
 
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
 
-        expect( isObjectId( result ) ).toBe( true );
         expect( updatedClass.changes.find( change => change._id.toString() === result.toString() ).createdBy ).toBe( MockStudent.vkId );
     } );
+    it( "should add attachment object to class' attachment", async () => {
+        const content = {
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            text: "changes"
+        };
+
+        const result = await DataBase.addChanges( MockClass.name, content, undefined, undefined, MockStudent.vkId );
+
+        const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
+        const attachment = updatedClass.changes
+            .find( change => change._id.toString() === result.toString() ).attachments
+            .find( at => at.value === content.attachments[ 0 ] );
+        expect( attachment ).toBeDefined();
+        expect( typeof attachment ).toBe( "object" );
+        expect( attachment.value ).toBeDefined();
+        expect( attachment.url ).toBeDefined();
+        expect( attachment.url ).toMatch( /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/ );
+        expect( isObjectId( attachment._id ) ).toBe( true );
+    } )
 } );
 
 describe( "getChanges", () => {
     const content1 = {
-        attachments: [ "photo111_111_as41" ],
+        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
         text: "changes1"
     };
     const content2 = {
-        attachments: [ "photo222_222_as41" ],
+        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
         text: "changes2"
     };
     let chId1;
@@ -118,34 +137,35 @@ describe( "getChanges", () => {
         await Class.deleteMany( {} );
         const { Class: c, Student: s } = await createTestData();
         className = c.name;
-        await DataBase.addChanges( c.name, content1 );
-        await DataBase.addChanges( c.name, content2 );
+        chId1 = await DataBase.addChanges( c.name, content1 );
+        chId2 = await DataBase.addChanges( c.name, content2 );
+        vkId = s.vkId;
     } )
     it( "should return array of changes for that class", async () => {
         const result = await DataBase.getChanges( className );
-        const content = {
-            attachments: [ "photo123_123_as41" ],
-            text: "changes"
-        };
-
-        const id = await DataBase.addChanges( className, content );
 
         const updatedClass = await DataBase.getClassByName( className );
-
         expect( Array.isArray( result ) ).toBe( true );
+        expect( result.every( ch => ch.attachments.every( it => typeof it === "object" ) ) ).toBe( true );
         expect( result.length ).toBe( 2 );
-        expect( updatedClass.changes.find( change => change._id.toString() === chId1.toString() ) ).not.toBeUndefined();
-        expect( updatedClass.changes.find( change => change._id.toString() === chId2.toString() ) ).not.toBeUndefined();
+        expect( updatedClass.changes.find( change => change._id.toString() === chId1.toString() ) ).toBeDefined();
+        expect( updatedClass.changes.find( change => change._id.toString() === chId2.toString() ) ).toBeDefined();
+        expect( updatedClass.changes
+            .find( change => change._id.toString() === chId1.toString() ).attachments
+            .some( at => at.value === content1.attachments[ 0 ] ) ).toBe( true );
+        expect( updatedClass.changes
+            .find( change => change._id.toString() === chId2.toString() ).attachments
+            .some( at => at.value === content2.attachments[ 0 ] ) ).toBe( true );
     } );
 } );
 
 describe( "removeChanges", () => {
     const content1 = {
-        attachments: [ "photo111_111_as41" ],
+        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
         text: "changes1"
     };
     const content2 = {
-        attachments: [ "photo222_222_as41" ],
+        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
         text: "changes2"
     };
     let chId1;
@@ -185,11 +205,11 @@ describe( "removeChanges", () => {
 describe( "updateChanges", () => {
     describe( "removeChanges", () => {
         const content1 = {
-            attachments: [ "photo111_111_as41" ],
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: "changes1"
         };
         const content2 = {
-            attachments: [ "photo222_222_as41" ],
+            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
             text: "changes2"
         };
         let chId1;

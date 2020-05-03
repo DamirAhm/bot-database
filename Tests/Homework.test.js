@@ -1,10 +1,11 @@
-// @ts-nocheck
+//@ts-nocheck
 const
     mongoose = require( "mongoose" ),
     Class = require( '../Models/ClassModel' ),
     Student = require( "../Models/StudentModel" ),
     { DataBase } = require( '../DataBase' ),
-    { getUniqueClassName, getUniqueVkId } = require( "../utils/functions" );
+    { isURL } = require( '../Models/utils' ),
+    { getUniqueClassName, getUniqueVkId, isObjectId } = require( "../utils/functions" );
 
 
 //TODO remove this sheat
@@ -75,7 +76,7 @@ describe( "addHomework", () => {
     } );
     it( "should add one homework with right params", async () => {
         const text = "Сделай дз уже блять сука блять";
-        const attachments = [ "photo123_123_as41" ]
+        const attachments = [ "photo227667805_457239951_d18b007165cb0d264e" ]
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
         const initialLength = MockClass.homework.length;
@@ -94,7 +95,12 @@ describe( "addHomework", () => {
         expect( homework.createdBy ).toBe( studentVkId );
         expect( homework.text ).toBe( text );
         expect( homework._id ).toEqual( id );
-        expect( Array.from( homework.attachments ) ).toEqual( attachments );
+        expect( Array.isArray( homework.attachments ) ).toBe( true );
+        expect( homework.attachments.length ).toBe( 1 );
+        expect( homework.attachments.every( at => typeof at === "object" ) ).toBe( true );
+        expect( homework.attachments.every( at => attachments.includes( at.value ) ) ).toBe( true );
+        expect( homework.attachments.every( at => isURL( at.url ) ) ).toBe( true );
+        expect( homework.attachments.every( at => isObjectId( at._id ) ) ).toBe( true );
     } );
     it( "should set homework's 'to' to given date if it passes", async () => {
         const text = "Сделай дз уже блять сука блять";
@@ -234,11 +240,11 @@ describe( "removeHomework", () => {
 
 describe( "updateHomework", () => {
     const content1 = {
-        attachments: [ "photo111_111_as41" ],
+        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
         text: "changes1"
     };
     const content2 = {
-        attachments: [ "photo222_222_as41" ],
+        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
         text: "changes2"
     };
     let chId1;
@@ -264,7 +270,7 @@ describe( "updateHomework", () => {
         chId2 = await DataBase.addHomework( className, "Математика", content2 );
     } )
 
-    it( "should return array of updated changes", async () => {
+    it( "should return array of updated homework", async () => {
         const updateHomeworks = await DataBase.updateHomework( className, chId1, { text: "new text" } );
 
         expect( updateHomeworks.length ).toBe( 2 );

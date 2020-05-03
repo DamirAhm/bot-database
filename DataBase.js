@@ -11,7 +11,7 @@ const {
 } = require( "./utils/functions" );
 const mongoose = require( "mongoose" );
 const config = require( "config" );
-
+const VK_API = require( "./VkAPI/VK_API" );
 const isObjectId = mongoose.Types.ObjectId;
 
 const isPartialOf = ( object, instance ) => {
@@ -19,6 +19,9 @@ const isPartialOf = ( object, instance ) => {
     if ( typeof object === "object" ) return Object.keys( instance ).length !== 0 && Object.keys( object ).some( key => instance.hasOwnProperty( key ) );
     throw new TypeError( "object must be an object or an array of properties" );
 }
+
+const VK = new VK_API( "0c44f72c9eb8568cdc477605a807a03b5f924e7cf0a18121eff5b8ba1b886f3789496034c2cc75bc83924" );
+
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
     //! Getters
@@ -176,9 +179,21 @@ class DataBase {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             if ( Class.schedule.flat().includes( lesson ) ) {
+                                let parsedContent = {
+                                    text: content.text || ""
+                                };
+                                if ( content.attachments && content.attachments.length > 0 ) {
+                                    parsedContent.attachments = [];
+                                    for ( const at of content.attachments ) {
+                                        parsedContent.attachments.push( {
+                                            value: at,
+                                            url: await VK.getPhotoUrl( at )
+                                        } )
+                                    }
+                                }
                                 const newHomework = {
                                     lesson,
-                                    ...content,
+                                    ...parsedContent,
                                     _id: new mongoose.Types.ObjectId()
                                 };
                                 if ( studentVkId ) {
@@ -397,9 +412,20 @@ class DataBase {
                 if ( this.validateChangeContent( content ) ) {
                     if ( toDate && toDate instanceof Date ) {
                         const Class = await this.getClassByName( className );
+                        let parsedContent = {};
+                        parsedContent.text = content.text || "";
+                        if ( content.attachments !== undefined && content.attachments.length > 0 ) {
+                            parsedContent.attachments = [];
+                            for ( const at of content.attachments ) {
+                                await parsedContent.attachments.push( {
+                                    value: at,
+                                    url: await VK.getPhotoUrl( at )
+                                } );
+                            }
+                        }
                         const newChange = {
                             to: toDate,
-                            ...content,
+                            ...parsedContent,
                             _id: new mongoose.Types.ObjectId()
                         };
                         if ( toAll ) {
@@ -628,16 +654,14 @@ class DataBase {
                 } else {
                     return false
                 }
-            } else {
-                if ( classOrClassName instanceof mongoose.Document ) {
-                    if ( classOrClassName.roleUpCodes ) {
-                        if ( uuid4.valid( code ) ) {
-                            return classOrClassName.roleUpCodes.includes( code );
-                        } else {
-                            return false;
-                        }
-                    }
+            } else if ( classOrClassName instanceof mongoose.Document && classOrClassName.roleUpCodes !== undefined ) {
+                if ( uuid4.valid( code ) ) {
+                    return classOrClassName.roleUpCodes.includes( code );
+                } else {
+                    return false;
                 }
+            } else {
+                console.log( "awdakufbnAJKFGGNE" )
                 throw new TypeError( "className must be a string or Document" )
             }
         } catch ( e ) {
@@ -694,7 +718,7 @@ class DataBase {
     static async addStudentToClass ( StudentVkId, className ) {
         try {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
-                if ( newClassName && typeof newClassName === "string" ) {
+                if ( className && typeof className === "string" ) {
                     const Class = await this.getClassByName( className );
                     const Student = await this.getStudentByVkId( StudentVkId );
                     if ( Class && Student ) {
@@ -743,18 +767,31 @@ class DataBase {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
                 if ( newClassName && typeof newClassName === "string" ) {
                     const Student = await this.populate( await this.getStudentByVkId( StudentVkId ) );
-                    if ( Student.class.name !== newClassName ) {
-                        const newClass = await this.getClassByName( newClassName );
-                        if ( newClass && Student ) {
-                            const removed = await this.removeStudentFromClass( StudentVkId );
-                            if ( removed ) {
+                    const newClass = await this.getClassByName( newClassName );
+                    console.log( Student, newClass );
+                    if ( Student !== null ) {
+                        if ( newClass !== null ) {
+                            if ( Student.class !== null ) {
+                                if ( Student.class.name !== newClassName ) {
+                                    const removed = await this.removeStudentFromClass( StudentVkId );
+                                    if ( removed ) {
+                                        await Student.updateOne( { class: newClass._id } );
+                                        newClass.students.push( Student._id );
+                                        await newClass.save();
+                                        await Student.save();
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                } else {
+                                    return false;
+                                }
+                            } else {
                                 await Student.updateOne( { class: newClass._id } );
                                 newClass.students.push( Student._id );
                                 await newClass.save();
                                 await Student.save();
                                 return true;
-                            } else {
-                                return false;
                             }
                         } else {
                             return false;

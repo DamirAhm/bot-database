@@ -1,9 +1,26 @@
 // @ts-nocheck
 const mongoose = require( "mongoose" );
 const uuid4 = require( "uuid4" );
-const { Lessons } = require( "./utils" );
+const { Lessons, isURL } = require( "./utils" );
 
 const isLesson = str => Lessons.includes( str );
+
+const attachment = mongoose.Schema( {
+    value: {
+        type: String,
+        validate: {
+            validator: str => /^photo.+(_.+)*/.test( str ),
+            message: "url must be a valid vk attachment"
+        }
+    },
+    url: {
+        type: String,
+        validate: {
+            validator: isURL,
+            message: "url must be a valid URL"
+        }
+    }
+} );
 
 const classSchema = mongoose.Schema( {
     students: {
@@ -48,7 +65,7 @@ const classSchema = mongoose.Schema( {
                     type: Date,
                     default: new Date( Date.now() + 1000 * 60 * 60 * 24 * 7 ),
                 },
-                attachments: [ String ],
+                attachments: [ attachment ],
                 createdBy: {
                     type: Number,
                     validate: {
@@ -85,7 +102,7 @@ const classSchema = mongoose.Schema( {
     changes: {
         type: [ {
             text: String,
-            attachments: [ String ],
+            attachments: [ attachment ],
             to: Date,
             createdBy: Number,
             _id: {
