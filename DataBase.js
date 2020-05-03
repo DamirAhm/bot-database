@@ -20,7 +20,7 @@ const isPartialOf = ( object, instance ) => {
     throw new TypeError( "object must be an object or an array of properties" );
 }
 
-const VK = new VK_API( "0c44f72c9eb8568cdc477605a807a03b5f924e7cf0a18121eff5b8ba1b886f3789496034c2cc75bc83924" );
+const VK = new VK_API( config.get( "VK_API_KEY" ) );
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
