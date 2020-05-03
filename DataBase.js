@@ -276,7 +276,7 @@ class DataBase {
                         return Class.homework;
                     }
                 } else {
-                    return null;
+                    return [];
                 }
             } else {
                 throw new TypeError( "ClassName must be string" )
@@ -284,7 +284,7 @@ class DataBase {
         } catch ( e ) {
             if ( e instanceof TypeError ) throw e;
             console.log( e );
-            return null
+            return []
         }
     }; //
 
@@ -773,7 +773,6 @@ class DataBase {
                 if ( newClassName && typeof newClassName === "string" ) {
                     const Student = await this.populate( await this.getStudentByVkId( StudentVkId ) );
                     const newClass = await this.getClassByName( newClassName );
-                    console.log( Student, newClass );
                     if ( Student !== null ) {
                         if ( newClass !== null ) {
                             if ( Student.class !== null ) {
