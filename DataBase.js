@@ -360,7 +360,7 @@ class DataBase {
     static async changeDay ( className, dayIndex, newDay ) {
         try {
             if ( className && typeof className === "string" ) {
-                if ( dayIndex && typeof dayIndex === "number" && dayIndex < 6 && dayIndex >= 0 ) {
+                if ( dayIndex !== undefined && typeof dayIndex === "number" && dayIndex <= 5 && dayIndex >= 0 ) {
                     if ( newDay && Array.isArray( newDay ) && newDay.every( lesson => typeof lesson === "string" && Lessons.includes( lesson ) ) ) {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
