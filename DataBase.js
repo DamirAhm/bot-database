@@ -299,7 +299,7 @@ class DataBase {
 
                             await Class.updateOne( { homework: updatedHomework } );
 
-                            return updatedHomework;
+                            return await this.getClassBy_Id( Class._id ).then( cl => cl.homework );
                         } else {
                             return [];
                         }
