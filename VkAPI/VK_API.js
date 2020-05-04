@@ -8,7 +8,7 @@ class VK_API {
         this.#api = createVkApi( key );
     }
 
-    getPhotoUrl = async ( at ) => {
+    async getPhotoUrl ( at ) {
         if ( at ) {
             let url;
             if ( /^photo/.test( at ) ) {
@@ -24,6 +24,9 @@ class VK_API {
         } else {
             return "#";
         }
+    }
+    async getUser ( userId ) {
+        return await this.#api( "users.get", { user_ids: userId } )
     }
 };
 
