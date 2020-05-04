@@ -865,7 +865,7 @@ class DataBase {
         for ( const at of attachments ) {
             parsedAttachments.push( {
                 value: at.value,
-                url: await VK.getPhotoUrl( at.value )
+                url: await VK.getPhotoUrl( at.value, at.album_id )
             } )
         }
         return parsedAttachments;

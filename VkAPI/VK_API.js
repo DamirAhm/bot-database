@@ -11,15 +11,15 @@ class VK_API {
         this.#api = createVkApi( key );
     }
 
-    async getPhotoUrl ( at ) {
-        if ( at ) {
+    async getPhotoUrl ( attachment, album_id ) {
+        if ( attachment ) {
             let url;
-            if ( /^photo/.test( at ) ) {
-                const [ owner_id, photo_ids ] = at.slice( 5 ).split( "_" );
+            if ( /^photo/.test( attachment ) ) {
+                const [ owner_id, photo_ids ] = attachment.slice( 5 ).split( "_" );
                 url = await this.#api( "photos.get", {
                     owner_id,
                     photo_ids,
-                    album_id: "saved"
+                    album_id: album_id
                 } ).then( photo => photo.items[ 0 ].sizes[ 4 ].url );
             }
 
