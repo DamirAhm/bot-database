@@ -16,3 +16,7 @@ afterAll( async () => {
     await Class.deleteMany( {} );
     await mongoose.disconnect();
 } );
+afterEach( async () => {
+    await Student.deleteMany( {} );
+    await Class.deleteMany( {} );
+} );            
