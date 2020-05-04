@@ -11,6 +11,7 @@ describe( "addChanges", () => {
     let StudentWithoutClass;
     let ClassWithoutStudent;
     beforeAll( async () => {
+        // mongoose.set( "debug", true );
         const { Class: c, Student: s } = await createTestData();
         const wcu = await DataBase.createStudent( getUniqueVkId() );
         const wsc = await DataBase.createClass( getUniqueClassName() );
@@ -37,7 +38,7 @@ describe( "addChanges", () => {
 
     it( "should return change id if all is ok", async () => {
         const content = {
-            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
             text: "changes"
         };
 
@@ -47,10 +48,9 @@ describe( "addChanges", () => {
     } );
     it( "should add all changes to class", async () => {
         const content = {
-            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
             text: "changes"
         };
-
         const id = await DataBase.addChanges( MockClass.name, content );
 
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
@@ -60,7 +60,7 @@ describe( "addChanges", () => {
     } );
     it( "should add changes to all classes if toAll prop passed", async () => {
         const content = {
-            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
             text: "changes"
         };
 
@@ -76,7 +76,7 @@ describe( "addChanges", () => {
     } );
     it( "shouldn add createdBy prop if student vkId is passed", async () => {
         const content = {
-            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
             text: "changes"
         };
 
@@ -88,7 +88,7 @@ describe( "addChanges", () => {
     } );
     it( "should add attachment object to class' attachment", async () => {
         const content = {
-            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
             text: "changes"
         };
 
@@ -97,7 +97,8 @@ describe( "addChanges", () => {
         const updatedClass = await DataBase.getClassBy_Id( MockClass._id );
         const attachment = updatedClass.changes
             .find( change => change._id.toString() === result.toString() ).attachments
-            .find( at => at.value === content.attachments[ 0 ] );
+            .find( at => at.value === content.attachments[ 0 ].value );
+
         expect( attachment ).toBeDefined();
         expect( typeof attachment ).toBe( "object" );
         expect( attachment.value ).toBeDefined();
@@ -109,11 +110,11 @@ describe( "addChanges", () => {
 
 describe( "getChanges", () => {
     const content1 = {
-        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+        attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
         text: "changes1"
     };
     const content2 = {
-        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+        attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
         text: "changes2"
     };
     let chId1;
@@ -152,20 +153,20 @@ describe( "getChanges", () => {
         expect( updatedClass.changes.find( change => change._id.toString() === chId2.toString() ) ).toBeDefined();
         expect( updatedClass.changes
             .find( change => change._id.toString() === chId1.toString() ).attachments
-            .some( at => at.value === content1.attachments[ 0 ] ) ).toBe( true );
+            .some( at => at.value === content1.attachments[ 0 ].value ) ).toBe( true );
         expect( updatedClass.changes
             .find( change => change._id.toString() === chId2.toString() ).attachments
-            .some( at => at.value === content2.attachments[ 0 ] ) ).toBe( true );
+            .some( at => at.value === content2.attachments[ 0 ].value ) ).toBe( true );
     } );
 } );
 
 describe( "removeChanges", () => {
     const content1 = {
-        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+        attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
         text: "changes1"
     };
     const content2 = {
-        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+        attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
         text: "changes2"
     };
     let chId1;
@@ -205,11 +206,11 @@ describe( "removeChanges", () => {
 describe( "updateChanges", () => {
     describe( "removeChanges", () => {
         const content1 = {
-            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
             text: "changes1"
         };
         const content2 = {
-            attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+            attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
             text: "changes2"
         };
         let chId1;

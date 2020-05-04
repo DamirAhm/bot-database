@@ -76,7 +76,7 @@ describe( "addHomework", () => {
     } );
     it( "should add one homework with right params", async () => {
         const text = "Сделай дз уже блять сука блять";
-        const attachments = [ "photo227667805_457239951_d18b007165cb0d264e" ]
+        const attachments = [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ]
         const lesson = "Обществознание";
         const studentVkId = getUniqueVkId();
         const initialLength = MockClass.homework.length;
@@ -98,7 +98,7 @@ describe( "addHomework", () => {
         expect( Array.isArray( homework.attachments ) ).toBe( true );
         expect( homework.attachments.length ).toBe( 1 );
         expect( homework.attachments.every( at => typeof at === "object" ) ).toBe( true );
-        expect( homework.attachments.every( at => attachments.includes( at.value ) ) ).toBe( true );
+        expect( homework.attachments.every( at => attachments.find( atach => atach.value === at.value ) !== undefined ) ).toBe( true );
         expect( homework.attachments.every( at => isURL( at.url ) ) ).toBe( true );
         expect( homework.attachments.every( at => isObjectId( at._id ) ) ).toBe( true );
     } );
@@ -240,11 +240,11 @@ describe( "removeHomework", () => {
 
 describe( "updateHomework", () => {
     const content1 = {
-        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+        attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
         text: "changes1"
     };
     const content2 = {
-        attachments: [ "photo227667805_457239951_d18b007165cb0d264e" ],
+        attachments: [ { value: "photo227667805_457239951_d18b007165cb0d264e", album_id: "-15" } ],
         text: "changes2"
     };
     let chId1;

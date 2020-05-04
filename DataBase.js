@@ -176,7 +176,7 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( lesson && Lessons.includes( lesson ) ) {
-                    if ( this.validateHomeworkContent( content ) ) {
+                    if ( this.validateContent( content ) ) {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             if ( Class.schedule.flat().includes( lesson ) ) {
@@ -184,13 +184,7 @@ class DataBase {
                                     text: content.text || ""
                                 };
                                 if ( content.attachments && content.attachments.length > 0 ) {
-                                    parsedContent.attachments = [];
-                                    for ( const at of content.attachments ) {
-                                        parsedContent.attachments.push( {
-                                            value: at,
-                                            url: await VK.getPhotoUrl( at )
-                                        } )
-                                    }
+                                    parsedContent.attachments = await this.parseAttachments( content.attachments );
                                 }
                                 const newHomework = {
                                     lesson,
@@ -410,19 +404,14 @@ class DataBase {
     static async addChanges ( className, content, toDate = new Date(), toAll = false, vkId ) {
         try {
             if ( className !== undefined && typeof className === 'string' ) {
-                if ( this.validateChangeContent( content ) ) {
+                if ( this.validateContent( content ) ) {
                     if ( toDate && toDate instanceof Date ) {
+                        // console.log( "NAMES", await _Class.find( {} ).then( e => e.map( r => r.name ) ) )
                         const Class = await this.getClassByName( className );
                         let parsedContent = {};
                         parsedContent.text = content.text || "";
                         if ( content.attachments !== undefined && content.attachments.length > 0 ) {
-                            parsedContent.attachments = [];
-                            for ( const at of content.attachments ) {
-                                await parsedContent.attachments.push( {
-                                    value: at,
-                                    url: await VK.getPhotoUrl( at )
-                                } );
-                            }
+                            parsedContent.attachments = await this.parseAttachments( content.attachments );
                         }
                         const newChange = {
                             to: toDate,
@@ -839,35 +828,7 @@ class DataBase {
             return null;
         }
     } //
-    static validateHomeworkContent ( content ) {
-        if ( typeof content === "object" && content !== null && content.toString() === "[object Object]" ) {
-            if (
-                Object.keys( content ).length === 0 ||
-                Object.keys( content ).length > 2 ||
-                Object.keys( content ).some( key => ![ "attachments", "text" ].includes( key ) )
-            ) {
-                return false;
-            }
-
-            if ( content.text && typeof content.text !== "string" ) { return false };
-
-            if (
-                content.attachments &&
-                (
-                    !Array.isArray( content.attachments ) ||
-                    content.attachments.some( at => !this.validateAttachment( at ) )
-                )
-            ) {
-                return false;
-            };
-
-            return true;
-
-        } else {
-            return false;
-        }
-    }
-    static validateChangeContent ( content ) {
+    static validateContent ( content ) {
         if ( content ) {
             if ( content !== null && content.toString() === "[object Object]" ) {
                 if (
@@ -892,8 +853,23 @@ class DataBase {
         return false;
     } //
     static validateAttachment ( attachment ) {
-        return typeof attachment === "string" && /[a-z]+\d+_\d+_.+/.test( attachment );
+        if ( typeof attachment === "object" ) {
+            return attachment.hasOwnProperty( "value" ) &&
+                /[a-z]+\d+_\d+_.+/.test( attachment.value ) &&
+                attachment.hasOwnProperty( "album_id" ) &&
+                typeof attachment.album_id === "string";
+        };
     } //
+    static async parseAttachments ( attachments ) {
+        const parsedAttachments = [];
+        for ( const at of attachments ) {
+            parsedAttachments.push( {
+                value: at.value,
+                url: await VK.getPhotoUrl( at.value )
+            } )
+        }
+        return parsedAttachments;
+    }
 }
 
 module.exports.DataBase = DataBase;

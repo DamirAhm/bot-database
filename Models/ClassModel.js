@@ -19,6 +19,10 @@ const attachment = mongoose.Schema( {
             validator: isURL,
             message: "url must be a valid URL"
         }
+    },
+    album_id: {
+        type: String,
+        required: true,
     }
 } );
 
