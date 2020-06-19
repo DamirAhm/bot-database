@@ -11,18 +11,19 @@ const attachment = mongoose.Schema( {
         validate: {
             validator: str => /^photo.+(_.+)*/.test( str ),
             message: "url must be a valid vk attachment"
-        }
+        },
+        required: true,
     },
     url: {
         type: String,
         validate: {
             validator: isURL,
             message: "url must be a valid URL"
-        }
+        },
+        required: true,
     },
     album_id: {
-        type: String,
-        required: true,
+        type: Number
     }
 } );
 
@@ -108,7 +109,13 @@ const classSchema = mongoose.Schema( {
             text: String,
             attachments: [ attachment ],
             to: Date,
-            createdBy: Number,
+            createdBy: {
+                type: Number,
+                validate: {
+                    validator: Number.isInteger,
+                    message: "Created by must be integer means vk id of user created it"
+                }
+            },
             _id: {
                 type: mongoose.Schema.Types.ObjectId,
                 default: new mongoose.Types.ObjectId()

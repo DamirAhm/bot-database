@@ -12,7 +12,7 @@ const {
 const mongoose = require( "mongoose" );
 const config = require( "config" );
 const VK_API = require( "./VkAPI/VK_API" );
-const isObjectId = mongoose.Types.ObjectId;
+const isObjectId = mongoose.Types.ObjectId.isValid;
 
 const isPartialOf = ( object, instance ) => {
     if ( Array.isArray( object ) ) return object.some( key => instance.hasOwnProperty( key ) );
@@ -176,20 +176,22 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( lesson && Lessons.includes( lesson ) ) {
-                    if ( this.validateContent( content ) ) {
+                    if ( this.validateContent( content ).length === 0 ) {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             if ( Class.schedule.flat().includes( lesson ) ) {
                                 let parsedContent = {
-                                    text: content.text || ""
+                                    text: content.text || "",
+                                    attachments: content.attachments
                                 };
-                                if ( content.attachments && content.attachments.length > 0 ) {
+                                if ( content.attachments && content.attachments.length > 0 && content.attachments.some( att => att.url === undefined ) ) {
                                     parsedContent.attachments = await this.parseAttachments( content.attachments );
                                 }
                                 const newHomework = {
                                     lesson,
                                     ...parsedContent,
-                                    _id: new mongoose.Types.ObjectId()
+                                    _id: new mongoose.Types.ObjectId(),
+                                    createdBy: studentVkId
                                 };
                                 if ( studentVkId ) {
                                     if ( studentVkId && typeof studentVkId === "number" ) {
@@ -199,7 +201,7 @@ class DataBase {
                                     }
                                 };
                                 if ( expirationDate ) {
-                                    if ( expirationDate instanceof Date && Date.now() - expirationDate.getTime() > 0 ) {
+                                    if ( this.validateDate( expirationDate, undefined, new Date(), 24 * 60 * 60 * 1000 ) ) {
                                         newHomework.to = expirationDate;
                                         await Class.updateOne( { homework: Class.homework.concat( [ newHomework ] ) } );
                                         return newHomework._id;
@@ -220,7 +222,7 @@ class DataBase {
                             return null;
                         }
                     } else {
-                        throw new TypeError( "text must be non empty string" );
+                        throw new Error( JSON.stringify( this.validateContent( content ) ) );
                     }
                 } else {
                     throw new TypeError( "Lesson must be in lessons list" );
@@ -286,7 +288,7 @@ class DataBase {
         try {
             if ( className && typeof className === "string" ) {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
-                    if ( isPartialOf( [ "attachments", "text", "lesson", "to", "createdBy", "_id" ], updates ) ) {
+                    if ( isPartialOf( [ "attachments", "text", "lesson", "to", "createdBy", "_id", "album_id" ], updates ) ) {
                         const Class = await this.getClassByName( className );
                         if ( Class ) {
                             const updatedHomework = Class.homework.map( ch => ch._id.toString() === homeworkId.toString() ? { ...ch.toObject(), ...updates } : ch );
@@ -404,38 +406,43 @@ class DataBase {
     static async addChanges ( className, content, toDate = new Date(), toAll = false, vkId ) {
         try {
             if ( className !== undefined && typeof className === 'string' ) {
-                if ( this.validateContent( content ) ) {
-                    if ( toDate && toDate instanceof Date ) {
-                        // console.log( "NAMES", await _Class.find( {} ).then( e => e.map( r => r.name ) ) )
+                if ( this.validateContent( content ).length === 0 ) {
+                    if ( this.validateDate( toDate ) ) {
                         const Class = await this.getClassByName( className );
-                        let parsedContent = {};
-                        parsedContent.text = content.text || "";
-                        if ( content.attachments !== undefined && content.attachments.length > 0 ) {
-                            parsedContent.attachments = await this.parseAttachments( content.attachments );
-                        }
-                        const newChange = {
-                            to: toDate,
-                            ...parsedContent,
-                            _id: new mongoose.Types.ObjectId()
-                        };
-                        if ( toAll ) {
-                            const classes = await _Class.find( {} );
-                            for ( const _class of classes ) {
-                                await _class.updateOne( { changes: [ ..._class.changes, newChange ] } )
+                        if ( Class ) {
+                            let parsedContent = {
+                                text: content.text || "",
+                                attachments: content.attachments
+                            };
+                            if ( content.attachments && content.attachments.length > 0 ) {
+                                parsedContent.attachments = await this.parseAttachments( content.attachments );
                             }
-                            return newChange._id;
+                            const newChange = {
+                                to: toDate,
+                                ...parsedContent,
+                                _id: new mongoose.Types.ObjectId()
+                            };
+                            if ( toAll ) {
+                                const classes = await _Class.find( {} );
+                                for ( const _class of classes ) {
+                                    await _class.updateOne( { changes: [ ..._class.changes, newChange ] } )
+                                }
+                                return newChange._id;
+                            } else {
+                                if ( vkId ) {
+                                    newChange.createdBy = vkId
+                                }
+                                await Class.updateOne( { changes: [ ...Class.changes, newChange ] } );
+                                return newChange._id;
+                            }
                         } else {
-                            if ( vkId ) {
-                                newChange.createdBy = vkId
-                            }
-                            await Class.updateOne( { changes: [ ...Class.changes, newChange ] } );
-                            return newChange._id;
+                            return null;
                         }
                     } else {
                         throw new TypeError( "toDate must be date" );
                     }
                 } else {
-                    throw new TypeError( "Contents must be object with poles attachments and text" )
+                    throw new TypeError( JSON.stringify( this.validateContent( content ) ) )
                 }
             } else {
                 throw new TypeError( "ClassName must be string" );
@@ -829,6 +836,7 @@ class DataBase {
         }
     } //
     static validateContent ( content ) {
+        const errors = [];
         if ( content ) {
             if ( content !== null && content.toString() === "[object Object]" ) {
                 if (
@@ -836,39 +844,67 @@ class DataBase {
                     Object.keys( content ).length <= 2 &&
                     Object.keys( content ).every( key => [ "attachments", "text" ].includes( key ) )
                 ) {
-                    if ( content.attachments && ( !Array.isArray( content.attachments ) || content.attachments.some( at => !this.validateAttachment( at ) ) ) ) {
-                        return false;
+                    if ( content.attachments.length > 0 && ( !Array.isArray( content.attachments ) || content.attachments.some( at => !this.validateAttachment( at ) ) ) ) {
+                        errors.push( "Invalid attachments" )
                     }
-                    if ( content.text && typeof content.text !== "string" ) {
-                        return false;
+                    if ( content.text !== undefined && content.text !== "" && typeof content.text !== "string" ) {
+                        errors.push( "Text must be a string" )
                     }
-                    return true;
                 } else {
-                    return false;
+                    errors.push( "Invalid content structure" )
                 }
             } else {
-                return false;
+                errors.push( "Content must be an object" );
             }
+        } else {
+            errors.push( "Content can't be undefined" );
         }
-        return false;
+        return errors;
     } //
     static validateAttachment ( attachment ) {
         if ( typeof attachment === "object" ) {
             return attachment.hasOwnProperty( "value" ) &&
-                /[a-z]+\d+_\d+_.+/.test( attachment.value ) &&
-                attachment.hasOwnProperty( "album_id" ) &&
-                typeof attachment.album_id === "string";
+                /[a-z]+-?\d+_-?\d+(_.+)?/.test( attachment.value ) &&
+                attachment.hasOwnProperty( "url" )
         };
     } //
     static async parseAttachments ( attachments ) {
         const parsedAttachments = [];
         for ( const at of attachments ) {
-            parsedAttachments.push( {
-                value: at.value,
-                url: await VK.getPhotoUrl( at.value, at.album_id )
-            } )
+            if ( at => at.url === undefined ) {
+                parsedAttachments.push( {
+                    value: at.value,
+                    url: await VK.getPhotoUrl( at.value, at.album_id || config.get( "ALBUM_ID" ) ),
+                    _id: new mongoose.Types.ObjectId()
+                } )
+            } else {
+                parsedAttachments.push( { ...at, _id: new mongoose.Types.ObjectId() } );
+            }
         }
         return parsedAttachments;
+    }
+    static validateDate ( date, maxDate, minDate = new Date(), d = 0 ) {
+        let flag = true;
+        if ( date instanceof Date ) {
+            if ( maxDate && maxDate instanceof Date ) {
+                flag = Math.abs( maxDate.getTime() - date.getTime() ) >= d;
+                if ( !flag ) return flag;
+            }
+            if ( minDate && minDate instanceof Date ) {
+                flag = Math.abs( date.getTime() - minDate.getTime() ) >= d;
+                if ( !flag ) return flag;
+            }
+            return true;
+        } else if ( typeof date === "string" ) {
+            if ( Date.parse( date ) ) {
+                return this.validateDate( new Date( Date.parse( date ) ), maxDate, minDate )
+            }
+            return false;
+        } else if ( typeof date === "number" ) {
+            return this.validateDate( new Date( date ), maxDate, minDate );
+        } else {
+            return false;
+        }
     }
 }
 
