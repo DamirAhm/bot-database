@@ -118,20 +118,20 @@ class DataBase {
     }; //Возвращает список всех редакторов
 
     //! Creators
-    static async createStudent ( vkId, class_id ) {
+    static async createStudent ( vkId, { class_id, firstName, lastName: secondName } ) {
         try {
             if ( vkId !== undefined ) {
                 if ( typeof vkId === "number" ) {
                     let newStudent;
+                    let newStudentInfo = { vkId, firstName, secondName };
                     if ( class_id ) {
                         const Class = await this.getClassBy_Id( class_id );
-                        newStudent = new _Student( { vkId, class: Class ? class_id : undefined } );
                         if ( Class ) {
+                            newStudentInfo.class = class_id;
                             await Class.updateOne( { students: [ ...Class.students, newStudent._id ] } );
                         }
-                    } else {
-                        newStudent = new _Student( { vkId } );
                     }
+                    newStudent = new _Student( newStudentInfo );
                     await newStudent.save();
                     return await DataBase.getStudentBy_Id( newStudent._id );
                 } else {
