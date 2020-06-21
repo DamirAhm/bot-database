@@ -46,7 +46,10 @@ const studentSchema = mongoose.Schema( {
     banned: {
         default: false,
         type: Boolean
-    }
+    },
+    firstName: String,
+    secondName: String,
+    fullName: String,
 } );
 
 module.exports = mongoose.model( "Student", studentSchema );
