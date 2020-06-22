@@ -124,6 +124,20 @@ class DataBase {
             return [];
         }
     }; //Возвращает список всех редакторов
+    async getAllStudents () {
+        try {
+            return await _Student.find( {} );
+        } catch ( e ) {
+            console.error( e );
+        }
+    }
+    async getAllClasses () {
+        try {
+            return await _Class.find( {} );
+        } catch ( e ) {
+            console.error( e );
+        }
+    }
 
     //! Creators
     async createStudent ( vkId, { class_id, firstName, lastName: secondName } ) {
