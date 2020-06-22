@@ -49,7 +49,17 @@ const studentSchema = mongoose.Schema( {
     },
     firstName: String,
     secondName: String,
-    fullName: String,
+    registered: {
+        type: Boolean,
+        default: false
+    }
 } );
+
+studentSchema.virtual( "fullName" ).get( () => {
+    if ( this.firstName || this.secondName ) {
+        return ( this.firstName || "" ) + " " + ( this.lastName || "" )
+    }
+    return undefined
+} )
 
 module.exports = mongoose.model( "Student", studentSchema );

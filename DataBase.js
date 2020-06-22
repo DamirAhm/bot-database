@@ -24,8 +24,16 @@ const VK = new VK_API( config.get( "VK_API_KEY" ) );
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
+    constructor( uri ) {
+        if ( uri ) {
+            this.uri = uri;
+        } else {
+            throw new Error( "You must pass an DataBase uri to constructor" )
+        }
+    }
+
     //! Getters
-    static async getStudentByVkId ( vkId ) {
+    async getStudentByVkId ( vkId ) {
         try {
             if ( vkId !== undefined && typeof vkId === "number" ) {
                 const Student = await _Student.findOne( { vkId } );
@@ -43,7 +51,7 @@ class DataBase {
             return null;
         }
     }; //Возвращает ученика по его id из vk
-    static async getStudentBy_Id ( _id ) {
+    async getStudentBy_Id ( _id ) {
         try {
             if ( typeof _id === "object" && isObjectId( _id ) ) _id = _id.toString();
             if ( _id && typeof _id === "string" ) {
@@ -62,7 +70,7 @@ class DataBase {
             return null;
         }
     }; //Возвращает ученика по его _id (это чисто для разработки (так быстрее ищется))
-    static async getClassByName ( name ) {
+    async getClassByName ( name ) {
         try {
             if ( name && typeof name === "string" ) {
                 const Class = await _Class.findOne( { name } );
@@ -80,7 +88,7 @@ class DataBase {
             return null;
         }
     }; //Возвращает класс по его имени
-    static async getClassBy_Id ( _id ) {
+    async getClassBy_Id ( _id ) {
         try {
             if ( isObjectId( _id ) ) {
                 if ( typeof _id === "object" ) _id = _id.toString();
@@ -103,7 +111,7 @@ class DataBase {
             return null;
         }
     }; //Возвращает ученика по его _id (это чисто для разработки (так быстрее ищется))
-    static async getAllContributors () {
+    async getAllContributors () {
         try {
             const contributors = await _Student.find( { role: Roles.contributor } );
             if ( contributors ) {
@@ -118,7 +126,7 @@ class DataBase {
     }; //Возвращает список всех редакторов
 
     //! Creators
-    static async createStudent ( vkId, { class_id, firstName, lastName: secondName } ) {
+    async createStudent ( vkId, { class_id, firstName, lastName: secondName } ) {
         try {
             if ( vkId !== undefined ) {
                 if ( typeof vkId === "number" ) {
@@ -146,7 +154,7 @@ class DataBase {
             return null;
         }
     }; //Создает и возвращает ученика
-    static async createClass ( name ) {
+    async createClass ( name ) {
         try {
             if ( name ) {
                 if ( typeof name === "string" ) {
@@ -172,7 +180,7 @@ class DataBase {
 
 
     //* Homework
-    static async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
+    async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
             if ( className && typeof className === "string" ) {
                 if ( lesson && Lessons.includes( lesson ) ) {
@@ -237,7 +245,7 @@ class DataBase {
         }
     }; //Добавляет жомашнее задание в класс
 
-    static async removeHomework ( className, homeworkId ) {
+    async removeHomework ( className, homeworkId ) {
         try {
             if ( typeof homeworkId === "object" && isObjectId( homeworkId ) ) homeworkId = homeworkId.toString();
             if ( className && typeof className === "string" ) {
@@ -261,7 +269,7 @@ class DataBase {
             return false;
         }
     }
-    static async getHomework ( className, date ) {
+    async getHomework ( className, date ) {
         try {
             if ( className && typeof className === "string" ) {
                 const Class = await this.getClassByName( className );
@@ -284,7 +292,7 @@ class DataBase {
         }
     }; //
 
-    static async updateHomework ( className, homeworkId, updates ) {
+    async updateHomework ( className, homeworkId, updates ) {
         try {
             if ( className && typeof className === "string" ) {
                 if ( homeworkId && isObjectId( homeworkId ) ) {
@@ -316,7 +324,7 @@ class DataBase {
     }
 
     //TODO refactor returning data from array to object
-    static async parseHomeworkToNotifications ( currentDateForTest ) {
+    async parseHomeworkToNotifications ( currentDateForTest ) {
         const classes = await _Class.find( {} );
         const notificationArray = []; //Массив массивов типа [[Массив вк айди учеников], [Массив дз]]
         for ( const cl of classes ) {
@@ -333,7 +341,7 @@ class DataBase {
     }; //
 
     //* Schedule
-    static async setSchedule ( className, lessonsIndexesByDays, lessonList = Lessons ) {
+    async setSchedule ( className, lessonsIndexesByDays, lessonList = Lessons ) {
         try {
             if ( className && typeof className === "string" ) {
                 const Class = await this.getClassByName( className );
@@ -353,7 +361,7 @@ class DataBase {
             return false;
         }
     }; //Устонавливает расписание (1: список предметов, 2: имя класса, 3: массив массивов индексов уроков где индекс соответствует уроку в массиве(1) по дням недели)
-    static async changeDay ( className, dayIndex, newDay ) {
+    async changeDay ( className, dayIndex, newDay ) {
         try {
             if ( className && typeof className === "string" ) {
                 if ( dayIndex !== undefined && typeof dayIndex === "number" && dayIndex <= 5 && dayIndex >= 0 ) {
@@ -383,7 +391,7 @@ class DataBase {
         }
     }
 
-    static async getSchedule ( className ) {
+    async getSchedule ( className ) {
         try {
             if ( className && typeof className === "string" ) {
                 const Class = await this.getClassByName( className );
@@ -403,7 +411,7 @@ class DataBase {
     }
 
     //*Changes
-    static async addChanges ( className, content, toDate = new Date(), toAll = false, vkId ) {
+    async addChanges ( className, content, toDate = new Date(), toAll = false, vkId ) {
         try {
             if ( className !== undefined && typeof className === 'string' ) {
                 if ( this.validateContent( content ).length === 0 ) {
@@ -454,7 +462,7 @@ class DataBase {
         }
     }; //
 
-    static async getChanges ( className, date ) {
+    async getChanges ( className, date ) {
         try {
             if ( className && typeof className === "string" ) {
                 const Class = await this.getClassByName( className );
@@ -476,7 +484,7 @@ class DataBase {
         }
     }; //
 
-    static async removeChanges ( className, changeId ) {
+    async removeChanges ( className, changeId ) {
         try {
             if ( className && typeof className === "string" ) {
                 if ( changeId && isObjectId( changeId ) ) {
@@ -504,7 +512,7 @@ class DataBase {
         }
     }
 
-    static async updateChange ( className, changeId, updates ) {
+    async updateChange ( className, changeId, updates ) {
         try {
             if ( className && typeof className === "string" ) {
                 if ( changeId && isObjectId( changeId ) ) {
@@ -538,7 +546,7 @@ class DataBase {
     //! Students
 
     //* Settings
-    static async changeSettings ( vkId, diffObject ) {
+    async changeSettings ( vkId, diffObject ) {
         try {
             if ( vkId !== undefined && typeof vkId === "number" ) {
                 if ( typeof diffObject === "object" && diffObject !== null ) {
@@ -569,7 +577,7 @@ class DataBase {
     };
 
     //* Roles utils
-    static async generateNewRoleUpCode ( className ) {
+    async generateNewRoleUpCode ( className ) {
         try {
             if ( className && typeof className === "string" ) {
                 const newCode = uuid4();
@@ -590,7 +598,7 @@ class DataBase {
             return null
         }
     }; //Генерирует и возвращает код для того что бы стать радактором, если не получилось возвращает null
-    static async removeRoleUpCode ( className, code ) {
+    async removeRoleUpCode ( className, code ) {
         try {
             if ( uuid4.valid( code ) ) {
                 const Class = await DataBase.getClassByName( className );
@@ -609,7 +617,7 @@ class DataBase {
             return false;
         }
     }; //Убирает код из списка кодов класса
-    static async activateCode ( vkId, code ) {
+    async activateCode ( vkId, code ) {
         try {
             if ( vkId !== undefined && typeof vkId === "number" ) {
                 let Student = await this.populate( await this.getStudentByVkId( vkId ) );
@@ -642,7 +650,7 @@ class DataBase {
             return false;
         }
     }; //Активирует код - делает ученика редактором и убирает код и списка кодов класса
-    static async checkCodeValidity ( classOrClassName, code ) {
+    async checkCodeValidity ( classOrClassName, code ) {
         try {
             if ( classOrClassName && typeof classOrClassName === "string" ) {
                 if ( uuid4.valid( code ) ) {
@@ -671,7 +679,7 @@ class DataBase {
             return false;
         }
     }; //Проверяет валидность кода - Правильного ли он формата и есть ли он в списке кодов класса
-    static async backStudentToInitialRole ( vkId ) {
+    async backStudentToInitialRole ( vkId ) {
         try {
             if ( vkId !== undefined && typeof vkId === "number" ) {
                 const Student = await this.getStudentByVkId( vkId );
@@ -691,7 +699,7 @@ class DataBase {
         }
     }; //Возвращает редактора к роли ученика
     //Status
-    static async banUser ( vkId, isBan = true ) {
+    async banUser ( vkId, isBan = true ) {
         try {
             if ( vkId !== undefined && typeof vkId === "number" ) {
                 if ( typeof isBan === "boolean" ) {
@@ -716,7 +724,7 @@ class DataBase {
     }; //
 
     //* Interactions
-    static async addStudentToClass ( StudentVkId, className ) {
+    async addStudentToClass ( StudentVkId, className ) {
         try {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
                 if ( className && typeof className === "string" ) {
@@ -741,7 +749,7 @@ class DataBase {
             return false;
         }
     }; //Добавляет ученика в класс
-    static async removeStudentFromClass ( StudentVkId ) {
+    async removeStudentFromClass ( StudentVkId ) {
         try {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
                 const Student = await this.populate( await DataBase.getStudentByVkId( StudentVkId ) );
@@ -763,7 +771,7 @@ class DataBase {
             return false;
         }
     }; //Удаляет ученика из класса
-    static async changeClass ( StudentVkId, newClassName ) {
+    async changeClass ( StudentVkId, newClassName ) {
         try {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
                 if ( newClassName && typeof newClassName === "string" ) {
@@ -813,7 +821,7 @@ class DataBase {
     }; //Меняет класс ученика
 
     //! Helpers
-    static async populate ( document ) {
+    async populate ( document ) {
         try {
             if ( document instanceof mongoose.Document ) {
                 if ( document.students ) {
@@ -835,7 +843,7 @@ class DataBase {
             return null;
         }
     } //
-    static validateContent ( content ) {
+    validateContent ( content ) {
         const errors = [];
         if ( content ) {
             if ( content !== null && content.toString() === "[object Object]" ) {
@@ -861,14 +869,14 @@ class DataBase {
         }
         return errors;
     } //
-    static validateAttachment ( attachment ) {
+    validateAttachment ( attachment ) {
         if ( typeof attachment === "object" ) {
             return attachment.hasOwnProperty( "value" ) &&
                 /[a-z]+-?\d+_-?\d+(_.+)?/.test( attachment.value ) &&
                 attachment.hasOwnProperty( "url" )
         };
     } //
-    static async parseAttachments ( attachments ) {
+    async parseAttachments ( attachments ) {
         const parsedAttachments = [];
         for ( const at of attachments ) {
             if ( at => at.url === undefined ) {
@@ -883,7 +891,7 @@ class DataBase {
         }
         return parsedAttachments;
     }
-    static validateDate ( date, maxDate, minDate = new Date(), d = 0 ) {
+    validateDate ( date, maxDate, minDate = new Date(), d = 0 ) {
         let flag = true;
         if ( date instanceof Date ) {
             if ( maxDate && maxDate instanceof Date ) {
@@ -905,6 +913,10 @@ class DataBase {
         } else {
             return false;
         }
+    }
+
+    connect ( ...args ) {
+        mongoose.connect( this.uri, ...args );
     }
 }
 
