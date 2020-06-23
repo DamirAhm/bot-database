@@ -7,7 +7,7 @@ const {
     findNextLessonDate,
     findNotifiedStudents,
     lessonsIndexesToLessonsNames,
-    checkIsToday
+    checkIsToday,
 } = require( "./utils/functions" );
 const mongoose = require( "mongoose" );
 const config = require( "config" );
@@ -126,21 +126,21 @@ class DataBase {
     }; //Возвращает список всех редакторов
     async getAllStudents () {
         try {
-            return await _Student.find( {} );
+            return await _Student.find( {} ) || [];
         } catch ( e ) {
             console.error( e );
         }
     }
     async getAllClasses () {
         try {
-            return await _Class.find( {} );
+            return await _Class.find( {} ) || [];
         } catch ( e ) {
             console.error( e );
         }
     }
 
     //! Creators
-    async createStudent ( vkId, { class_id, firstName, lastName: secondName } ) {
+    async createStudent ( vkId, { class_id, firstName, lastName: secondName } = {} ) {
         try {
             if ( vkId !== undefined ) {
                 if ( typeof vkId === "number" ) {
@@ -155,7 +155,7 @@ class DataBase {
                     }
                     newStudent = new _Student( newStudentInfo );
                     await newStudent.save();
-                    return await DataBase.getStudentBy_Id( newStudent._id );
+                    return await this.getStudentBy_Id( newStudent._id );
                 } else {
                     throw new TypeError( "VkId must be number" );
                 }
@@ -176,7 +176,7 @@ class DataBase {
                         name
                     } );
                     await newClass.save();
-                    return await DataBase.getClassBy_Id( newClass._id );
+                    return await this.getClassBy_Id( newClass._id );
                 } else {
                     throw new TypeError( "name must be string" );
                 }
@@ -591,11 +591,33 @@ class DataBase {
     };
 
     //* Roles utils
+    async getRole ( id ) {
+        try {
+            let Student;
+
+            if ( typeof id === "number" ) {
+                Student = await _Student.findOne( { vkId: id } );
+            } else if ( isObjectId( id ) ) {
+                Student = await _Student.findById( id );
+            } else {
+                throw new TypeError( "Id must be a number or an objectId" );
+            }
+
+            if ( Student ) {
+                return Student.role;
+            } else {
+                return null;
+            }
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.error( e );
+        }
+    }
     async generateNewRoleUpCode ( className ) {
         try {
             if ( className && typeof className === "string" ) {
                 const newCode = uuid4();
-                const Class = await DataBase.getClassByName( className );
+                const Class = await this.getClassByName( className );
                 if ( Class ) {
                     Class.roleUpCodes.push( newCode );
                     await Class.save();
@@ -615,7 +637,7 @@ class DataBase {
     async removeRoleUpCode ( className, code ) {
         try {
             if ( uuid4.valid( code ) ) {
-                const Class = await DataBase.getClassByName( className );
+                const Class = await this.getClassByName( className );
                 if ( Class && Class.roleUpCodes ) {
                     Class.roleUpCodes = Class.roleUpCodes.filter( code => code !== code );
                     await Class.save();
@@ -712,6 +734,7 @@ class DataBase {
             return false;
         }
     }; //Возвращает редактора к роли ученика
+
     //Status
     async banUser ( vkId, isBan = true ) {
         try {
@@ -766,7 +789,7 @@ class DataBase {
     async removeStudentFromClass ( StudentVkId ) {
         try {
             if ( StudentVkId !== undefined && typeof StudentVkId === "number" ) {
-                const Student = await this.populate( await DataBase.getStudentByVkId( StudentVkId ) );
+                const Student = await this.populate( await this.getStudentByVkId( StudentVkId ) );
                 if ( Student ) {
                     const Class = Student.class;
                     if ( !Class ) return true;
