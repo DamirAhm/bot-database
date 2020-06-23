@@ -7,13 +7,13 @@ const path = require( 'path' );
 const fs = require( "fs" );
 
 class VK_API {
-    #apiKey;
-    #api;
+    apiKey;
+    api;
     constructor( key, groupId, albumId ) {
-        this.#apiKey = key;
+        this.apiKey = key;
         this.groupId = groupId;
         this.albumId = albumId;
-        this.#api = createVkApi( key );
+        this.api = createVkApi( key );
     }
 
     async getPhotoUrl ( attachment, album_id ) {
@@ -21,7 +21,7 @@ class VK_API {
             let url;
             if ( /^photo/.test( attachment ) ) {
                 const [ owner_id, photo_ids ] = attachment.slice( 5 ).split( "_" );
-                url = await this.#api( "photos.get", {
+                url = await this.api( "photos.get", {
                     owner_id,
                     photo_ids,
                     album_id: album_id
@@ -30,11 +30,11 @@ class VK_API {
 
             return url;
         } else {
-            return "#";
+            return "";
         }
     }
     async getUser ( userId ) {
-        return await this.#api( "users.get", { user_ids: userId } )
+        return await this.api( "users.get", { user_ids: userId } )
     }
 
     async uploadPhotoToAlbum ( fileReadStream ) {
@@ -72,7 +72,7 @@ class VK_API {
     }
 
     async getUploadServerUrl ( group_id, album_id ) {
-        return await this.#api( "photos.getUploadServer", { group_id, album_id } )
+        return await this.api( "photos.getUploadServer", { group_id, album_id } )
             .then( res => {
                 return res.upload_url
             } );
@@ -80,7 +80,7 @@ class VK_API {
 
     async savePhoto ( uploadedPhotosObject ) {
         try {
-            return await this.#api( "photos.save", uploadedPhotosObject );
+            return await this.api( "photos.save", uploadedPhotosObject );
         } catch ( e ) {
             console.error( e );
         }
