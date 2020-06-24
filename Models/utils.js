@@ -31,10 +31,20 @@ const checkValidTime = ( str ) => {
 
 const isURL = str => /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/.test( str );//
 
+const daysOfWeek = {
+    0: "Понедельник",
+    1: "Вторник",
+    2: "Среда",
+    3: "Четверг",
+    4: "Пятница",
+    5: "Суббота",
+    6: "Воскресение",
+}
 
 module.exports = {
     Roles,
     Lessons,
     checkValidTime,
-    isURL
+    isURL,
+    daysOfWeek
 };

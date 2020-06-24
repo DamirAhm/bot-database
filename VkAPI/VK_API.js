@@ -17,24 +17,32 @@ class VK_API {
     }
 
     async getPhotoUrl ( attachment, album_id ) {
-        if ( attachment ) {
-            let url;
-            if ( /^photo/.test( attachment ) ) {
-                const [ owner_id, photo_ids ] = attachment.slice( 5 ).split( "_" );
-                url = await this.api( "photos.get", {
-                    owner_id,
-                    photo_ids,
-                    album_id: album_id
-                } ).then( photo => photo.items[ 0 ].sizes[ 5 ].url );
-            }
+        try {
+            if ( attachment ) {
+                let url;
+                if ( /^photo/.test( attachment ) ) {
+                    const [ owner_id, photo_ids ] = attachment.slice( 5 ).split( "_" );
+                    url = await this.api( "photos.get", {
+                        owner_id,
+                        photo_ids,
+                        album_id: album_id
+                    } ).then( photo => photo.items[ 0 ].sizes[ 5 ].url );
+                }
 
-            return url;
-        } else {
-            return "";
+                return url;
+            } else {
+                return "";
+            }
+        } catch ( e ) {
+            console.error( e );
         }
     }
     async getUser ( userId ) {
-        return await this.api( "users.get", { user_ids: userId } )
+        try {
+            return await this.api( "users.get", { user_ids: userId } )
+        } catch ( e ) {
+            console.error( e );
+        }
     }
 
     async uploadPhotoToAlbum ( fileReadStream ) {
@@ -50,7 +58,7 @@ class VK_API {
 
             return res;
         } catch ( e ) {
-            console.log( e );
+            console.error( e );
         }
     }
     async uploadPhotoToServer ( formData, url ) {
@@ -67,15 +75,19 @@ class VK_API {
                 throw new Error( "Empty response" );
             }
         } catch ( err ) {
-            throw new Error( err );
+            console.error( e );
         }
     }
 
     async getUploadServerUrl ( group_id, album_id ) {
-        return await this.api( "photos.getUploadServer", { group_id, album_id } )
-            .then( res => {
-                return res.upload_url
-            } );
+        try {
+            return await this.api( "photos.getUploadServer", { group_id, album_id } )
+                .then( res => {
+                    return res.upload_url
+                } );
+        } catch ( e ) {
+            console.error( e )
+        }
     }
 
     async savePhoto ( uploadedPhotosObject ) {
