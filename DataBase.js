@@ -332,6 +332,34 @@ class DataBase {
             return null;
         }
     }
+    async getHomeworkByDate ( classNameOrInstance, date ) {
+        try {
+            if ( classNameOrInstance && ( typeof classNameOrInstance === "string" || ( typeof classNameOrInstance === "object" && classNameOrInstance.homework instanceof Array && classNameOrInstance.homework[ 0 ].lesson ) ) ) {
+                if ( date && date instanceof Date ) {
+                    let Class;
+                    if ( typeof classNameOrInstance === "string" ) {
+                        Class = await this.getClassByName( classNameOrInstance );
+                    }
+
+                    if ( Class ) {
+                        const { homework } = Class;
+                        return homework?.filter(
+                            hw => ( Math.abs( hw.to.getTime() - date.getTime() ) <= dayInMilliseconds ) && hw.to.getDate() === date.getDate()
+                        );
+                    } else {
+                        return [];
+                    }
+                } else {
+                    throw new TypeError( "Date must be instance of Date" )
+                }
+            } else {
+                throw new TypeError( "ClassName must be string or Class instance" )
+            }
+        } catch ( e ) {
+            if ( e instanceof TypeError ) { throw e }
+            console.error( e );
+        }
+    }
 
     //TODO refactor returning data from array to object
     async parseHomeworkToNotifications ( currentDateForTest ) {
