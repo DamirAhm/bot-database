@@ -127,6 +127,14 @@ const isPartialOf = ( object, instance ) => {
     throw new TypeError( "object must be an object or an array of properties" );
 }
 
+const mapHomeworkByLesson = ( homework ) => {
+    if ( homework instanceof Array ) {
+        return homework.reduce( ( acc, c ) => acc[ c.lesson ] ? acc[ c.lesson ].push( c ) : acc[ c.lesson ] = [ c ], new Map() );
+    } else {
+        throw new TypeError( "homework must be an array" )
+    }
+}
+
 module.exports = {
     toObject,
     isObjectId,
@@ -138,7 +146,8 @@ module.exports = {
     checkIsToday,
     getUniqueClassName,
     getUniqueVkId,
-    isPartialOf
+    isPartialOf,
+    mapHomeworkByLesson
 };
 
 

@@ -38,7 +38,14 @@ const daysOfWeek = {
     3: "Четверг",
     4: "Пятница",
     5: "Суббота",
-    6: "Воскресение",
+}
+
+const isValidClassName = ( name ) => {
+    if ( /(^\d{2})([A-Z]|[А-Я])/i.test( name ) ) {
+        const [ _, digit, letter ] = name.match( /(^\d{2})([A-Z]|[А-Я])/i );
+        return +digit > 0 && +digit <= 11 && Number.isInteger( digit );
+    }
+    return false;
 }
 
 module.exports = {
@@ -46,5 +53,6 @@ module.exports = {
     Lessons,
     checkValidTime,
     isURL,
-    daysOfWeek
+    daysOfWeek,
+    isValidClassName
 };
