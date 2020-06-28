@@ -129,6 +129,7 @@ const isPartialOf = ( object, instance ) => {
     throw new TypeError( "object must be an object or an array of properties" );
 }
 
+<<<<<<< HEAD
 const filterContentByDate = ( content, date ) => {
     return content.filter(
         cont => ( Math.abs( cont.to.getTime() - date.getTime() ) <= dayInMilliseconds ) && cont.to.getDate() === date.getDate()
@@ -137,6 +138,11 @@ const filterContentByDate = ( content, date ) => {
 const mapHomeworkByLesson = ( homework ) => {
     if ( homework instanceof Array ) {
         return homework.reduce( ( acc, c ) => ( acc.has( c.lesson ) ? acc.get( c.lesson ).push( c ) : acc.set( c.lesson, [ c ] ), acc ), new Map() );
+=======
+const mapHomeworkByLesson = ( homework ) => {
+    if ( homework instanceof Array ) {
+        return homework.reduce( ( acc, c ) => acc[ c.lesson ] ? acc[ c.lesson ].push( c ) : acc[ c.lesson ] = [ c ], new Map() );
+>>>>>>> 8a19450b6139433ed137bdd4bd2e410a7ff7d98c
     } else {
         throw new TypeError( "homework must be an array" )
     }
@@ -154,8 +160,12 @@ module.exports = {
     getUniqueClassName,
     getUniqueVkId,
     isPartialOf,
+<<<<<<< HEAD
     mapHomeworkByLesson,
     filterContentByDate
+=======
+    mapHomeworkByLesson
+>>>>>>> 8a19450b6139433ed137bdd4bd2e410a7ff7d98c
 };
 
 
