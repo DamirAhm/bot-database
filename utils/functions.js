@@ -129,7 +129,7 @@ const isPartialOf = ( object, instance ) => {
 
 const mapHomeworkByLesson = ( homework ) => {
     if ( homework instanceof Array ) {
-        return homework.reduce( ( acc, c ) => acc[ c.lesson ] ? acc[ c.lesson ].push( c ) : acc[ c.lesson ] = [ c ], new Map() );
+        return homework.reduce( ( acc, c ) => ( acc.has( c.lesson ) ? acc.get( c.lesson ).push( c ) : acc.set( c.lesson, [ c ] ), acc ), new Map() );
     } else {
         throw new TypeError( "homework must be an array" )
     }
