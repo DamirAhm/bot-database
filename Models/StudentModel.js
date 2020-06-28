@@ -61,5 +61,11 @@ studentSchema.virtual( "fullName" ).get( () => {
     }
     return undefined
 } )
+studentSchema.virtual( "fullName" ).set( ( name ) => {
+    const [ fn, sn ] = name.split( " " );
+
+    this.firstName = fn;
+    this.lastName = sn;
+} )
 
 module.exports = mongoose.model( "Student", studentSchema );

@@ -22,6 +22,8 @@ const isPartialOf = ( object, instance ) => {
 
 const VK = new VK_API( config.get( "VK_API_KEY" ) );
 
+const dayInMilliseconds = 24 * 60 * 60 * 1000;
+
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
     constructor( uri ) {
@@ -206,9 +208,6 @@ class DataBase {
                                     text: content.text || "",
                                     attachments: content.attachments
                                 };
-                                if ( content.attachments && content.attachments.length > 0 && content.attachments.some( att => att.url === undefined ) ) {
-                                    parsedContent.attachments = await this.parseAttachments( content.attachments );
-                                }
                                 const newHomework = {
                                     lesson,
                                     ...parsedContent,
@@ -258,7 +257,6 @@ class DataBase {
             return null;
         }
     }; //Добавляет жомашнее задание в класс
-
     async removeHomework ( className, homeworkId ) {
         try {
             if ( typeof homeworkId === "object" && isObjectId( homeworkId ) ) homeworkId = homeworkId.toString();
@@ -305,7 +303,6 @@ class DataBase {
             return []
         }
     }; //
-
     async updateHomework ( className, homeworkId, updates ) {
         try {
             if ( className && typeof className === "string" ) {
@@ -334,6 +331,34 @@ class DataBase {
             if ( e instanceof TypeError ) { throw e };
             console.log( e );
             return null;
+        }
+    }
+    async getHomeworkByDate ( classNameOrInstance, date ) {
+        try {
+            if ( classNameOrInstance && ( typeof classNameOrInstance === "string" || ( typeof classNameOrInstance === "object" && classNameOrInstance.homework instanceof Array && classNameOrInstance.homework[ 0 ].lesson ) ) ) {
+                if ( date && date instanceof Date ) {
+                    let Class;
+                    if ( typeof classNameOrInstance === "string" ) {
+                        Class = await this.getClassByName( classNameOrInstance );
+                    }
+
+                    if ( Class ) {
+                        const { homework } = Class;
+                        return homework?.filter(
+                            hw => ( Math.abs( hw.to.getTime() - date.getTime() ) <= dayInMilliseconds ) && hw.to.getDate() === date.getDate()
+                        );
+                    } else {
+                        return [];
+                    }
+                } else {
+                    throw new TypeError( "Date must be instance of Date" )
+                }
+            } else {
+                throw new TypeError( "ClassName must be string or Class instance" )
+            }
+        } catch ( e ) {
+            if ( e instanceof TypeError ) { throw e }
+            console.error( e );
         }
     }
 
@@ -375,6 +400,7 @@ class DataBase {
             return false;
         }
     }; //Устонавливает расписание (1: список предметов, 2: имя класса, 3: массив массивов индексов уроков где индекс соответствует уроку в массиве(1) по дням недели)
+    //TODO refactor change schedule scene with it | 
     async changeDay ( className, dayIndex, newDay ) {
         try {
             if ( className && typeof className === "string" ) {
@@ -404,7 +430,6 @@ class DataBase {
             return false;
         }
     }
-
     async getSchedule ( className ) {
         try {
             if ( className && typeof className === "string" ) {
@@ -436,9 +461,6 @@ class DataBase {
                                 text: content.text || "",
                                 attachments: content.attachments
                             };
-                            if ( content.attachments && content.attachments.length > 0 ) {
-                                parsedContent.attachments = await this.parseAttachments( content.attachments );
-                            }
                             const newChange = {
                                 to: toDate,
                                 ...parsedContent,
@@ -913,21 +935,6 @@ class DataBase {
                 attachment.hasOwnProperty( "url" )
         };
     } //
-    async parseAttachments ( attachments ) {
-        const parsedAttachments = [];
-        for ( const at of attachments ) {
-            if ( at => at.url === undefined ) {
-                parsedAttachments.push( {
-                    value: at.value,
-                    url: await VK.getPhotoUrl( at.value, at.album_id || config.get( "ALBUM_ID" ) ),
-                    _id: new mongoose.Types.ObjectId()
-                } )
-            } else {
-                parsedAttachments.push( { ...at, _id: new mongoose.Types.ObjectId() } );
-            }
-        }
-        return parsedAttachments;
-    }
     validateDate ( date, maxDate, minDate = new Date(), d = 0 ) {
         let flag = true;
         if ( date instanceof Date ) {
