@@ -7,6 +7,8 @@ const letters = "ABCDEFGHIJKLNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРС
 let currentClassNumber = 1;
 let currentClassLetterIndex = 0;
 let curentVkId = 0;
+const dayInMilliseconds = 24 * 60 * 60 * 1000;
+
 
 const findNextDayWithLesson = ( schedule, lesson, currentWeekDay ) => {
     let lastIndex = -1;
@@ -127,6 +129,11 @@ const isPartialOf = ( object, instance ) => {
     throw new TypeError( "object must be an object or an array of properties" );
 }
 
+const filterContentByDate = ( content, date ) => {
+    return content.filter(
+        cont => ( Math.abs( cont.to.getTime() - date.getTime() ) <= dayInMilliseconds ) && cont.to.getDate() === date.getDate()
+    )
+}
 const mapHomeworkByLesson = ( homework ) => {
     if ( homework instanceof Array ) {
         return homework.reduce( ( acc, c ) => ( acc.has( c.lesson ) ? acc.get( c.lesson ).push( c ) : acc.set( c.lesson, [ c ] ), acc ), new Map() );
@@ -147,7 +154,8 @@ module.exports = {
     getUniqueClassName,
     getUniqueVkId,
     isPartialOf,
-    mapHomeworkByLesson
+    mapHomeworkByLesson,
+    filterContentByDate
 };
 
 

@@ -22,7 +22,6 @@ const isPartialOf = ( object, instance ) => {
 
 const VK = new VK_API( config.get( "VK_API_KEY" ) );
 
-const dayInMilliseconds = 24 * 60 * 60 * 1000;
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
@@ -331,36 +330,6 @@ class DataBase {
             if ( e instanceof TypeError ) { throw e };
             console.log( e );
             return null;
-        }
-    }
-    async getHomeworkByDate ( classNameOrInstance, date ) {
-        try {
-            if ( classNameOrInstance && ( typeof classNameOrInstance === "string" || ( typeof classNameOrInstance === "object" && classNameOrInstance.homework instanceof Array && classNameOrInstance.homework[ 0 ].lesson ) ) ) {
-                if ( date && date instanceof Date ) {
-                    let Class;
-                    if ( typeof classNameOrInstance === "string" ) {
-                        Class = await this.getClassByName( classNameOrInstance );
-                    } else {
-                        Class = classNameOrInstance;
-                    }
-
-                    if ( Class ) {
-                        const { homework } = Class;
-                        return homework?.filter(
-                            hw => ( Math.abs( hw.to.getTime() - date.getTime() ) <= dayInMilliseconds ) && hw.to.getDate() === date.getDate()
-                        );
-                    } else {
-                        return [];
-                    }
-                } else {
-                    throw new TypeError( "Date must be instance of Date" )
-                }
-            } else {
-                throw new TypeError( "ClassName must be string or Class instance" )
-            }
-        } catch ( e ) {
-            if ( e instanceof TypeError ) { throw e }
-            console.error( e );
         }
     }
 
