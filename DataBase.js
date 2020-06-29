@@ -8,6 +8,7 @@ const {
     findNotifiedStudents,
     lessonsIndexesToLessonsNames,
     checkIsToday,
+    dayInMilliseconds
 } = require( "./utils/functions" );
 const mongoose = require( "mongoose" );
 const config = require( "config" );
@@ -334,11 +335,13 @@ class DataBase {
     }
     async getHomeworkByDate ( classNameOrInstance, date ) {
         try {
-            if ( classNameOrInstance && ( typeof classNameOrInstance === "string" || ( typeof classNameOrInstance === "object" && classNameOrInstance.homework instanceof Array && classNameOrInstance.homework[ 0 ].lesson ) ) ) {
+            if ( classNameOrInstance && ( typeof classNameOrInstance === "string" || ( typeof classNameOrInstance === "object" && classNameOrInstance.homework instanceof Array ) ) ) {
                 if ( date && date instanceof Date ) {
                     let Class;
                     if ( typeof classNameOrInstance === "string" ) {
                         Class = await this.getClassByName( classNameOrInstance );
+                    } else {
+                        Class = classNameOrInstance;
                     }
 
                     if ( Class ) {

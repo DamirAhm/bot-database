@@ -155,7 +155,8 @@ module.exports = {
     getUniqueVkId,
     isPartialOf,
     mapHomeworkByLesson,
-    filterContentByDate
+    filterContentByDate,
+    dayInMilliseconds
 };
 
 
