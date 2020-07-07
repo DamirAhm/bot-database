@@ -3,12 +3,12 @@
 ## Installation
 
 ```sh
-$ npm install -d
+$ npm i bot-database
 ```
 
 ### Import
 ```sh
-const {DataBase} from "Bot-DataBase-Helper";
+const { DataBase } from "bot-database";
 ```
 
 Use for your pleasure
