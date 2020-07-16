@@ -1,6 +1,6 @@
 const ClassModel = require( "../Models/ClassModel.js" );
 const mongoose = require( "mongoose" );
-const { DataBase } = require( "../DataBase.js" );
+const { DataBase } = require( "./DataBase.js" );
 
 
 const letters = "ABCDEFGHIJKLNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
