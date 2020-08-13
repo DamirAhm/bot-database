@@ -464,9 +464,9 @@ class DataBase {
 
                     await Class.updateOne({ homework: actualHomework });
 
-                    return true;
+                    return actualHomework;
                 } else {
-                    return false;
+                    return [];
                 }
             } else {
                 throw new TypeError("ClassName must be string");
@@ -474,7 +474,7 @@ class DataBase {
         } catch (e) {
             if (e instanceof TypeError) {
                 console.error(e);
-                return false;
+                return [];
             }
             throw e;
         }
@@ -771,9 +771,9 @@ class DataBase {
 
                     await Class.updateOne({ changes: actualChanges });
 
-                    return true;
+                    return actualChanges;
                 } else {
-                    return false;
+                    return [];
                 }
             } else {
                 throw new TypeError("ClassName must be string");
@@ -781,7 +781,7 @@ class DataBase {
         } catch (e) {
             if (e instanceof TypeError) {
                 console.error(e);
-                return false;
+                return [];
             }
             throw e;
         }
