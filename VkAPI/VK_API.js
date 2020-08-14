@@ -53,27 +53,32 @@ class VK_API {
                 config.get("GROUP_ID"),
                 config.get("ALBUM_ID")
             );
-            const formData = new FormData();
+	    
+	    if (url !== undefined) {
+	        const formData = new FormData();
 
-            formData.append("file", fileReadStream);
+        	formData.append("file", fileReadStream);
 
-            const {
-                aid: album_id,
-                gid: group_id,
-                hash,
-                server,
-                photos_list,
-            } = await this.uploadPhotoToServer(formData, url);
+	        const {
+        		aid: album_id,
+	                gid: group_id,
+	                hash,
+                	server,
+                	photos_list,
+            	} = await this.uploadPhotoToServer(formData, url);
 
-            const res = this.savePhoto({
-                album_id,
-                group_id,
-                hash,
-                server,
-                photos_list,
-            });
+            	const res = this.savePhoto({
+                	album_id,
+                	group_id,
+                	hash,
+                	server,
+                	photos_list,
+            	});
 
-            return res;
+            	return res;
+	    } else {
+	        throw new Error("Can't get upload server url, try later");
+	    }
         } catch (e) {
             console.error(e);
         }
