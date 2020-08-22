@@ -11,8 +11,7 @@ const {
     dayInMilliseconds,
 } = require("./utils/functions");
 const mongoose = require("mongoose");
-const config = require("config");
-const VK_API = require("./VkAPI/VK_API");
+const config = require("./config.json");
 const isObjectId = mongoose.Types.ObjectId.isValid;
 
 const isPartialOf = (object, instance) => {
@@ -495,7 +494,7 @@ class DataBase {
                 const notifiedStudentIds = findNotifiedStudents(
                     populatedClass.students,
                     currentDateForTest || new Date(),
-                    config.get("REMIND_AFTER")
+                    config["REMIND_AFTER"]
                 ).map(({ vkId }) => vkId);
                 const homework = populatedClass.homework.filter(({ to }) =>
                     checkIsToday(to, date)
