@@ -204,7 +204,6 @@ describe("createTestData", () => {
                 role: expect.any(String),
                 vkId: expect.any(Number),
                 class: expect.any(Object),
-                banned: expect.any(Boolean),
                 settings: expect.objectContaining({
                     notificationsEnabled: expect.any(Boolean),
                     notificationTime: expect.any(String),

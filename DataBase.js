@@ -987,31 +987,6 @@ class DataBase {
         }
     } //Возвращает редактора к роли ученика
 
-    //Status
-    async banUser(vkId, isBan = true) {
-        try {
-            if (vkId !== undefined && typeof vkId === "number") {
-                if (typeof isBan === "boolean") {
-                    const Student = await this.getStudentByVkId(vkId);
-                    if (Student) {
-                        await Student.updateOne({ banned: isBan });
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    throw new TypeError("isBan param must be boolean");
-                }
-            } else {
-                throw new TypeError("VkId must be a number");
-            }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
-            return false;
-        }
-    } //
-
     //* Interactions
     async addStudentToClass(StudentVkId, className) {
         try {
