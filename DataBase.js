@@ -1066,29 +1066,21 @@ class DataBase {
                                     const removed = await this.removeStudentFromClass(
                                         StudentVkId
                                     );
-                                    if (removed) {
-                                        await Student.updateOne({
-                                            class: newClass._id,
-                                        });
-                                        newClass.students.push(Student._id);
-                                        await newClass.save();
-                                        await Student.save();
-                                        return true;
-                                    } else {
+                                    if (!removed) {
                                         return false;
                                     }
                                 } else {
-                                    return false;
+                                    return true;
                                 }
-                            } else {
-                                await Student.updateOne({
-                                    class: newClass._id,
-                                });
-                                newClass.students.push(Student._id);
-                                await newClass.save();
-                                await Student.save();
-                                return true;
                             }
+                            await Student.updateOne({
+                                class: newClass._id,
+                            });
+                            await newClass.updateOne({
+                                students: [...newClass.students, Student._id],
+                            });
+
+                            return true;
                         } else {
                             return false;
                         }
