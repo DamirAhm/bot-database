@@ -15,14 +15,22 @@ const config = require("./config.json");
 const isObjectId = mongoose.Types.ObjectId.isValid;
 
 const isPartialOf = (object, instance) => {
-    if (Array.isArray(object))
-        return object.some((key) => instance.hasOwnProperty(key));
-    if (typeof object === "object")
-        return (
-            Object.keys(instance).length !== 0 &&
-            Object.keys(object).some((key) => instance.hasOwnProperty(key))
-        );
-    throw new TypeError("object must be an object or an array of properties");
+    if (typeof instance === "object" && !Array.isArray(instance)) {
+        if (Array.isArray(object)) {
+            return object.some((key) => instance.hasOwnProperty(key));
+        } else if (typeof object === "object") {
+            return (
+                Object.keys(instance).length !== 0 &&
+                Object.keys(object).some((key) => instance.hasOwnProperty(key))
+            );
+        } else {
+            throw new TypeError(
+                `object must be an object or an array of properties, got: ${object}`
+            );
+        }
+    } else {
+        throw new TypeError(`Instance must be an array, got: ${instance}`);
+    }
 };
 
 //TODO Replace returns of false and null to errors or error codes
@@ -46,7 +54,7 @@ class DataBase {
                     return null;
                 }
             } else {
-                throw new TypeError("VkId must be number");
+                throw new TypeError(`VkId must be type of number, got ${vkId}`);
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -66,7 +74,7 @@ class DataBase {
                     return null;
                 }
             } else {
-                throw new TypeError("_id must be string");
+                throw new TypeError(`_id must be string, got ${_id}`);
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -84,7 +92,7 @@ class DataBase {
                     return null;
                 }
             } else {
-                throw new TypeError("name must be string");
+                throw new TypeError(`name must be string, got ${name}`);
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -104,10 +112,10 @@ class DataBase {
                         return null;
                     }
                 } else {
-                    throw new TypeError("_id must be string");
+                    throw new TypeError(`_id must be a string, got ${_id}`);
                 }
             } else {
-                throw new TypeError("_id must be an objectId");
+                throw new TypeError(`_id must be valid objectId, got ${_id}`);
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -146,10 +154,7 @@ class DataBase {
     }
 
     //! Creators
-    async createStudent(
-        vkId,
-        { class_id, firstName, lastName: secondName } = {}
-    ) {
+    async createStudent(vkId, { class_id, firstName, lastName: secondName }) {
         try {
             if (vkId !== undefined) {
                 if (typeof vkId === "number") {
@@ -168,7 +173,9 @@ class DataBase {
                     await newStudent.save();
                     return await this.getStudentBy_Id(newStudent._id);
                 } else {
-                    throw new TypeError("VkId must be number");
+                    throw new TypeError(
+                        `VkId must be type of number, got ${vkId}`
+                    );
                 }
             } else {
                 throw new TypeError("Vkid parameter is required");
@@ -189,7 +196,7 @@ class DataBase {
                     await newClass.save();
                     return await this.getClassBy_Id(newClass._id);
                 } else {
-                    throw new TypeError("name must be string");
+                    throw new TypeError(`name must be string, got ${name}`);
                 }
             } else {
                 throw new TypeError("name parameter is required");
@@ -230,7 +237,7 @@ class DataBase {
                                         newHomework.createdBy = studentVkId;
                                     } else {
                                         throw new TypeError(
-                                            "if vkid is passed it must be a number"
+                                            `if vkid is passed it must be a number, got ${studentVkId}`
                                         );
                                     }
                                 }
@@ -252,7 +259,7 @@ class DataBase {
                                         return newHomework._id;
                                     } else {
                                         throw new TypeError(
-                                            "Expiration date must be Date in the future"
+                                            `Expiration date must be Date in the future, got ${expirationDate}`
                                         );
                                     }
                                 } else {
@@ -284,10 +291,18 @@ class DataBase {
                         );
                     }
                 } else {
-                    throw new TypeError("Lesson must be in lessons list");
+                    throw new TypeError(
+                        `Lesson must be in lessons list, got ${lesson}, but lessons list is ${JSON.stringify(
+                            Lessons,
+                            null,
+                            2
+                        )}`
+                    );
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -314,11 +329,13 @@ class DataBase {
                     }
                 } else {
                     throw new TypeError(
-                        "homeworkId must be a string or objectId"
+                        `homeworkId must be a string or objectId, got "${homeworkId}"`
                     );
                 }
             } else {
-                throw new TypeError("className must be a string");
+                throw new TypeError(
+                    `className must be a string, got "${className}"`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -344,7 +361,9 @@ class DataBase {
                     return [];
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -390,14 +409,18 @@ class DataBase {
                         }
                     } else {
                         throw new TypeError(
-                            "updates must be object containing poles of homework"
+                            `updates must be object containing poles of homework, got ${updates}`
                         );
                     }
                 } else {
-                    throw new TypeError("HomeworkId must be objectId");
+                    throw new TypeError(
+                        `HomeworkId must be objectId, got ${updates}`
+                    );
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -435,11 +458,13 @@ class DataBase {
                         return [];
                     }
                 } else {
-                    throw new TypeError("Date must be instance of Date");
+                    throw new TypeError(
+                        `date must be instance of Date, got ${date}`
+                    );
                 }
             } else {
                 throw new TypeError(
-                    "ClassName must be string or Class instance"
+                    `classNameOrInstance must be string or Class instance, got ${classNameOrInstance}`
                 );
             }
         } catch (e) {
@@ -468,7 +493,9 @@ class DataBase {
                     return [];
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -521,7 +548,9 @@ class DataBase {
                     return false;
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -559,7 +588,7 @@ class DataBase {
                         }
                     } else {
                         throw new TypeError(
-                            "new day must be array of lessons but you pass: " +
+                            "new day must be array of lessons, but your day includes " +
                                 newDay
                                     .filter((l) => !Lessons.includes(l))
                                     .join(",")
@@ -567,11 +596,13 @@ class DataBase {
                     }
                 } else {
                     throw new TypeError(
-                        "day index must be number less than 6 and greater than 0"
+                        `day index must be number less than 6 and greater than 0, got ${dayIndex}`
                     );
                 }
             } else {
-                throw new TypeError("Class name must be string");
+                throw new TypeError(
+                    `className must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -589,7 +620,9 @@ class DataBase {
                     return [];
                 }
             } else {
-                throw new TypeError("Class name must be string");
+                throw new TypeError(
+                    `className must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -644,7 +677,9 @@ class DataBase {
                             return null;
                         }
                     } else {
-                        throw new TypeError("toDate must be date");
+                        throw new TypeError(
+                            `toDate must be date, got "${toDate}"`
+                        );
                     }
                 } else {
                     throw new TypeError(
@@ -652,7 +687,9 @@ class DataBase {
                     );
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -677,7 +714,9 @@ class DataBase {
                     return null;
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -703,10 +742,14 @@ class DataBase {
                         return null;
                     }
                 } else {
-                    throw new TypeError("ChangeId must be objectId");
+                    throw new TypeError(
+                        `ChangeId must be objectId, got ${changeId}`
+                    );
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -738,14 +781,18 @@ class DataBase {
                         }
                     } else {
                         throw new TypeError(
-                            "updates must be object containing poles of change"
+                            `updates must be object containing poles of change, got ${updates}`
                         );
                     }
                 } else {
-                    throw new TypeError("ChangeId must be objectId");
+                    throw new TypeError(
+                        `ChangeId must be objectId, got ${changeId}`
+                    );
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -775,7 +822,9 @@ class DataBase {
                     return [];
                 }
             } else {
-                throw new TypeError("ClassName must be string");
+                throw new TypeError(
+                    `ClassName must be string, got ${className}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -808,15 +857,43 @@ class DataBase {
                     }
                 } else {
                     throw new TypeError(
-                        "Second parameter must be an object of diffs in object"
+                        `diffObject must be an object of diffs in object, got ${diffObject}`
                     );
                 }
             } else {
-                throw new TypeError("VkId must be type of number");
+                throw new TypeError(`VkId must be type of number, got ${vkId}`);
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
             console.log(e);
+            return false;
+        }
+    }
+    async changeLastHomeworkCheckDate(vkId, newCheckDate) {
+        try {
+            if (typeof vkId === "number") {
+                if (newCheckDate instanceof Date) {
+                    const Student = await this.getStudentByVkId(vkId);
+
+                    if (Student) {
+                        await Student.updateOne({
+                            lastHomeworkCheck: newCheckDate,
+                        });
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    throw new TypeError(
+                        `newCheckDate must be a Date, got ${newCheckDate}`
+                    );
+                }
+            } else {
+                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+            }
+        } catch (e) {
+            if (e instanceof TypeError) throw e;
+            console.error(e);
             return false;
         }
     }
@@ -831,7 +908,9 @@ class DataBase {
             } else if (isObjectId(id)) {
                 Student = await _Student.findById(id);
             } else {
-                throw new TypeError("Id must be a number or an objectId");
+                throw new TypeError(
+                    `Id must be a number or an objectId, got ${id}`
+                );
             }
 
             if (Student) {
@@ -844,129 +923,6 @@ class DataBase {
             console.error(e);
         }
     }
-    async generateNewRoleUpCode(className) {
-        try {
-            if (className && typeof className === "string") {
-                const newCode = uuid4();
-                const Class = await this.getClassByName(className);
-                if (Class) {
-                    Class.roleUpCodes.push(newCode);
-                    await Class.save();
-                    return newCode;
-                } else {
-                    return null;
-                }
-            } else {
-                throw new TypeError("className must be string");
-            }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.error(e);
-            return null;
-        }
-    } //Генерирует и возвращает код для того что бы стать радактором, если не получилось возвращает null
-    async removeRoleUpCode(className, code) {
-        try {
-            if (uuid4.valid(code)) {
-                const Class = await this.getClassByName(className);
-                if (Class && Class.roleUpCodes) {
-                    Class.roleUpCodes = Class.roleUpCodes.filter(
-                        (code) => code !== code
-                    );
-                    await Class.save();
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                throw new TypeError(
-                    "Code to be removed must be valid uuid4 code"
-                );
-            }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            return false;
-        }
-    } //Убирает код из списка кодов класса
-    async activateCode(vkId, code) {
-        try {
-            if (vkId !== undefined && typeof vkId === "number") {
-                let Student = await this.populate(
-                    await this.getStudentByVkId(vkId)
-                );
-                if (Student) {
-                    if (Student.class) {
-                        const isValid = await this.checkCodeValidity(
-                            Student.class,
-                            code
-                        );
-
-                        if (isValid) {
-                            const removed = await this.removeRoleUpCode(
-                                Student.class.name,
-                                code
-                            );
-                            if (removed) {
-                                await Student.updateOne({
-                                    role: Roles.contributor,
-                                });
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        throw new TypeError(
-                            "Student must have class property to activate code"
-                        );
-                    }
-                } else {
-                    return false;
-                }
-            } else {
-                throw new TypeError("VkId must be number");
-            }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            return false;
-        }
-    } //Активирует код - делает ученика редактором и убирает код и списка кодов класса
-    async checkCodeValidity(classOrClassName, code) {
-        try {
-            if (classOrClassName && typeof classOrClassName === "string") {
-                if (uuid4.valid(code)) {
-                    const Class = await this.getClassByName(classOrClassName);
-                    if (Class && Class.roleUpCodes) {
-                        return Class.roleUpCodes.includes(code);
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            } else if (
-                classOrClassName instanceof mongoose.Document &&
-                classOrClassName.roleUpCodes !== undefined
-            ) {
-                if (uuid4.valid(code)) {
-                    return classOrClassName.roleUpCodes.includes(code);
-                } else {
-                    return false;
-                }
-            } else {
-                console.log("awdakufbnAJKFGGNE");
-                throw new TypeError("className must be a string or Document");
-            }
-        } catch (e) {
-            if (e instanceof TypeError) {
-                throw e;
-            }
-            console.log(e);
-            return false;
-        }
-    } //Проверяет валидность кода - Правильного ли он формата и есть ли он в списке кодов класса
     async backStudentToInitialRole(vkId) {
         try {
             if (vkId !== undefined && typeof vkId === "number") {
@@ -978,7 +934,7 @@ class DataBase {
                     return false;
                 }
             } else {
-                throw new TypeError("VkId must be a number");
+                throw new TypeError(`VkId must be type of number, got ${vkId}`);
             }
         } catch (e) {
             if (e instanceof TypeError) throw e;
@@ -988,12 +944,12 @@ class DataBase {
     } //Возвращает редактора к роли ученика
 
     //* Interactions
-    async addStudentToClass(StudentVkId, className) {
+    async addStudentToClass(vkId, className) {
         try {
-            if (StudentVkId !== undefined && typeof StudentVkId === "number") {
+            if (vkId !== undefined && typeof vkId === "number") {
                 if (className && typeof className === "string") {
                     const Class = await this.getClassByName(className);
-                    const Student = await this.getStudentByVkId(StudentVkId);
+                    const Student = await this.getStudentByVkId(vkId);
                     if (Class && Student) {
                         await Class.updateOne({
                             students: [...Class.students, Student._id],
@@ -1004,10 +960,12 @@ class DataBase {
                         return false;
                     }
                 } else {
-                    throw new TypeError("newClassName must be string");
+                    throw new TypeError(
+                        `ClassName must be string, got ${className}`
+                    );
                 }
             } else {
-                throw new TypeError("Student vkId must be a number");
+                throw new TypeError(`VkId must be type of number, got ${vkId}`);
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -1017,11 +975,11 @@ class DataBase {
             return false;
         }
     } //Добавляет ученика в класс
-    async removeStudentFromClass(StudentVkId) {
+    async removeStudentFromClass(vkId) {
         try {
-            if (StudentVkId !== undefined && typeof StudentVkId === "number") {
+            if (vkId !== undefined && typeof vkId === "number") {
                 const Student = await this.populate(
-                    await this.getStudentByVkId(StudentVkId)
+                    await this.getStudentByVkId(vkId)
                 );
                 if (Student) {
                     const Class = Student.class;
@@ -1038,7 +996,7 @@ class DataBase {
                     return false;
                 }
             } else {
-                throw new TypeError("StudentVkId must be a number");
+                throw new TypeError(`VkId must be type of number, got ${vkId}`);
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -1048,12 +1006,12 @@ class DataBase {
             return false;
         }
     } //Удаляет ученика из класса
-    async changeClass(StudentVkId, newClassName) {
+    async changeClass(vkId, newClassName) {
         try {
-            if (StudentVkId !== undefined && typeof StudentVkId === "number") {
+            if (vkId !== undefined && typeof vkId === "number") {
                 if (newClassName && typeof newClassName === "string") {
                     const Student = await this.populate(
-                        await this.getStudentByVkId(StudentVkId)
+                        await this.getStudentByVkId(vkId)
                     );
                     const newClass = await this.getClassByName(newClassName);
                     if (Student !== null) {
@@ -1064,7 +1022,7 @@ class DataBase {
                             ) {
                                 if (Student.class.name !== newClassName) {
                                     const removed = await this.removeStudentFromClass(
-                                        StudentVkId
+                                        vkId
                                     );
                                     if (!removed) {
                                         return false;
@@ -1073,14 +1031,11 @@ class DataBase {
                                     return true;
                                 }
                             }
-                            await Student.updateOne({
-                                class: newClass._id,
-                            });
-                            await newClass.updateOne({
-                                students: [...newClass.students, Student._id],
-                            });
 
-                            return true;
+                            return await this.addStudentToClass(
+                                vkId,
+                                newClass.name
+                            );
                         } else {
                             return false;
                         }
@@ -1088,10 +1043,12 @@ class DataBase {
                         return false;
                     }
                 } else {
-                    throw new TypeError("newClassName must be string");
+                    throw new TypeError(
+                        `newClassName must be string, got ${newClassName}`
+                    );
                 }
             } else {
-                throw new TypeError("Student vkId must be a number");
+                throw new TypeError(`VkId must be type of number, got ${vkId}`);
             }
         } catch (e) {
             if (e instanceof TypeError) {
@@ -1117,7 +1074,9 @@ class DataBase {
                 if (document === null) {
                     return null;
                 }
-                throw new TypeError("Argument must be a Document");
+                throw new TypeError(
+                    `Argument must be a Document, got ${document}`
+                );
             }
         } catch (e) {
             if (e instanceof TypeError) {
