@@ -1,6 +1,6 @@
 {
   "name": "bot-database",
-  "version": "1.0.11",
+  "version": "1.0.11-1",
   "description": "",
   "main": "index.js",
   "scripts": {

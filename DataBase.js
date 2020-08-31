@@ -724,7 +724,7 @@ class DataBase {
         }
     } //
 
-    async removeAnnouncements ( className, announcementId ) {
+    async removeAnnouncement ( className, announcementId ) {
         try {
             if ( className && typeof className === "string" ) {
                 if ( announcementId && isObjectId( announcementId ) ) {
