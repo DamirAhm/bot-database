@@ -669,7 +669,7 @@ class DataBase {
                                     newAnnouncement.createdBy = vkId;
                                 }
                                 await Class.updateOne( {
-                                    announcement: [ ...Class.announcements, newAnnouncement ],
+                                    announcements: [ ...Class.announcements, newAnnouncement ],
                                 } );
                                 return newAnnouncement._id;
                             }
