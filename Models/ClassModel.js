@@ -1,15 +1,15 @@
 // @ts-nocheck
-const mongoose = require("mongoose");
-const uuid4 = require("uuid4");
-const { Lessons, isURL } = require("./utils");
+const mongoose = require( "mongoose" );
+const uuid4 = require( "uuid4" );
+const { Lessons, isURL } = require( "./utils" );
 
-const isLesson = (str) => Lessons.includes(str);
+const isLesson = ( str ) => Lessons.includes( str );
 
-const attachment = mongoose.Schema({
+const attachment = mongoose.Schema( {
   value: {
     type: String,
     validate: {
-      validator: (str) => /^photo.+(_.+)*/.test(str),
+      validator: ( str ) => /^photo.+(_.+)*/.test( str ),
       message: "url must be a valid vk attachment",
     },
     required: true,
@@ -25,9 +25,9 @@ const attachment = mongoose.Schema({
   album_id: {
     type: Number,
   },
-});
+} );
 
-const classSchema = mongoose.Schema({
+const classSchema = mongoose.Schema( {
   students: {
     type: [
       {
@@ -40,10 +40,10 @@ const classSchema = mongoose.Schema({
   name: {
     type: String,
     validate: {
-      validator: (name) => {
-        if (/(^\d{2})([A-Z]|[А-Я])/i.test(name)) {
-          const [_, digit, letter] = name.match(/(^\d{2})([A-Z]|[А-Я])/i);
-          return +digit > 0 && +digit <= 11 && Number.isInteger(+digit);
+      validator: ( name ) => {
+        if ( /(^\d{2})([A-Z]|[А-Я])/i.test( name ) ) {
+          const [ _, digit, letter ] = name.match( /(^\d{2})([A-Z]|[А-Я])/i );
+          return +digit > 0 && +digit <= 11 && Number.isInteger( +digit );
         }
         return false;
       },
@@ -69,9 +69,9 @@ const classSchema = mongoose.Schema({
         },
         to: {
           type: Date,
-          default: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          default: new Date( Date.now() + 1000 * 60 * 60 * 24 * 7 ),
         },
-        attachments: [attachment],
+        attachments: [ attachment ],
         createdBy: {
           type: Number,
           validate: {
@@ -100,13 +100,13 @@ const classSchema = mongoose.Schema({
         },
       ],
     ],
-    default: [[], [], [], [], [], []],
+    default: [ [], [], [], [], [], [] ],
   },
-  changes: {
+  announcements: {
     type: [
       {
         text: String,
-        attachments: [attachment],
+        attachments: [ attachment ],
         to: Date,
         createdBy: {
           type: Number,
@@ -125,14 +125,14 @@ const classSchema = mongoose.Schema({
     default: [],
   },
   roleUpCodes: {
-    type: [String],
+    type: [ String ],
     default: [],
     validate: {
-      validator: (arrayOfCodes) =>
-        arrayOfCodes.every((code) => uuid4.valid(code)),
+      validator: ( arrayOfCodes ) =>
+        arrayOfCodes.every( ( code ) => uuid4.valid( code ) ),
       message: "All roleUp codes must be valid uuid4 codes",
     },
   },
-});
+} );
 
-module.exports = mongoose.model("Class", classSchema);
+module.exports = mongoose.model( "Class", classSchema );

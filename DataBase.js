@@ -1,7 +1,7 @@
-const { Roles, Lessons } = require("./Models/utils");
-const _Student = require("./Models/StudentModel");
-const _Class = require("./Models/ClassModel");
-const uuid4 = require("uuid4");
+const { Roles, Lessons } = require( "./Models/utils" );
+const _Student = require( "./Models/StudentModel" );
+const _Class = require( "./Models/ClassModel" );
+const uuid4 = require( "uuid4" );
 const {
     findNextDayWithLesson,
     findNextLessonDate,
@@ -9,19 +9,19 @@ const {
     lessonsIndexesToLessonsNames,
     checkIsToday,
     dayInMilliseconds,
-} = require("./utils/functions");
-const mongoose = require("mongoose");
-const config = require("./config.json");
+} = require( "./utils/functions" );
+const mongoose = require( "mongoose" );
+const config = require( "./config.json" );
 const isObjectId = mongoose.Types.ObjectId.isValid;
 
-const isPartialOf = (object, instance) => {
-    if (typeof instance === "object" && !Array.isArray(instance)) {
-        if (Array.isArray(object)) {
-            return object.some((key) => instance.hasOwnProperty(key));
-        } else if (typeof object === "object") {
+const isPartialOf = ( object, instance ) => {
+    if ( typeof instance === "object" && !Array.isArray( instance ) ) {
+        if ( Array.isArray( object ) ) {
+            return object.some( ( key ) => instance.hasOwnProperty( key ) );
+        } else if ( typeof object === "object" ) {
             return (
-                Object.keys(instance).length !== 0 &&
-                Object.keys(object).some((key) => instance.hasOwnProperty(key))
+                Object.keys( instance ).length !== 0 &&
+                Object.keys( object ).some( ( key ) => instance.hasOwnProperty( key ) )
             );
         } else {
             throw new TypeError(
@@ -29,181 +29,181 @@ const isPartialOf = (object, instance) => {
             );
         }
     } else {
-        throw new TypeError(`Instance must be an array, got: ${instance}`);
+        throw new TypeError( `Instance must be an array, got: ${instance}` );
     }
 };
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
-    constructor(uri) {
-        if (uri) {
+    constructor( uri ) {
+        if ( uri ) {
             this.uri = uri;
         } else {
-            throw new Error("You must pass an DataBase uri to constructor");
+            throw new Error( "You must pass an DataBase uri to constructor" );
         }
     }
 
     //! Getters
-    async getStudentByVkId(vkId) {
+    async getStudentByVkId ( vkId ) {
         try {
-            if (vkId !== undefined && typeof vkId === "number") {
-                const Student = await _Student.findOne({ vkId });
-                if (Student) {
+            if ( vkId !== undefined && typeof vkId === "number" ) {
+                const Student = await _Student.findOne( { vkId } );
+                if ( Student ) {
                     return Student;
                 } else {
                     return null;
                 }
             } else {
-                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+                throw new TypeError( `VkId must be type of number, got ${vkId}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return null;
         }
     } //Возвращает ученика по его id из vk
-    async getStudentBy_Id(_id) {
+    async getStudentBy_Id ( _id ) {
         try {
-            if (typeof _id === "object" && isObjectId(_id))
+            if ( typeof _id === "object" && isObjectId( _id ) )
                 _id = _id.toString();
-            if (_id && typeof _id === "string") {
-                const Student = await _Student.findById(_id);
-                if (Student) {
+            if ( _id && typeof _id === "string" ) {
+                const Student = await _Student.findById( _id );
+                if ( Student ) {
                     return Student;
                 } else {
                     return null;
                 }
             } else {
-                throw new TypeError(`_id must be string, got ${_id}`);
+                throw new TypeError( `_id must be string, got ${_id}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return null;
         }
     } //Возвращает ученика по его _id (это чисто для разработки (так быстрее ищется))
-    async getClassByName(name) {
+    async getClassByName ( name ) {
         try {
-            if (name && typeof name === "string") {
-                const Class = await _Class.findOne({ name });
-                if (Class) {
+            if ( name && typeof name === "string" ) {
+                const Class = await _Class.findOne( { name } );
+                if ( Class ) {
                     return Class;
                 } else {
                     return null;
                 }
             } else {
-                throw new TypeError(`name must be string, got ${name}`);
+                throw new TypeError( `name must be string, got ${name}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return null;
         }
     } //Возвращает класс по его имени
-    async getClassBy_Id(_id) {
+    async getClassBy_Id ( _id ) {
         try {
-            if (isObjectId(_id)) {
-                if (typeof _id === "object") _id = _id.toString();
-                if (_id && typeof _id === "string") {
-                    const Class = await _Class.findById(_id);
-                    if (Class) {
+            if ( isObjectId( _id ) ) {
+                if ( typeof _id === "object" ) _id = _id.toString();
+                if ( _id && typeof _id === "string" ) {
+                    const Class = await _Class.findById( _id );
+                    if ( Class ) {
                         return Class;
                     } else {
                         return null;
                     }
                 } else {
-                    throw new TypeError(`_id must be a string, got ${_id}`);
+                    throw new TypeError( `_id must be a string, got ${_id}` );
                 }
             } else {
-                throw new TypeError(`_id must be valid objectId, got ${_id}`);
+                throw new TypeError( `_id must be valid objectId, got ${_id}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return null;
         }
     } //Возвращает ученика по его _id (это чисто для разработки (так быстрее ищется))
-    async getAllContributors() {
+    async getAllContributors () {
         try {
-            const contributors = await _Student.find({
+            const contributors = await _Student.find( {
                 role: Roles.contributor,
-            });
-            if (contributors) {
+            } );
+            if ( contributors ) {
                 return contributors;
             } else {
                 return [];
             }
-        } catch (e) {
-            console.log(e);
+        } catch ( e ) {
+            console.log( e );
             return [];
         }
     } //Возвращает список всех редакторов
-    async getAllStudents() {
+    async getAllStudents () {
         try {
-            return (await _Student.find({})) || [];
-        } catch (e) {
-            console.error(e);
+            return ( await _Student.find( {} ) ) || [];
+        } catch ( e ) {
+            console.error( e );
         }
     }
-    async getAllClasses() {
+    async getAllClasses () {
         try {
-            return (await _Class.find({})) || [];
-        } catch (e) {
-            console.error(e);
+            return ( await _Class.find( {} ) ) || [];
+        } catch ( e ) {
+            console.error( e );
         }
     }
 
     //! Creators
-    async createStudent(vkId, { class_id, firstName, lastName: secondName }) {
+    async createStudent ( vkId, { class_id, firstName, lastName: secondName } ) {
         try {
-            if (vkId !== undefined) {
-                if (typeof vkId === "number") {
+            if ( vkId !== undefined ) {
+                if ( typeof vkId === "number" ) {
                     let newStudent;
                     let newStudentInfo = { vkId, firstName, secondName };
-                    if (class_id) {
-                        const Class = await this.getClassBy_Id(class_id);
-                        if (Class) {
+                    if ( class_id ) {
+                        const Class = await this.getClassBy_Id( class_id );
+                        if ( Class ) {
                             newStudentInfo.class = class_id;
-                            await Class.updateOne({
-                                students: [...Class.students, newStudent._id],
-                            });
+                            await Class.updateOne( {
+                                students: [ ...Class.students, newStudent._id ],
+                            } );
                         }
                     }
-                    newStudent = new _Student(newStudentInfo);
+                    newStudent = new _Student( newStudentInfo );
                     await newStudent.save();
-                    return await this.getStudentBy_Id(newStudent._id);
+                    return await this.getStudentBy_Id( newStudent._id );
                 } else {
                     throw new TypeError(
                         `VkId must be type of number, got ${vkId}`
                     );
                 }
             } else {
-                throw new TypeError("Vkid parameter is required");
+                throw new TypeError( "Vkid parameter is required" );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return null;
         }
     } //Создает и возвращает ученика
-    async createClass(name) {
+    async createClass ( name ) {
         try {
-            if (name) {
-                if (typeof name === "string") {
-                    const newClass = new _Class({
+            if ( name ) {
+                if ( typeof name === "string" ) {
+                    const newClass = new _Class( {
                         name,
-                    });
+                    } );
                     await newClass.save();
-                    return await this.getClassBy_Id(newClass._id);
+                    return await this.getClassBy_Id( newClass._id );
                 } else {
-                    throw new TypeError(`name must be string, got ${name}`);
+                    throw new TypeError( `name must be string, got ${name}` );
                 }
             } else {
-                throw new TypeError("name parameter is required");
+                throw new TypeError( "name parameter is required" );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return null;
         }
     } //Создает и возвращает класс
@@ -211,14 +211,14 @@ class DataBase {
     //! Classes
 
     //* Homework
-    async addHomework(className, lesson, content, studentVkId, expirationDate) {
+    async addHomework ( className, lesson, content, studentVkId, expirationDate ) {
         try {
-            if (className && typeof className === "string") {
-                if (lesson && Lessons.includes(lesson)) {
-                    if (this.validateContent(content).length === 0) {
-                        const Class = await this.getClassByName(className);
-                        if (Class) {
-                            if (Class.schedule.flat().includes(lesson)) {
+            if ( className && typeof className === "string" ) {
+                if ( lesson && Lessons.includes( lesson ) ) {
+                    if ( this.validateContent( content ).length === 0 ) {
+                        const Class = await this.getClassByName( className );
+                        if ( Class ) {
+                            if ( Class.schedule.flat().includes( lesson ) ) {
                                 let parsedContent = {
                                     text: content.text || "",
                                     attachments: content.attachments,
@@ -229,7 +229,7 @@ class DataBase {
                                     _id: new mongoose.Types.ObjectId(),
                                     createdBy: studentVkId,
                                 };
-                                if (studentVkId) {
+                                if ( studentVkId ) {
                                     if (
                                         studentVkId &&
                                         typeof studentVkId === "number"
@@ -241,7 +241,7 @@ class DataBase {
                                         );
                                     }
                                 }
-                                if (expirationDate) {
+                                if ( expirationDate ) {
                                     if (
                                         this.validateDate(
                                             expirationDate,
@@ -251,11 +251,11 @@ class DataBase {
                                         )
                                     ) {
                                         newHomework.to = expirationDate;
-                                        await Class.updateOne({
-                                            homework: Class.homework.concat([
+                                        await Class.updateOne( {
+                                            homework: Class.homework.concat( [
                                                 newHomework,
-                                            ]),
-                                        });
+                                            ] ),
+                                        } );
                                         return newHomework._id;
                                     } else {
                                         throw new TypeError(
@@ -272,11 +272,11 @@ class DataBase {
                                         nextLessonWeekDay
                                     );
                                     newHomework.to = nextLessonDate;
-                                    await Class.updateOne({
-                                        homework: Class.homework.concat([
+                                    await Class.updateOne( {
+                                        homework: Class.homework.concat( [
                                             newHomework,
-                                        ]),
-                                    });
+                                        ] ),
+                                    } );
                                     return newHomework._id;
                                 }
                             } else {
@@ -287,7 +287,7 @@ class DataBase {
                         }
                     } else {
                         throw new Error(
-                            JSON.stringify(this.validateContent(content))
+                            JSON.stringify( this.validateContent( content ) )
                         );
                     }
                 } else {
@@ -304,25 +304,25 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return null;
         }
     } //Добавляет жомашнее задание в класс
-    async removeHomework(className, homeworkId) {
+    async removeHomework ( className, homeworkId ) {
         try {
-            if (typeof homeworkId === "object" && isObjectId(homeworkId))
+            if ( typeof homeworkId === "object" && isObjectId( homeworkId ) )
                 homeworkId = homeworkId.toString();
-            if (className && typeof className === "string") {
-                if (homeworkId && typeof homeworkId === "string") {
-                    const Class = await this.getClassByName(className);
-                    if (Class) {
-                        await Class.updateOne({
+            if ( className && typeof className === "string" ) {
+                if ( homeworkId && typeof homeworkId === "string" ) {
+                    const Class = await this.getClassByName( className );
+                    if ( Class ) {
+                        await Class.updateOne( {
                             homework: Class.homework.filter(
-                                (hw) => hw._id.toString() !== homeworkId
+                                ( hw ) => hw._id.toString() !== homeworkId
                             ),
-                        });
+                        } );
                         return true;
                     } else {
                         return false;
@@ -337,22 +337,22 @@ class DataBase {
                     `className must be a string, got "${className}"`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return false;
         }
     }
-    async getHomework(className, date) {
+    async getHomework ( className, date ) {
         try {
-            if (className && typeof className === "string") {
-                const Class = await this.getClassByName(className);
-                if (Class) {
-                    if (date) {
-                        return Class.homework.filter(({ to }) =>
-                            checkIsToday(date, to)
+            if ( className && typeof className === "string" ) {
+                const Class = await this.getClassByName( className );
+                if ( Class ) {
+                    if ( date ) {
+                        return Class.homework.filter( ( { to } ) =>
+                            checkIsToday( date, to )
                         );
                     } else {
                         return Class.homework;
@@ -365,16 +365,16 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return [];
         }
     } //
-    async updateHomework(className, homeworkId, updates) {
+    async updateHomework ( className, homeworkId, updates ) {
         try {
-            if (className && typeof className === "string") {
-                if (homeworkId && isObjectId(homeworkId)) {
+            if ( className && typeof className === "string" ) {
+                if ( homeworkId && isObjectId( homeworkId ) ) {
                     if (
                         isPartialOf(
                             [
@@ -389,20 +389,20 @@ class DataBase {
                             updates
                         )
                     ) {
-                        const Class = await this.getClassByName(className);
-                        if (Class) {
-                            const updatedHomework = Class.homework.map((ch) =>
+                        const Class = await this.getClassByName( className );
+                        if ( Class ) {
+                            const updatedHomework = Class.homework.map( ( ch ) =>
                                 ch._id.toString() === homeworkId.toString()
                                     ? { ...ch.toObject(), ...updates }
                                     : ch
                             );
 
-                            await Class.updateOne({
+                            await Class.updateOne( {
                                 homework: updatedHomework,
-                            });
+                            } );
 
-                            return await this.getClassBy_Id(Class._id).then(
-                                (cl) => cl.homework
+                            return await this.getClassBy_Id( Class._id ).then(
+                                ( cl ) => cl.homework
                             );
                         } else {
                             return [];
@@ -422,36 +422,36 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return null;
         }
     }
-    async getHomeworkByDate(classNameOrInstance, date) {
+    async getHomeworkByDate ( classNameOrInstance, date ) {
         try {
             if (
                 classNameOrInstance &&
-                (typeof classNameOrInstance === "string" ||
-                    (typeof classNameOrInstance === "object" &&
-                        classNameOrInstance.homework instanceof Array))
+                ( typeof classNameOrInstance === "string" ||
+                    ( typeof classNameOrInstance === "object" &&
+                        classNameOrInstance.homework instanceof Array ) )
             ) {
-                if (date && date instanceof Date) {
+                if ( date && date instanceof Date ) {
                     let Class;
-                    if (typeof classNameOrInstance === "string") {
-                        Class = await this.getClassByName(classNameOrInstance);
+                    if ( typeof classNameOrInstance === "string" ) {
+                        Class = await this.getClassByName( classNameOrInstance );
                     } else {
                         Class = classNameOrInstance;
                     }
 
-                    if (Class) {
+                    if ( Class ) {
                         const { homework } = Class;
                         return homework?.filter(
-                            (hw) =>
-                                Math.abs(hw.to.getTime() - date.getTime()) <=
-                                    dayInMilliseconds &&
+                            ( hw ) =>
+                                Math.abs( hw.to.getTime() - date.getTime() ) <=
+                                dayInMilliseconds &&
                                 hw.to.getDate() === date.getDate()
                         );
                     } else {
@@ -467,26 +467,26 @@ class DataBase {
                     `classNameOrInstance must be string or Class instance, got ${classNameOrInstance}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.error(e);
+            console.error( e );
         }
     }
-    async removeOldHomework(className) {
+    async removeOldHomework ( className ) {
         try {
-            if (className && typeof className === "string") {
-                const Class = await this.getClassByName(className);
+            if ( className && typeof className === "string" ) {
+                const Class = await this.getClassByName( className );
 
-                if (Class) {
+                if ( Class ) {
                     const { homework } = Class;
 
                     const actualHomework = homework.filter(
-                        ({ to }) => Date.now() - +to <= 24 * 60 * 60 * 1000
+                        ( { to } ) => Date.now() - +to <= 24 * 60 * 60 * 1000
                     );
 
-                    await Class.updateOne({ homework: actualHomework });
+                    await Class.updateOne( { homework: actualHomework } );
 
                     return actualHomework;
                 } else {
@@ -497,9 +497,9 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
-                console.error(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
+                console.error( e );
                 return [];
             }
             throw e;
@@ -507,42 +507,42 @@ class DataBase {
     }
 
     //TODO refactor returning data from array to object
-    async parseHomeworkToNotifications(currentDateForTest) {
-        const classes = await _Class.find({});
+    async parseHomeworkToNotifications ( currentDateForTest ) {
+        const classes = await _Class.find( {} );
         const notificationArray = []; //Массив массивов типа [[Массив вк айди учеников], [Массив дз]]
-        for (const cl of classes) {
-            const populatedClass = await this.populate(cl);
+        for ( const cl of classes ) {
+            const populatedClass = await this.populate( cl );
             if (
                 populatedClass.homework.length &&
                 populatedClass.students.length
             ) {
                 const date = currentDateForTest || Date();
-                date.setDate(date.getDate() + 1); // Берем дз на некст день
+                date.setDate( date.getDate() + 1 ); // Берем дз на некст день
                 const notifiedStudentIds = findNotifiedStudents(
                     populatedClass.students,
                     currentDateForTest || new Date(),
-                    config["REMIND_AFTER"]
-                ).map(({ vkId }) => vkId);
-                const homework = populatedClass.homework.filter(({ to }) =>
-                    checkIsToday(to, date)
+                    config[ "REMIND_AFTER" ]
+                ).map( ( { vkId } ) => vkId );
+                const homework = populatedClass.homework.filter( ( { to } ) =>
+                    checkIsToday( to, date )
                 );
-                notificationArray.push([notifiedStudentIds, homework]);
+                notificationArray.push( [ notifiedStudentIds, homework ] );
             }
         }
         return notificationArray;
     } //
 
     //* Schedule
-    async setSchedule(className, lessonsIndexesByDays, lessonList = Lessons) {
+    async setSchedule ( className, lessonsIndexesByDays, lessonList = Lessons ) {
         try {
-            if (className && typeof className === "string") {
-                const Class = await this.getClassByName(className);
-                if (Class) {
+            if ( className && typeof className === "string" ) {
+                const Class = await this.getClassByName( className );
+                if ( Class ) {
                     const newSchedule = lessonsIndexesToLessonsNames(
                         lessonList,
                         lessonsIndexesByDays
                     );
-                    await Class.updateOne({ schedule: newSchedule });
+                    await Class.updateOne( { schedule: newSchedule } );
                     return true;
                 } else {
                     return false;
@@ -552,16 +552,16 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return false;
         }
     } //Устонавливает расписание (1: список предметов, 2: имя класса, 3: массив массивов индексов уроков где индекс соответствует уроку в массиве(1) по дням недели)
-    //TODO refactor change schedule scene with it |
-    async changeDay(className, dayIndex, newDay) {
+
+    async changeDay ( className, dayIndex, newDay ) {
         try {
-            if (className && typeof className === "string") {
+            if ( className && typeof className === "string" ) {
                 if (
                     dayIndex !== undefined &&
                     typeof dayIndex === "number" &&
@@ -570,18 +570,18 @@ class DataBase {
                 ) {
                     if (
                         newDay &&
-                        Array.isArray(newDay) &&
+                        Array.isArray( newDay ) &&
                         newDay.every(
-                            (lesson) =>
+                            ( lesson ) =>
                                 typeof lesson === "string" &&
-                                Lessons.includes(lesson)
+                                Lessons.includes( lesson )
                         )
                     ) {
-                        const Class = await this.getClassByName(className);
-                        if (Class) {
-                            const schedule = [...Class.schedule];
-                            schedule[dayIndex] = newDay;
-                            await Class.updateOne({ schedule });
+                        const Class = await this.getClassByName( className );
+                        if ( Class ) {
+                            const schedule = [ ...Class.schedule ];
+                            schedule[ dayIndex ] = newDay;
+                            await Class.updateOne( { schedule } );
                             return schedule;
                         } else {
                             return false;
@@ -589,9 +589,9 @@ class DataBase {
                     } else {
                         throw new TypeError(
                             "new day must be array of lessons, but your day includes " +
-                                newDay
-                                    .filter((l) => !Lessons.includes(l))
-                                    .join(",")
+                            newDay
+                                .filter( ( l ) => !Lessons.includes( l ) )
+                                .join( "," )
                         );
                     }
                 } else {
@@ -604,17 +604,17 @@ class DataBase {
                     `className must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return false;
         }
     }
-    async getSchedule(className) {
+    async getSchedule ( className ) {
         try {
-            if (className && typeof className === "string") {
-                const Class = await this.getClassByName(className);
-                if (Class) {
+            if ( className && typeof className === "string" ) {
+                const Class = await this.getClassByName( className );
+                if ( Class ) {
                     return Class.schedule;
                 } else {
                     return [];
@@ -624,17 +624,17 @@ class DataBase {
                     `className must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return [];
         }
     }
 
-    //*Changes
-    async addChanges(
+    //* Announcements
+    async addAnnouncement (
         className,
         content,
         toDate = new Date(),
@@ -642,36 +642,36 @@ class DataBase {
         vkId
     ) {
         try {
-            if (className !== undefined && typeof className === "string") {
-                if (this.validateContent(content).length === 0) {
-                    if (this.validateDate(toDate)) {
-                        const Class = await this.getClassByName(className);
-                        if (Class) {
+            if ( className !== undefined && typeof className === "string" ) {
+                if ( this.validateContent( content ).length === 0 ) {
+                    if ( this.validateDate( toDate ) ) {
+                        const Class = await this.getClassByName( className );
+                        if ( Class ) {
                             let parsedContent = {
                                 text: content.text || "",
                                 attachments: content.attachments,
                             };
-                            const newChange = {
+                            const newAnnouncement = {
                                 to: toDate,
                                 ...parsedContent,
                                 _id: new mongoose.Types.ObjectId(),
                             };
-                            if (toAll) {
-                                const classes = await _Class.find({});
-                                for (const _class of classes) {
-                                    await _class.updateOne({
-                                        changes: [..._class.changes, newChange],
-                                    });
+                            if ( toAll ) {
+                                const classes = await _Class.find( {} );
+                                for ( const _class of classes ) {
+                                    await _class.updateOne( {
+                                        announcements: [ ..._class.announcements, newAnnouncement ],
+                                    } );
                                 }
-                                return newChange._id;
+                                return newAnnouncement._id;
                             } else {
-                                if (vkId) {
-                                    newChange.createdBy = vkId;
+                                if ( vkId ) {
+                                    newAnnouncement.createdBy = vkId;
                                 }
-                                await Class.updateOne({
-                                    changes: [...Class.changes, newChange],
-                                });
-                                return newChange._id;
+                                await Class.updateOne( {
+                                    announcement: [ ...Class.announcements, newAnnouncement ],
+                                } );
+                                return newAnnouncement._id;
                             }
                         } else {
                             return null;
@@ -683,7 +683,7 @@ class DataBase {
                     }
                 } else {
                     throw new TypeError(
-                        JSON.stringify(this.validateContent(content))
+                        JSON.stringify( this.validateContent( content ) )
                     );
                 }
             } else {
@@ -691,24 +691,24 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return false;
         }
     } //
 
-    async getChanges(className, date) {
+    async getAnnouncements ( className, date ) {
         try {
-            if (className && typeof className === "string") {
-                const Class = await this.getClassByName(className);
-                if (Class) {
-                    if (date) {
-                        return Class.changes.filter((ch) =>
-                            checkIsToday(ch.to, date)
+            if ( className && typeof className === "string" ) {
+                const Class = await this.getClassByName( className );
+                if ( Class ) {
+                    if ( date ) {
+                        return Class.announcements.filter( ( ch ) =>
+                            checkIsToday( ch.to, date )
                         );
                     } else {
-                        return Class.changes;
+                        return Class.announcements;
                     }
                 } else {
                     return null;
@@ -718,24 +718,24 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
             return null;
         }
     } //
 
-    async removeChanges(className, changeId) {
+    async removeAnnouncements ( className, announcementId ) {
         try {
-            if (className && typeof className === "string") {
-                if (changeId && isObjectId(changeId)) {
-                    const Class = await this.getClassByName(className);
-                    if (Class) {
-                        const changes = Class.changes;
-                        const updatedChanges = changes.filter(
-                            (ch) => ch._id.toString() !== changeId.toString()
+            if ( className && typeof className === "string" ) {
+                if ( announcementId && isObjectId( announcementId ) ) {
+                    const Class = await this.getClassByName( className );
+                    if ( Class ) {
+                        const announcements = Class.announcements;
+                        const updatedChanges = announcements.filter(
+                            ( ch ) => ch._id.toString() !== announcementId.toString()
                         );
 
-                        await Class.updateOne({ changes: updatedChanges });
+                        await Class.updateOne( { announcements: updatedChanges } );
 
                         return updatedChanges;
                     } else {
@@ -743,7 +743,7 @@ class DataBase {
                     }
                 } else {
                     throw new TypeError(
-                        `ChangeId must be objectId, got ${changeId}`
+                        `announcementId must be objectId, got ${announcementId}`
                     );
                 }
             } else {
@@ -751,31 +751,31 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return null;
         }
     }
 
-    async updateChange(className, changeId, updates) {
+    async updateAnnouncement ( className, announcementId, updates ) {
         try {
-            if (className && typeof className === "string") {
-                if (changeId && isObjectId(changeId)) {
-                    if (isPartialOf(["attachments", "text", "to"], updates)) {
-                        const Class = await this.getClassByName(className);
-                        if (Class) {
-                            const updatedChanges = Class.changes.map((ch) =>
-                                ch._id.toString() === changeId.toString()
+            if ( className && typeof className === "string" ) {
+                if ( announcementId && isObjectId( announcementId ) ) {
+                    if ( isPartialOf( [ "attachments", "text", "to" ], updates ) ) {
+                        const Class = await this.getClassByName( className );
+                        if ( Class ) {
+                            const updatedAnnouncements = Class.announcements.map( ( ch ) =>
+                                ch._id.toString() === announcementId.toString()
                                     ? { ...ch.toObject(), ...updates }
                                     : ch
                             );
 
-                            await Class.updateOne({ changes: updatedChanges });
+                            await Class.updateOne( { announcements: updatedAnnouncements } );
 
-                            return updatedChanges;
+                            return updatedAnnouncements;
                         } else {
                             return [];
                         }
@@ -786,7 +786,7 @@ class DataBase {
                     }
                 } else {
                     throw new TypeError(
-                        `ChangeId must be objectId, got ${changeId}`
+                        `announcementId must be objectId, got ${announcementId}`
                     );
                 }
             } else {
@@ -794,30 +794,30 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return null;
         }
     }
 
-    async removeOldChanges(className) {
+    async removeOldAnnouncements ( className ) {
         try {
-            if (className && typeof className === "string") {
-                const Class = await this.getClassByName(className);
+            if ( className && typeof className === "string" ) {
+                const Class = await this.getClassByName( className );
 
-                if (Class) {
-                    const { changes } = Class;
+                if ( Class ) {
+                    const { announcements } = Class;
 
-                    const actualChanges = changes.filter(
-                        ({ to }) => Date.now() - +to <= 24 * 60 * 60 * 1000
+                    const actualAnnouncements = announcements.filter(
+                        ( { to } ) => Date.now() - +to <= 24 * 60 * 60 * 1000
                     );
 
-                    await Class.updateOne({ changes: actualChanges });
+                    await Class.updateOne( { announcements: actualAnnouncements } );
 
-                    return actualChanges;
+                    return actualAnnouncements;
                 } else {
                     return [];
                 }
@@ -826,9 +826,9 @@ class DataBase {
                     `ClassName must be string, got ${className}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
-                console.error(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
+                console.error( e );
                 return [];
             }
             throw e;
@@ -838,19 +838,19 @@ class DataBase {
     //! Students
 
     //* Settings
-    async changeSettings(vkId, diffObject) {
+    async changeSettings ( vkId, diffObject ) {
         try {
-            if (vkId !== undefined && typeof vkId === "number") {
-                if (typeof diffObject === "object" && diffObject !== null) {
-                    const Student = await this.getStudentByVkId(vkId);
-                    if (Student) {
+            if ( vkId !== undefined && typeof vkId === "number" ) {
+                if ( typeof diffObject === "object" && diffObject !== null ) {
+                    const Student = await this.getStudentByVkId( vkId );
+                    if ( Student ) {
                         let settings = Student.settings;
-                        for (const key in diffObject) {
-                            if (key in settings) {
-                                settings[key] = diffObject[key];
+                        for ( const key in diffObject ) {
+                            if ( key in settings ) {
+                                settings[ key ] = diffObject[ key ];
                             }
                         }
-                        await Student.updateOne({ settings });
+                        await Student.updateOne( { settings } );
                         return true;
                     } else {
                         return false;
@@ -861,24 +861,24 @@ class DataBase {
                     );
                 }
             } else {
-                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+                throw new TypeError( `VkId must be type of number, got ${vkId}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.log(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.log( e );
             return false;
         }
     }
-    async changeLastHomeworkCheckDate(vkId, newCheckDate) {
+    async changeLastHomeworkCheckDate ( vkId, newCheckDate ) {
         try {
-            if (typeof vkId === "number") {
-                if (newCheckDate instanceof Date) {
-                    const Student = await this.getStudentByVkId(vkId);
+            if ( typeof vkId === "number" ) {
+                if ( newCheckDate instanceof Date ) {
+                    const Student = await this.getStudentByVkId( vkId );
 
-                    if (Student) {
-                        await Student.updateOne({
+                    if ( Student ) {
+                        await Student.updateOne( {
                             lastHomeworkCheck: newCheckDate,
-                        });
+                        } );
                         return true;
                     } else {
                         return false;
@@ -889,72 +889,72 @@ class DataBase {
                     );
                 }
             } else {
-                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+                throw new TypeError( `VkId must be type of number, got ${vkId}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.error(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.error( e );
             return false;
         }
     }
 
     //* Roles utils
-    async getRole(id) {
+    async getRole ( id ) {
         try {
             let Student;
 
-            if (typeof id === "number") {
-                Student = await _Student.findOne({ vkId: id });
-            } else if (isObjectId(id)) {
-                Student = await _Student.findById(id);
+            if ( typeof id === "number" ) {
+                Student = await _Student.findOne( { vkId: id } );
+            } else if ( isObjectId( id ) ) {
+                Student = await _Student.findById( id );
             } else {
                 throw new TypeError(
                     `Id must be a number or an objectId, got ${id}`
                 );
             }
 
-            if (Student) {
+            if ( Student ) {
                 return Student.role;
             } else {
                 return null;
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.error(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.error( e );
         }
     }
-    async backStudentToInitialRole(vkId) {
+    async backStudentToInitialRole ( vkId ) {
         try {
-            if (vkId !== undefined && typeof vkId === "number") {
-                const Student = await this.getStudentByVkId(vkId);
-                if (Student) {
-                    await Student.updateOne({ role: Roles.student });
+            if ( vkId !== undefined && typeof vkId === "number" ) {
+                const Student = await this.getStudentByVkId( vkId );
+                if ( Student ) {
+                    await Student.updateOne( { role: Roles.student } );
                     return true;
                 } else {
                     return false;
                 }
             } else {
-                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+                throw new TypeError( `VkId must be type of number, got ${vkId}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) throw e;
-            console.error(e);
+        } catch ( e ) {
+            if ( e instanceof TypeError ) throw e;
+            console.error( e );
             return false;
         }
     } //Возвращает редактора к роли ученика
 
     //* Interactions
-    async addStudentToClass(vkId, className) {
+    async addStudentToClass ( vkId, className ) {
         try {
-            if (vkId !== undefined && typeof vkId === "number") {
-                if (className && typeof className === "string") {
-                    const Class = await this.getClassByName(className);
-                    const Student = await this.getStudentByVkId(vkId);
-                    if (Class && Student) {
-                        await Class.updateOne({
-                            students: [...Class.students, Student._id],
-                        });
-                        await Student.updateOne({ class: Class._id });
+            if ( vkId !== undefined && typeof vkId === "number" ) {
+                if ( className && typeof className === "string" ) {
+                    const Class = await this.getClassByName( className );
+                    const Student = await this.getStudentByVkId( vkId );
+                    if ( Class && Student ) {
+                        await Class.updateOne( {
+                            students: [ ...Class.students, Student._id ],
+                        } );
+                        await Student.updateOne( { class: Class._id } );
                         return true;
                     } else {
                         return false;
@@ -965,66 +965,66 @@ class DataBase {
                     );
                 }
             } else {
-                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+                throw new TypeError( `VkId must be type of number, got ${vkId}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return false;
         }
     } //Добавляет ученика в класс
-    async removeStudentFromClass(vkId) {
+    async removeStudentFromClass ( vkId ) {
         try {
-            if (vkId !== undefined && typeof vkId === "number") {
+            if ( vkId !== undefined && typeof vkId === "number" ) {
                 const Student = await this.populate(
-                    await this.getStudentByVkId(vkId)
+                    await this.getStudentByVkId( vkId )
                 );
-                if (Student) {
+                if ( Student ) {
                     const Class = Student.class;
-                    if (!Class) return true;
-                    await Class.updateOne({
+                    if ( !Class ) return true;
+                    await Class.updateOne( {
                         students: Class.students.filter(
-                            ({ _id }) =>
+                            ( { _id } ) =>
                                 _id.toString() !== Student._id.toString()
                         ),
-                    });
-                    await Student.updateOne({ class: null });
+                    } );
+                    await Student.updateOne( { class: null } );
                     return true;
                 } else {
                     return false;
                 }
             } else {
-                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+                throw new TypeError( `VkId must be type of number, got ${vkId}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.error(e);
+            console.error( e );
             return false;
         }
     } //Удаляет ученика из класса
-    async changeClass(vkId, newClassName) {
+    async changeClass ( vkId, newClassName ) {
         try {
-            if (vkId !== undefined && typeof vkId === "number") {
-                if (newClassName && typeof newClassName === "string") {
+            if ( vkId !== undefined && typeof vkId === "number" ) {
+                if ( newClassName && typeof newClassName === "string" ) {
                     const Student = await this.populate(
-                        await this.getStudentByVkId(vkId)
+                        await this.getStudentByVkId( vkId )
                     );
-                    const newClass = await this.getClassByName(newClassName);
-                    if (Student !== null) {
-                        if (newClass !== null) {
+                    const newClass = await this.getClassByName( newClassName );
+                    if ( Student !== null ) {
+                        if ( newClass !== null ) {
                             if (
                                 Student.class !== null &&
                                 Student.class !== undefined
                             ) {
-                                if (Student.class.name !== newClassName) {
+                                if ( Student.class.name !== newClassName ) {
                                     const removed = await this.removeStudentFromClass(
                                         vkId
                                     );
-                                    if (!removed) {
+                                    if ( !removed ) {
                                         return false;
                                     }
                                 } else {
@@ -1048,121 +1048,121 @@ class DataBase {
                     );
                 }
             } else {
-                throw new TypeError(`VkId must be type of number, got ${vkId}`);
+                throw new TypeError( `VkId must be type of number, got ${vkId}` );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return false;
         }
     } //Меняет класс ученика
 
     //! Helpers
-    async populate(document) {
+    async populate ( document ) {
         try {
-            if (document instanceof mongoose.Document) {
-                if (document.students) {
-                    return await document.populate("students").execPopulate();
-                } else if (document.class) {
-                    return await document.populate("class").execPopulate();
+            if ( document instanceof mongoose.Document ) {
+                if ( document.students ) {
+                    return await document.populate( "students" ).execPopulate();
+                } else if ( document.class ) {
+                    return await document.populate( "class" ).execPopulate();
                 } else {
                     return document;
                 }
             } else {
-                if (document === null) {
+                if ( document === null ) {
                     return null;
                 }
                 throw new TypeError(
                     `Argument must be a Document, got ${document}`
                 );
             }
-        } catch (e) {
-            if (e instanceof TypeError) {
+        } catch ( e ) {
+            if ( e instanceof TypeError ) {
                 throw e;
             }
-            console.log(e);
+            console.log( e );
             return null;
         }
     } //
-    validateContent(content) {
+    validateContent ( content ) {
         const errors = [];
-        if (content) {
-            if (content !== null && content.toString() === "[object Object]") {
+        if ( content ) {
+            if ( content !== null && content.toString() === "[object Object]" ) {
                 if (
-                    Object.keys(content).length > 0 &&
-                    Object.keys(content).length <= 2 &&
-                    Object.keys(content).every((key) =>
-                        ["attachments", "text"].includes(key)
+                    Object.keys( content ).length > 0 &&
+                    Object.keys( content ).length <= 2 &&
+                    Object.keys( content ).every( ( key ) =>
+                        [ "attachments", "text" ].includes( key )
                     )
                 ) {
                     if (
                         content.attachments.length > 0 &&
-                        (!Array.isArray(content.attachments) ||
+                        ( !Array.isArray( content.attachments ) ||
                             content.attachments.some(
-                                (at) => !this.validateAttachment(at)
-                            ))
+                                ( at ) => !this.validateAttachment( at )
+                            ) )
                     ) {
-                        errors.push("Invalid attachments");
+                        errors.push( "Invalid attachments" );
                     }
                     if (
                         content.text !== undefined &&
                         content.text !== "" &&
                         typeof content.text !== "string"
                     ) {
-                        errors.push("Text must be a string");
+                        errors.push( "Text must be a string" );
                     }
                 } else {
-                    errors.push("Invalid content structure");
+                    errors.push( "Invalid content structure" );
                 }
             } else {
-                errors.push("Content must be an object");
+                errors.push( "Content must be an object" );
             }
         } else {
-            errors.push("Content can't be undefined");
+            errors.push( "Content can't be undefined" );
         }
         return errors;
     } //
-    validateAttachment(attachment) {
-        if (typeof attachment === "object") {
+    validateAttachment ( attachment ) {
+        if ( typeof attachment === "object" ) {
             return (
-                attachment.hasOwnProperty("value") &&
-                /[a-z]+-?\d+_-?\d+(_.+)?/.test(attachment.value) &&
-                attachment.hasOwnProperty("url")
+                attachment.hasOwnProperty( "value" ) &&
+                /[a-z]+-?\d+_-?\d+(_.+)?/.test( attachment.value ) &&
+                attachment.hasOwnProperty( "url" )
             );
         }
     } //
-    validateDate(date, maxDate, minDate = new Date(), d = 0) {
+    validateDate ( date, maxDate, minDate = new Date(), d = 0 ) {
         let flag = true;
-        if (date instanceof Date) {
-            if (maxDate && maxDate instanceof Date) {
-                flag = Math.abs(maxDate.getTime() - date.getTime()) >= d;
-                if (!flag) return flag;
+        if ( date instanceof Date ) {
+            if ( maxDate && maxDate instanceof Date ) {
+                flag = Math.abs( maxDate.getTime() - date.getTime() ) >= d;
+                if ( !flag ) return flag;
             }
-            if (minDate && minDate instanceof Date) {
-                flag = Math.abs(date.getTime() - minDate.getTime()) >= d;
-                if (!flag) return flag;
+            if ( minDate && minDate instanceof Date ) {
+                flag = Math.abs( date.getTime() - minDate.getTime() ) >= d;
+                if ( !flag ) return flag;
             }
             return true;
-        } else if (typeof date === "string") {
-            if (Date.parse(date)) {
+        } else if ( typeof date === "string" ) {
+            if ( Date.parse( date ) ) {
                 return this.validateDate(
-                    new Date(Date.parse(date)),
+                    new Date( Date.parse( date ) ),
                     maxDate,
                     minDate
                 );
             }
             return false;
-        } else if (typeof date === "number") {
-            return this.validateDate(new Date(date), maxDate, minDate);
+        } else if ( typeof date === "number" ) {
+            return this.validateDate( new Date( date ), maxDate, minDate );
         } else {
             return false;
         }
     }
 
-    connect(...args) {
-        mongoose.connect(this.uri, ...args);
+    connect ( ...args ) {
+        mongoose.connect( this.uri, ...args );
     }
 }
 
