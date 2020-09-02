@@ -1134,17 +1134,16 @@ class DataBase {
         }
     } //
     validateDate ( date, maxDate, minDate = new Date(), d = 0 ) {
-        let flag = true;
+        let flag = undefined;
+
         if ( date instanceof Date ) {
             if ( maxDate && maxDate instanceof Date ) {
-                flag = Math.abs( maxDate.getTime() - date.getTime() ) >= d;
-                if ( !flag ) return flag;
+                flag = undefined ?? maxDate.getTime() - date.getTime() >= d;
             }
             if ( minDate && minDate instanceof Date ) {
-                flag = Math.abs( date.getTime() - minDate.getTime() ) >= d;
-                if ( !flag ) return flag;
+                flag = undefined ?? date.getTime() - minDate.getTime() >= d;
             }
-            return true;
+            return flag ?? true;
         } else if ( typeof date === "string" ) {
             if ( Date.parse( date ) ) {
                 return this.validateDate(
