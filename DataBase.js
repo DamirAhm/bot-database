@@ -242,11 +242,14 @@ class DataBase {
                                     }
                                 }
                                 if ( expirationDate ) {
+                                    const date = new Date();
+
                                     if (
+
                                         this.validateDate(
                                             expirationDate,
                                             undefined,
-                                            new Date(),
+                                            new Date( date.getFullYear(), date.getMonth(), date.getDate() ),
                                             24 * 60 * 60 * 1000
                                         )
                                     ) {
@@ -1133,7 +1136,7 @@ class DataBase {
             );
         }
     } //
-    validateDate ( date, maxDate, minDate = new Date(), d = 0 ) {
+    validateDate ( date, maxDate, minDate = new Date( date.getFullYear(), date.getMonth(), date.getDate() ), d = 0 ) {
         let flag = undefined;
 
         if ( date instanceof Date ) {
