@@ -39,7 +39,7 @@ const studentSchema = mongoose.Schema( {
             type: [ Number ],
             default: [ 1 ],
             validate: {
-                validator: array => array.every.call( array, Number.isInteger ) && array.length > 0,
+                validator: array => array.every( number => Number.isInteger( number ) && number >= 0 ) && array.length > 0,
                 message: "Day index must be an integer and mustn't be empty"
             }
         },
