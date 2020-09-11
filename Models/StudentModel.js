@@ -35,6 +35,14 @@ const studentSchema = mongoose.Schema( {
                 message: "Notification time should match template like 00:00",
             },
         },
+        daysForNotification: {
+            type: [ Number ],
+            default: [ 1 ],
+            validate: {
+                validator: array => array.every.call( array, Number.isInteger ),
+                message: "Day index must be an integer"
+            }
+        },
     },
     lastHomeworkCheck: {
         type: Date,
