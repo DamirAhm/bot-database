@@ -176,7 +176,7 @@ class DataBase {
 							await newStudent.updateOne({ class: Class._id });
 						}
 					}
-
+					await newStudent.save();
 					return await this.getStudentBy_Id(newStudent._id);
 				} else {
 					throw new TypeError(`VkId must be type of number, got ${vkId}`);
