@@ -137,6 +137,26 @@ class DataBase {
 			return [];
 		}
 	} //Возвращает список всех редакторов
+	async getStudentsCount(className) {
+		try {
+			if (typeof className === 'string') {
+				const Class = await this.getClassByName(className);
+
+				if (Class) {
+					const Students = await _Student.find({ class: Class._id });
+
+					return Students.length;
+				} else {
+					return 0;
+				}
+			} else {
+				throw new TypeError(`ClassName must be a string, got ${className}`);
+			}
+		} catch (e) {
+			if (e instanceof TypeError) throw e;
+			return 0;
+		}
+	}
 	async getAllStudents() {
 		try {
 			return (await _Student.find({})) || [];
