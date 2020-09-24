@@ -193,7 +193,13 @@ class DataBase {
 							await Class.updateOne({
 								students: [...Class.students, newStudent._id],
 							});
-							await newStudent.updateOne({ class: Class._id });
+							await newStudent.updateOne({
+								class: Class._id,
+								role:
+									Class.students.length === 0
+										? Roles.contributor
+										: newStudent.role,
+							});
 						}
 					}
 					await newStudent.save();
@@ -901,7 +907,10 @@ class DataBase {
 						await Class.updateOne({
 							students: [...Class.students, Student._id],
 						});
-						await Student.updateOne({ class: Class._id });
+						await Student.updateOne({
+							class: Class._id,
+							role: Class.students.length === 0 ? Roles.contributor : Student.role,
+						});
 						return true;
 					} else {
 						return false;
