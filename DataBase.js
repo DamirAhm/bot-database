@@ -45,10 +45,18 @@ class DataBase {
 
 	//! Getters
 	async getSchoolByName(schoolName) {
-		return await _School.findOne({ name: schoolName });
+		try {
+			return await _School.findOne({ name: schoolName });
+		} catch (e) {
+			console.error(e);
+		}
 	}
 	async getSchoolBy_Id(_id) {
-		return await _School.findById(_id);
+		try {
+			return await _School.findById(_id);
+		} catch (e) {
+			console.error(e);
+		}
 	}
 
 	async getStudentByVkId(vkId) {
@@ -190,9 +198,15 @@ class DataBase {
 		}
 	}
 	async getStudentsFromClass(className, schoolName) {
-		const { students } = await this.populate(await this.getClassByName(className, schoolName));
+		try {
+			const { students } = await this.populate(
+				await this.getClassByName(className, schoolName),
+			);
 
-		return students.map(({ vkId }) => vkId);
+			return students.map(({ vkId }) => vkId);
+		} catch (e) {
+			console.error(e);
+		}
 	}
 
 	//! Creators
@@ -268,6 +282,16 @@ class DataBase {
 			return null;
 		}
 	} //Создает и возвращает класс
+	async createSchool(name) {
+		try {
+			const School = new _School({ name });
+
+			await School.save();
+			return School;
+		} catch (e) {
+			console.error(e);
+		}
+	}
 
 	//! Classes
 
