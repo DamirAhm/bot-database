@@ -1,6 +1,28 @@
 // @ts-nocheck
 const mongoose = require('mongoose');
 
+const attachment = mongoose.Schema({
+	value: {
+		type: String,
+		validate: {
+			validator: (str) => /^photo.+(_.+)*/.test(str),
+			message: 'url must be a valid vk attachment',
+		},
+		required: true,
+	},
+	url: {
+		type: String,
+		validate: {
+			validator: isURL,
+			message: 'url must be a valid URL',
+		},
+		required: true,
+	},
+	album_id: {
+		type: Number,
+	},
+});
+
 const schoolSchema = mongoose.Schema({
 	classes: {
 		type: [
