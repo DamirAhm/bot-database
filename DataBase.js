@@ -176,6 +176,13 @@ class DataBase {
 			console.error(e);
 		}
 	}
+	async getAllSchools() {
+		try {
+			return await _School.find({});
+		} catch (e) {
+			console.error(e);
+		}
+	}
 
 	async getStudentsCount(className, schoolName) {
 		try {
@@ -204,6 +211,13 @@ class DataBase {
 			);
 
 			return students.map(({ vkId }) => vkId);
+		} catch (e) {
+			console.error(e);
+		}
+	}
+	async getClassesForSchool(schoolName) {
+		try {
+			return _Class.find({ schoolName });
 		} catch (e) {
 			console.error(e);
 		}
