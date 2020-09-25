@@ -1,201 +1,141 @@
-const mongoose = require( "mongoose" );
-const { DataBase } = require( "../DataBase.js" );
+const mongoose = require('mongoose');
+const { DataBase } = require('../DataBase.js');
 
-const letters = "ABCDEFGHIJKLNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+const letters = 'ABCDEFGHIJKLNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
 let currentClassNumber = 1;
 let currentClassLetterIndex = 0;
 let curentVkId = 0;
 const dayInMilliseconds = 24 * 60 * 60 * 1000;
 
-const findNextDayWithLesson = ( schedule, lesson, currentWeekDay ) => {
-    let lastIndex = -1;
-    if ( schedule.slice( currentWeekDay ).find( ( e ) => e.includes( lesson ) ) ) {
-        lastIndex =
-            schedule
-                .slice( currentWeekDay )
-                .findIndex( ( e ) => e.includes( lesson ) ) +
-            currentWeekDay +
-            1;
-    } else if ( schedule.find( ( e ) => e.includes( lesson ) ) ) {
-        lastIndex = schedule.findIndex( ( e ) => e.includes( lesson ) ) + 1;
-    }
-    return lastIndex;
+const findNextDayWithLesson = (schedule, lesson, currentWeekDay) => {
+	let lastIndex = -1;
+	if (schedule.slice(currentWeekDay).find((e) => e.includes(lesson))) {
+		lastIndex =
+			schedule.slice(currentWeekDay).findIndex((e) => e.includes(lesson)) +
+			currentWeekDay +
+			1;
+	} else if (schedule.find((e) => e.includes(lesson))) {
+		lastIndex = schedule.findIndex((e) => e.includes(lesson)) + 1;
+	}
+	return lastIndex;
 };
 
-const findNextLessonDate = (
-    nextLessonWeekDay,
-    { currentDate = new Date() } = {}
-) => {
-    if ( nextLessonWeekDay <= 7 && nextLessonWeekDay > 0 ) {
-        const weekDay = currentDate.getDay() || 7; //Чтобы воскресенье было 7 днем недели
-        const addition = nextLessonWeekDay <= weekDay ? 7 : 0; //Равно 7 если урок на следующей неделе
+const findNextLessonDate = (nextLessonWeekDay, { currentDate = new Date() } = {}) => {
+	if (nextLessonWeekDay <= 7 && nextLessonWeekDay > 0) {
+		const weekDay = currentDate.getDay() || 7; //Чтобы воскресенье было 7 днем недели
+		const addition = nextLessonWeekDay <= weekDay ? 7 : 0; //Равно 7 если урок на следующей неделе
 
-        let date = currentDate.getDate() + addition - ( weekDay - nextLessonWeekDay );
-        let month = currentDate.getMonth();
+		let date = currentDate.getDate() + addition - (weekDay - nextLessonWeekDay);
+		let month = currentDate.getMonth();
 
-        return new Date( currentDate.getFullYear(), month, date );
-    } else if ( nextLessonWeekDay < 0 ) {
-        return null;
-    } else {
-        throw new TypeError( "Week day must be less or equal to 7" );
-    }
+		return new Date(currentDate.getFullYear(), month, date);
+	} else if (nextLessonWeekDay < 0) {
+		return null;
+	} else {
+		throw new TypeError('Week day must be less or equal to 7');
+	}
 };
 
-const toObject = ( Document ) => JSON.parse( JSON.stringify( Document ) );
-const isObjectId = ( id ) => {
-    return mongoose.Types.ObjectId.isValid( id );
+const toObject = (Document) => JSON.parse(JSON.stringify(Document));
+const isObjectId = (id) => {
+	return mongoose.Types.ObjectId.isValid(id);
 };
 
-const createTestData = async () => {
-    const Class = await DataBase.createClass( getUniqueClassName() );
-    const Student = await DataBase.createStudent( getUniqueVkId(), Class._id );
-    await Class.updateOne( { students: [ Student._id ] } );
-    return {
-        Student: await DataBase.getStudentBy_Id( Student._id ),
-        Class: await DataBase.getClassBy_Id( Class._id ),
-    };
+const findNotifiedStudents = (students, notificationDate, maxRemindFrequency) => {
+	return students.filter(({ settings: sets, lastHomeworkCheck }) => {
+		if (sets.notificationsEnabled) {
+			//Проверяет что уведомления включены
+			if (
+				notificationDate.getHours() === +sets.notificationTime.match(/^\d*/)[0] &&
+				Math.abs(notificationDate.getMinutes() - +sets.notificationTime.match(/\d*$/)) <= 1
+			) {
+				//Проверяет что время совпадает или почти
+				if (notificationDate - lastHomeworkCheck >= maxRemindFrequency) {
+					//Проверяет что чел недавно (3 часа) сам не чекал дз}
+					return true;
+				}
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	});
 };
 
-const findNotifiedStudents = (
-    students,
-    notificationDate,
-    maxRemindFrequency
-) => {
-    return students.filter( ( { settings: sets, lastHomeworkCheck } ) => {
-        if ( sets.notificationsEnabled ) {
-            //Проверяет что уведомления включены
-            if (
-                notificationDate.getHours() ===
-                +sets.notificationTime.match( /^\d*/ )[ 0 ] &&
-                Math.abs(
-                    notificationDate.getMinutes() -
-                    +sets.notificationTime.match( /\d*$/ )
-                ) <= 1
-            ) {
-                //Проверяет что время совпадает или почти
-                if (
-                    notificationDate - lastHomeworkCheck >=
-                    maxRemindFrequency
-                ) {
-                    //Проверяет что чел недавно (3 часа) сам не чекал дз}
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    } );
+const lessonsIndexesToLessonsNames = (lessonList, indexes) => {
+	if (
+		Array.isArray(lessonList) &&
+		lessonList.length &&
+		lessonList.every((el) => typeof el === 'string')
+	) {
+		if (
+			Array.isArray(indexes) &&
+			indexes.length > 0 &&
+			indexes.every((lesson) => Array.isArray(lesson) && lesson.every(Number.isInteger)) //lessonList должен быть массивом массивов целых чисел
+		) {
+			if (lessonList.length - 1 < Math.max(...indexes.flat())) {
+				throw new ReferenceError(
+					'Index in indexes array can`t be bigger than lesson list length',
+				);
+			}
+			return indexes.map((dayIdxs) => dayIdxs.map((idx) => lessonList[idx])); //превращает массив индексов в массив предметов
+		} else {
+			throw new TypeError('lessonsIndexesByDays must be array of arrays of integers');
+		}
+	} else {
+		throw new TypeError('LessonList must be array of strings');
+	}
 };
 
-const lessonsIndexesToLessonsNames = ( lessonList, indexes ) => {
-    if (
-        Array.isArray( lessonList ) &&
-        lessonList.length &&
-        lessonList.every( ( el ) => typeof el === "string" )
-    ) {
-        if (
-            Array.isArray( indexes ) &&
-            indexes.length > 0 &&
-            indexes.every(
-                ( lesson ) =>
-                    Array.isArray( lesson ) && lesson.every( Number.isInteger )
-            ) //lessonList должен быть массивом массивов целых чисел
-        ) {
-            if ( lessonList.length - 1 < Math.max( ...indexes.flat() ) ) {
-                throw new ReferenceError(
-                    "Index in indexes array can`t be bigger than lesson list length"
-                );
-            }
-            return indexes.map( ( dayIdxs ) =>
-                dayIdxs.map( ( idx ) => lessonList[ idx ] )
-            ); //превращает массив индексов в массив предметов
-        } else {
-            throw new TypeError(
-                "lessonsIndexesByDays must be array of arrays of integers"
-            );
-        }
-    } else {
-        throw new TypeError( "LessonList must be array of strings" );
-    }
+const checkIsToday = (date, to = new Date()) => {
+	return (
+		to.getDate() === date.getDate() &&
+		date.getMonth() === to.getMonth() &&
+		date.getFullYear() === to.getFullYear()
+	);
 };
 
-const checkIsToday = ( date, to = new Date() ) => {
-    return (
-        to.getDate() === date.getDate() &&
-        date.getMonth() === to.getMonth() &&
-        date.getFullYear() === to.getFullYear()
-    );
+const isPartialOf = (object, instance) => {
+	if (Array.isArray(object)) return Object.keys(instance).every((key) => object.includes(key));
+	if (typeof object === 'object')
+		return (
+			Object.keys(instance).length !== 0 &&
+			Object.keys(instance).every((key) => object.hasOwnProperty(key))
+		);
+	throw new TypeError('object must be an object or an array of properties');
 };
 
-const getUniqueClassName = () => {
-    if ( currentClassNumber === 11 ) {
-        currentClassNumber = 1;
-        currentClassLetterIndex++;
-        if ( currentClassLetterIndex > letters.length ) {
-            throw new Error( "Too many classes, can't find unique class name" );
-        }
-    }
-    const num = ( currentClassNumber++ ).toString();
-    const letter = letters[ currentClassLetterIndex ];
-
-    const className = num + letter;
-    return className;
+const filterContentByDate = (content, date) => {
+	return content.filter(
+		(cont) =>
+			Math.abs(cont.to.getTime() - date.getTime()) <= dayInMilliseconds &&
+			cont.to.getDate() === date.getDate(),
+	);
 };
-const getUniqueVkId = () => {
-    const id = curentVkId++;
-
-    return id;
-};
-
-const isPartialOf = ( object, instance ) => {
-    if ( Array.isArray( object ) )
-        return Object.keys( instance ).every( ( key ) => object.includes( key ) );
-    if ( typeof object === "object" )
-        return (
-            Object.keys( instance ).length !== 0 &&
-            Object.keys( instance ).every( ( key ) => object.hasOwnProperty( key ) )
-        );
-    throw new TypeError( "object must be an object or an array of properties" );
-};
-
-const filterContentByDate = ( content, date ) => {
-    return content.filter(
-        ( cont ) =>
-            Math.abs( cont.to.getTime() - date.getTime() ) <= dayInMilliseconds &&
-            cont.to.getDate() === date.getDate()
-    );
-};
-const mapHomeworkByLesson = ( homework ) => {
-    if ( homework instanceof Array ) {
-        return homework.reduce(
-            ( acc, c ) => (
-                acc.has( c.lesson )
-                    ? acc.get( c.lesson ).push( c )
-                    : acc.set( c.lesson, [ c ] ),
-                acc
-            ),
-            new Map()
-        );
-    } else {
-        throw new TypeError( "homework must be an array" );
-    }
+const mapHomeworkByLesson = (homework) => {
+	if (homework instanceof Array) {
+		return homework.reduce(
+			(acc, c) => (
+				acc.has(c.lesson) ? acc.get(c.lesson).push(c) : acc.set(c.lesson, [c]), acc
+			),
+			new Map(),
+		);
+	} else {
+		throw new TypeError('homework must be an array');
+	}
 };
 
 module.exports = {
-    toObject,
-    isObjectId,
-    createTestData,
-    findNextDayWithLesson,
-    findNextLessonDate,
-    findNotifiedStudents,
-    lessonsIndexesToLessonsNames,
-    checkIsToday,
-    getUniqueClassName,
-    getUniqueVkId,
-    isPartialOf,
-    mapHomeworkByLesson,
-    filterContentByDate,
-    dayInMilliseconds,
+	toObject,
+	isObjectId,
+	findNextDayWithLesson,
+	findNextLessonDate,
+	findNotifiedStudents,
+	lessonsIndexesToLessonsNames,
+	checkIsToday,
+	isPartialOf,
+	mapHomeworkByLesson,
+	filterContentByDate,
+	dayInMilliseconds,
 };

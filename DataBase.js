@@ -1,7 +1,7 @@
 const { Roles, Lessons } = require('./Models/utils');
 const _Student = require('./Models/StudentModel');
+const _School = require('./Models/SchoolModel');
 const _Class = require('./Models/ClassModel');
-const uuid4 = require('uuid4');
 const {
 	findNextDayWithLesson,
 	findNextLessonDate,
@@ -44,6 +44,13 @@ class DataBase {
 	}
 
 	//! Getters
+	async getSchoolByName(schoolName) {
+		return await _School.findOne({ name: schoolName });
+	}
+	async getSchoolBy_Id(_id) {
+		return await _School.findById(_id);
+	}
+
 	async getStudentByVkId(vkId) {
 		try {
 			if (vkId !== undefined && typeof vkId === 'number') {
@@ -81,10 +88,11 @@ class DataBase {
 			return null;
 		}
 	} //Возвращает ученика по его _id (это чисто для разработки (так быстрее ищется))
-	async getClassByName(name) {
+
+	async getClassByName(name, schoolName) {
 		try {
 			if (name && typeof name === 'string') {
-				const Class = await _Class.findOne({ name });
+				const Class = await _Class.findOne({ name, schoolName });
 				if (Class) {
 					return Class;
 				} else {
@@ -122,11 +130,19 @@ class DataBase {
 			return null;
 		}
 	} //Возвращает ученика по его _id (это чисто для разработки (так быстрее ищется))
-	async getAllContributors() {
+
+	async getAllContributors(schoolName) {
 		try {
-			const contributors = await _Student.find({
-				role: Roles.contributor,
-			});
+			const contributors = await _Student.find(
+				!schoolName
+					? {
+							role: Roles.contributor,
+					  }
+					: {
+							role: Roles.contributor,
+							schoolName,
+					  },
+			);
 			if (contributors) {
 				return contributors;
 			} else {
@@ -137,10 +153,26 @@ class DataBase {
 			return [];
 		}
 	} //Возвращает список всех редакторов
-	async getStudentsCount(className) {
+
+	async getAllStudents(schoolName) {
+		try {
+			return (await _Student.find(!schoolName ? {} : { schoolName })) || [];
+		} catch (e) {
+			console.error(e);
+		}
+	}
+	async getAllClasses(schoolName) {
+		try {
+			return (await _Class.find(!schoolName ? {} : { schoolName })) || [];
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
+	async getStudentsCount(className, schoolName) {
 		try {
 			if (typeof className === 'string') {
-				const Class = await this.getClassByName(className);
+				const Class = await this.getClassByName(className, schoolName);
 
 				if (Class) {
 					const Students = await _Student.find({ class: Class._id });
@@ -157,19 +189,10 @@ class DataBase {
 			return 0;
 		}
 	}
-	async getAllStudents() {
-		try {
-			return (await _Student.find({})) || [];
-		} catch (e) {
-			console.error(e);
-		}
-	}
-	async getAllClasses() {
-		try {
-			return (await _Class.find({})) || [];
-		} catch (e) {
-			console.error(e);
-		}
+	async getStudentsFromClass(className, schoolName) {
+		const { students } = await this.populate(await this.getClassByName(className, schoolName));
+
+		return students.map(({ vkId }) => vkId);
 	}
 
 	//! Creators
@@ -180,12 +203,13 @@ class DataBase {
 			firstName = undefined,
 			lastName: secondName = undefined,
 			registered = false,
+			schoolName,
 		},
 	) {
 		try {
 			if (vkId !== undefined) {
 				if (typeof vkId === 'number') {
-					let newStudentInfo = { vkId, firstName, secondName, registered };
+					let newStudentInfo = { vkId, firstName, secondName, registered, schoolName };
 					const newStudent = new _Student(newStudentInfo);
 					if (class_id) {
 						const Class = await this.getClassBy_Id(class_id);
@@ -216,15 +240,22 @@ class DataBase {
 			return null;
 		}
 	} //Создает и возвращает ученика
-	async createClass(name) {
+	async createClass(name, schoolName) {
 		try {
 			if (name) {
 				if (typeof name === 'string') {
-					const newClass = new _Class({
-						name: name.toUpperCase(),
-					});
-					await newClass.save();
-					return await this.getClassBy_Id(newClass._id);
+					const School = await this.getSchoolByName(schoolName);
+
+					if (School) {
+						const newClass = new _Class({
+							name: name.toUpperCase(),
+							schoolName,
+						});
+						await newClass.save();
+						return newClass;
+					} else {
+						return null;
+					}
 				} else {
 					throw new TypeError(`name must be string, got ${name}`);
 				}
@@ -241,12 +272,12 @@ class DataBase {
 	//! Classes
 
 	//* Homework
-	async addHomework(className, lesson, content, studentVkId, expirationDate) {
+	async addHomework({ className, schoolName }, lesson, content, studentVkId, expirationDate) {
 		try {
 			if (className && typeof className === 'string') {
 				if (lesson && Lessons.includes(lesson)) {
 					if (this.validateContent(content).length === 0) {
-						const Class = await this.getClassByName(className);
+						const Class = await this.getClassByName(className, schoolName);
 						if (Class) {
 							if (Class.schedule.flat().includes(lesson)) {
 								let parsedContent = {
@@ -333,13 +364,13 @@ class DataBase {
 			return null;
 		}
 	} //Добавляет жомашнее задание в класс
-	async removeHomework(className, homeworkId) {
+	async removeHomework({ className, schoolName }, homeworkId) {
 		try {
 			if (typeof homeworkId === 'object' && isObjectId(homeworkId))
 				homeworkId = homeworkId.toString();
 			if (className && typeof className === 'string') {
 				if (homeworkId && typeof homeworkId === 'string') {
-					const Class = await this.getClassByName(className);
+					const Class = await this.getClassByName(className, schoolName);
 					if (Class) {
 						await Class.updateOne({
 							homework: Class.homework.filter(
@@ -366,10 +397,10 @@ class DataBase {
 			return false;
 		}
 	}
-	async getHomework(className, date) {
+	async getHomework({ className, schoolName }, date) {
 		try {
 			if (className && typeof className === 'string') {
-				const Class = await this.getClassByName(className);
+				const Class = await this.getClassByName(className, schoolName);
 				if (Class) {
 					if (date) {
 						return Class.homework.filter(({ to }) => checkIsToday(date, to));
@@ -388,7 +419,7 @@ class DataBase {
 			return [];
 		}
 	} //
-	async updateHomework(className, homeworkId, updates) {
+	async updateHomework({ className, schoolName }, homeworkId, updates) {
 		try {
 			if (className && typeof className === 'string') {
 				if (homeworkId && isObjectId(homeworkId)) {
@@ -398,7 +429,7 @@ class DataBase {
 							updates,
 						)
 					) {
-						const Class = await this.getClassByName(className);
+						const Class = await this.getClassByName(className, schoolName);
 						if (Class) {
 							const updatedHomework = Class.homework.map((ch) =>
 								ch._id.toString() === homeworkId.toString()
@@ -433,7 +464,7 @@ class DataBase {
 			return null;
 		}
 	}
-	async getHomeworkByDate(classNameOrInstance, date) {
+	async getHomeworkByDate({ classNameOrInstance, schoolName }, date) {
 		try {
 			if (
 				classNameOrInstance &&
@@ -444,7 +475,7 @@ class DataBase {
 				if (date && date instanceof Date) {
 					let Class;
 					if (typeof classNameOrInstance === 'string') {
-						Class = await this.getClassByName(classNameOrInstance);
+						Class = await this.getClassByName(classNameOrInstance, schoolName);
 					} else {
 						Class = classNameOrInstance;
 					}
@@ -474,10 +505,10 @@ class DataBase {
 			console.error(e);
 		}
 	}
-	async removeOldHomework(className) {
+	async removeOldHomework({ className, schoolName }) {
 		try {
 			if (className && typeof className === 'string') {
-				const Class = await this.getClassByName(className);
+				const Class = await this.getClassByName(className, schoolName);
 
 				if (Class) {
 					const { homework } = Class;
@@ -526,10 +557,10 @@ class DataBase {
 	} //
 
 	//* Schedule
-	async setSchedule(className, lessonsIndexesByDays, lessonList = Lessons) {
+	async setSchedule({ className, schoolName }, lessonsIndexesByDays, lessonList = Lessons) {
 		try {
 			if (className && typeof className === 'string') {
-				const Class = await this.getClassByName(className);
+				const Class = await this.getClassByName(className, schoolName);
 				if (Class) {
 					const newSchedule = lessonsIndexesToLessonsNames(
 						lessonList,
@@ -550,7 +581,7 @@ class DataBase {
 		}
 	} //Устонавливает расписание (1: список предметов, 2: имя класса, 3: массив массивов индексов уроков где индекс соответствует уроку в массиве(1) по дням недели)
 
-	async changeDay(className, dayIndex, newDay) {
+	async changeDay({ className, schoolName }, dayIndex, newDay) {
 		try {
 			if (className && typeof className === 'string') {
 				if (
@@ -566,7 +597,7 @@ class DataBase {
 							(lesson) => typeof lesson === 'string' && Lessons.includes(lesson),
 						)
 					) {
-						const Class = await this.getClassByName(className);
+						const Class = await this.getClassByName(className, schoolName);
 						if (Class) {
 							const schedule = [...Class.schedule];
 							schedule[dayIndex] = newDay;
@@ -595,10 +626,10 @@ class DataBase {
 			return false;
 		}
 	}
-	async getSchedule(className) {
+	async getSchedule({ className, schoolName }) {
 		try {
 			if (className && typeof className === 'string') {
-				const Class = await this.getClassByName(className);
+				const Class = await this.getClassByName(className, schoolName);
 				if (Class) {
 					return Class.schedule;
 				} else {
@@ -617,12 +648,18 @@ class DataBase {
 	}
 
 	//* Announcements
-	async addAnnouncement(className, content, toDate = new Date(), toAll = false, vkId) {
+	async addAnnouncement(
+		{ className, schoolName },
+		content,
+		toDate = new Date(),
+		toAll = false,
+		vkId,
+	) {
 		try {
 			if (className !== undefined && typeof className === 'string') {
 				if (this.validateContent(content).length === 0) {
 					if (this.validateDate(toDate)) {
-						const Class = await this.getClassByName(className);
+						const Class = await this.getClassByName(className, schoolName);
 						if (Class) {
 							let parsedContent = {
 								text: content.text || '',
@@ -669,10 +706,10 @@ class DataBase {
 		}
 	} //
 
-	async getAnnouncements(className, date) {
+	async getAnnouncements({ className, schoolName }, date) {
 		try {
 			if (className && typeof className === 'string') {
-				const Class = await this.getClassByName(className);
+				const Class = await this.getClassByName(className, schoolName);
 				if (Class) {
 					if (date) {
 						return Class.announcements.filter((ch) => checkIsToday(ch.to, date));
@@ -691,11 +728,11 @@ class DataBase {
 		}
 	} //
 
-	async removeAnnouncement(className, announcementId) {
+	async removeAnnouncement({ className, schoolName }, announcementId) {
 		try {
 			if (className && typeof className === 'string') {
 				if (announcementId && isObjectId(announcementId)) {
-					const Class = await this.getClassByName(className);
+					const Class = await this.getClassByName(className, schoolName);
 					if (Class) {
 						const announcements = Class.announcements;
 						const updatedChanges = announcements.filter(
@@ -723,12 +760,12 @@ class DataBase {
 		}
 	}
 
-	async updateAnnouncement(className, announcementId, updates) {
+	async updateAnnouncement({ className, schoolName }, announcementId, updates) {
 		try {
 			if (className && typeof className === 'string') {
 				if (announcementId && isObjectId(announcementId)) {
 					if (isPartialOf(['attachments', 'text', 'to'], updates)) {
-						const Class = await this.getClassByName(className);
+						const Class = await this.getClassByName(className, schoolName);
 						if (Class) {
 							const updatedAnnouncements = Class.announcements.map((ch) =>
 								ch._id.toString() === announcementId.toString()
@@ -762,10 +799,10 @@ class DataBase {
 		}
 	}
 
-	async removeOldAnnouncements(className) {
+	async removeOldAnnouncements({ className, schoolName }) {
 		try {
 			if (className && typeof className === 'string') {
-				const Class = await this.getClassByName(className);
+				const Class = await this.getClassByName(className, schoolName);
 
 				if (Class) {
 					const { announcements } = Class;
@@ -897,11 +934,11 @@ class DataBase {
 	} //Возвращает редактора к роли ученика
 
 	//* Interactions
-	async addStudentToClass(vkId, className) {
+	async addStudentToClass(vkId, className, schoolName) {
 		try {
 			if (vkId !== undefined && typeof vkId === 'number') {
 				if (className && typeof className === 'string') {
-					const Class = await this.getClassByName(className);
+					const Class = await this.getClassByName(className, schoolName);
 					const Student = await this.getStudentByVkId(vkId);
 					if (Class && Student) {
 						await Class.updateOne({
@@ -957,12 +994,12 @@ class DataBase {
 			return false;
 		}
 	} //Удаляет ученика из класса
-	async changeClass(vkId, newClassName) {
+	async changeClass(vkId, newClassName, schoolName) {
 		try {
 			if (vkId !== undefined && typeof vkId === 'number') {
 				if (newClassName && typeof newClassName === 'string') {
 					const Student = await this.populate(await this.getStudentByVkId(vkId));
-					const newClass = await this.getClassByName(newClassName);
+					const newClass = await this.getClassByName(newClassName, schoolName);
 					if (Student !== null) {
 						if (newClass !== null) {
 							if (Student.class !== null && Student.class !== undefined) {
@@ -976,7 +1013,7 @@ class DataBase {
 								}
 							}
 
-							return await this.addStudentToClass(vkId, newClass.name);
+							return await this.addStudentToClass(vkId, newClass.name, schoolName);
 						} else {
 							return false;
 						}
