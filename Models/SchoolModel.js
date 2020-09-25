@@ -63,4 +63,4 @@ const schoolSchema = mongoose.Schema({
 	},
 });
 
-module.exports = mongoose.model('Class', schoolSchema);
+module.exports = mongoose.model('School', schoolSchema);
