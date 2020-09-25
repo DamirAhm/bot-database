@@ -61,11 +61,6 @@ const studentSchema = mongoose.Schema({
 		type: Boolean,
 		default: false,
 	},
-	schoolName: {
-		type: string,
-		ref: 'Student',
-		required: true,
-	},
 });
 
 module.exports = mongoose.model('Student', studentSchema);
