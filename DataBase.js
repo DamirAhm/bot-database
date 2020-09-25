@@ -265,6 +265,7 @@ class DataBase {
 							name: name.toUpperCase(),
 							schoolName,
 						});
+						await School.updateOne({ classes: { $addToSet: newClass._id } });
 						await newClass.save();
 						return newClass;
 					} else {
