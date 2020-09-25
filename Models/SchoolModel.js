@@ -1,4 +1,6 @@
 // @ts-nocheck
+const { isURL } = require('./utils');
+
 const mongoose = require('mongoose');
 
 const attachment = mongoose.Schema({
