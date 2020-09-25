@@ -141,30 +141,38 @@ class DataBase {
 
 	async getAllContributors(schoolName) {
 		try {
-			const contributors = await _Student.find(
-				!schoolName
-					? {
-							role: Roles.contributor,
-					  }
-					: {
-							role: Roles.contributor,
-							schoolName,
-					  },
-			);
-			if (contributors) {
-				return contributors;
+			let classes;
+			if (schoolName) {
+				classes = await this.getClassesForSchool(schoolName);
 			} else {
-				return [];
+				classes = await this.getAllClasses();
 			}
+
+			return Promise.all(
+				classes
+					.reduce((acc, c) => acc.concat(c.students), [])
+					.filter(({ role }) => Roles.contributor === role)
+					.map((studentId) => this.getStudentBy_Id(studentId)),
+			);
 		} catch (e) {
-			console.log(e);
-			return [];
+			console.error(e);
 		}
 	} //Возвращает список всех редакторов
 
 	async getAllStudents(schoolName) {
 		try {
-			return (await _Student.find(!schoolName ? {} : { schoolName })) || [];
+			let classes;
+			if (schoolName) {
+				classes = await this.getClassesForSchool(schoolName);
+			} else {
+				classes = await this.getAllClasses();
+			}
+
+			return Promise.all(
+				classes
+					.reduce((acc, c) => acc.concat(c.students), [])
+					.map((studentId) => this.getStudentBy_Id(studentId)),
+			);
 		} catch (e) {
 			console.error(e);
 		}
@@ -1082,6 +1090,8 @@ class DataBase {
 					return await document.populate('students').execPopulate();
 				} else if (document.class) {
 					return await document.populate('class').execPopulate();
+				} else if (document.classes) {
+					return await document.populate('classes').execPopulate();
 				} else {
 					return document;
 				}
