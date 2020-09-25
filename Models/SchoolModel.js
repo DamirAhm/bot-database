@@ -37,6 +37,10 @@ const schoolSchema = mongoose.Schema({
 	},
 	name: {
 		type: String,
+		valudate: {
+			validator: (str) => /.*:.*/.test(str),
+			message: 'School name must fit format',
+		},
 		required: true,
 		unique: true,
 	},
