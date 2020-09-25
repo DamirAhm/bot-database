@@ -131,7 +131,7 @@ const classSchema = mongoose.Schema({
 		},
 	},
 	schoolName: {
-		type: string,
+		type: String,
 		ref: 'Student',
 		required: true,
 	},
