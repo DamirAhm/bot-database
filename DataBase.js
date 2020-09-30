@@ -230,6 +230,27 @@ class DataBase {
 			console.error(e);
 		}
 	}
+	async getStudentsForSchool(schoolName) {
+		try {
+			const Classes = await this.getClassesForSchool(schoolName);
+
+			if (Classes) {
+				const PopulatedClassesPromises = Classes.map((Class) => this.populate(Class));
+
+				const schoolStudents = [];
+
+				for await (const { students: classStudents } of PopulatedClassesPromises) {
+					schoolStudents.push(...classStudents);
+				}
+
+				return schoolStudents;
+			}
+
+			return [];
+		} catch (e) {
+			console.error(e);
+		}
+	}
 
 	//! Creators
 	async createStudent(
