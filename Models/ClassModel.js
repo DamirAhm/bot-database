@@ -50,7 +50,6 @@ const classSchema = mongoose.Schema({
 			message: 'Class name must match digit + letter',
 		},
 		required: true,
-		unique: true,
 	},
 	homework: {
 		type: [

@@ -1010,7 +1010,7 @@ class DataBase {
 					const Student = await this.getStudentByVkId(vkId);
 					if (Class && Student) {
 						await Class.updateOne({
-							students: [...Class.students, Student._id],
+							students: { $push: Student._id },
 						});
 						await Student.updateOne({
 							class: Class._id,
