@@ -251,6 +251,16 @@ class DataBase {
 			console.error(e);
 		}
 	}
+	async getSchoolsForCity(cityName) {
+		try {
+			const Schools = await _School.find({
+				name: { $regex: new RegExp(`^${cityName}:`) },
+			});
+			return Schools || [];
+		} catch (e) {
+			console.error(e);
+		}
+	}
 
 	//! Creators
 	async createStudent(
