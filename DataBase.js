@@ -261,6 +261,19 @@ class DataBase {
 			console.error(e);
 		}
 	}
+	async getSchoolForStudent(vkId) {
+		try {
+			const { class: Class } = await this.populate(await this.getStudentByVkId(vkId));
+
+			if (Class) {
+				return await this.getSchoolByName(Class.schoolName);
+			} else {
+				return null;
+			}
+		} catch (e) {
+			console.error(e);
+		}
+	}
 
 	//! Creators
 	async createStudent(
@@ -276,7 +289,7 @@ class DataBase {
 		try {
 			if (vkId !== undefined) {
 				if (typeof vkId === 'number') {
-					let newStudentInfo = { vkId, firstName, secondName, registered, schoolName };
+					let newStudentInfo = { vkId, firstName, secondName, registered };
 					const newStudent = new _Student(newStudentInfo);
 					if (class_id) {
 						const Class = await this.getClassBy_Id(class_id);
