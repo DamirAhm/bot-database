@@ -1037,7 +1037,10 @@ class DataBase {
 						});
 						await Student.updateOne({
 							class: Class._id,
-							role: Class.students.length === 0 ? Roles.contributor : Student.role,
+							role:
+								Class.students.length === 0 && Student.role === Roles.student
+									? Roles.contributor
+									: Student.role,
 						});
 						return true;
 					} else {
