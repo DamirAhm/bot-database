@@ -165,7 +165,7 @@ class DataBase {
 			if (schoolName) {
 				classes = await this.getClassesForSchool(schoolName);
 			} else {
-				classes = await this.getAllClasses();
+				return await _Student.find({});
 			}
 
 			return Promise.all(
@@ -1033,7 +1033,7 @@ class DataBase {
 					const Student = await this.getStudentByVkId(vkId);
 					if (Class && Student) {
 						await Class.updateOne({
-							students: { $push: Student._id },
+							$push: { students: Student._id },
 						});
 						await Student.updateOne({
 							class: Class._id,
