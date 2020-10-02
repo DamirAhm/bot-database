@@ -331,7 +331,7 @@ class DataBase {
 							name: name.toUpperCase(),
 							schoolName,
 						});
-						await School.updateOne({ classes: { $addToSet: newClass._id } });
+						await School.updateOne({ $addToSet: { classes: newClass._id } });
 						await newClass.save();
 						return newClass;
 					} else {
@@ -1033,7 +1033,7 @@ class DataBase {
 					const Student = await this.getStudentByVkId(vkId);
 					if (Class && Student) {
 						await Class.updateOne({
-							$push: { students: Student._id },
+							$addToSet: { students: Student._id },
 						});
 						await Student.updateOne({
 							class: Class._id,
