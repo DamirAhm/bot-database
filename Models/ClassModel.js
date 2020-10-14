@@ -41,8 +41,8 @@ const classSchema = mongoose.Schema({
 		type: String,
 		validate: {
 			validator: (name) => {
-				if (/(^\d{2})([A-Z]|[А-Я])/i.test(name)) {
-					const [_, digit, letter] = name.match(/(^\d{2})([A-Z]|[А-Я])/i);
+				if (/^\d{1,2}[a-zа-я]+$/i.test(name)) {
+					const [_, digit] = name.match(/^(\d{1,2})([a-zа-я]+)$/i);
 					return +digit > 0 && +digit <= 11 && Number.isInteger(+digit);
 				}
 				return false;
