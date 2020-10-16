@@ -1,9 +1,8 @@
-// @ts-nocheck
 const { isURL } = require('./utils');
 
 const mongoose = require('mongoose');
 
-const attachment = mongoose.Schema({
+const attachment = new mongoose.Schema({
 	value: {
 		type: String,
 		validate: {
@@ -25,7 +24,7 @@ const attachment = mongoose.Schema({
 	},
 });
 
-const schoolSchema = mongoose.Schema({
+const schoolSchema = new mongoose.Schema({
 	classes: {
 		type: [
 			{
@@ -65,6 +64,13 @@ const schoolSchema = mongoose.Schema({
 		],
 		default: [],
 	},
+});
+
+schoolSchema.virtual('city', {}).get(function () {
+	return this.name.split(':')[0];
+});
+schoolSchema.virtual('number').get(function () {
+	return this.name.split(':')[1];
 });
 
 module.exports = mongoose.model('School', schoolSchema);

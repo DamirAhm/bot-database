@@ -54,13 +54,32 @@ const studentSchema = mongoose.Schema({
 			message: 'Last check of homework time can`t be in the future',
 		},
 	},
-	firstName: String,
-	secondName: String,
-	fullName: String,
+	fullName: {
+		type: String,
+		required: true,
+	},
 	registered: {
 		type: Boolean,
 		default: false,
 	},
 });
+
+studentSchema
+	.virtual('firstName')
+	.get(function () {
+		return this.fullName.split(' ')[0];
+	})
+	.set(function (value) {
+		this.fullName = this.fullName.replace(/^\w*/, value.toString());
+	});
+
+studentSchema
+	.virtual('secondName')
+	.get(function () {
+		return this.fullName.split(' ')[1];
+	})
+	.set(function (value) {
+		this.fullName = this.fullName.replace(/\w*$/, value.toString());
+	});
 
 module.exports = mongoose.model('Student', studentSchema);
