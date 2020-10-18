@@ -10,9 +10,7 @@ const attachment = mongoose.Schema({
 		type: String,
 		validate: {
 			validator: (str) =>
-				/^(photo|doc|video|audio|link|market|market_album|wall|wall_reply|sticker|gift)[0-9]+(_[0-9]+)(_[a-z0-9])?/i.test(
-					str,
-				),
+				/^(photo|doc|video|audio|link)[0-9]+(_[0-9]+)(_[a-z0-9])?/i.test(str),
 			message: 'url must be a valid vk attachment',
 		},
 		required: true,
