@@ -124,9 +124,9 @@ class VK_API {
 		}
 	}
 
-	async getUploadServerUrl(type, arguments) {
+	async getUploadServerUrl(type, props) {
 		try {
-			return await this.api(`${type}.getUploadServer`, arguments).then((res) => {
+			return await this.api(`${type}.getUploadServer`, props).then((res) => {
 				return res.upload_url;
 			});
 		} catch (e) {
