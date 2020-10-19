@@ -1,4 +1,3 @@
-// @ts-nocheck
 const { createVkApi } = require('./apiCreator');
 const fetch = require('node-fetch');
 const config = require('../config.json');
@@ -63,9 +62,9 @@ class VK_API {
 					hash,
 					server,
 					photos_list,
-				} = await this.uploadPhotoToServer(formData, url);
+				} = await this.uploadFileToServer(formData, url);
 
-				const res = this.savePhoto('photos', {
+				const res = this.saveFile('photos', {
 					album_id,
 					group_id,
 					hash,
