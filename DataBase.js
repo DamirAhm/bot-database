@@ -43,7 +43,7 @@ const getPureDate = (date) => {
 	} else {
 		throw new Error('Ожидалась дата, дано: ' + JSON.stringify(date));
 	}
-}
+};
 
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
@@ -617,7 +617,9 @@ class DataBase {
 					const { homework } = Class;
 
 					const actualHomework = homework.filter(
-						({ to }) => getPureDate(maxDate.getTime()).getTime() - getPureDate(to).getTime() >= 0,
+						({ to }) =>
+							getPureDate(maxDate.getTime()).getTime() - getPureDate(to).getTime() >=
+							0,
 					);
 
 					await Class.updateOne({ homework: actualHomework });
@@ -902,7 +904,7 @@ class DataBase {
 		}
 	}
 
-	async removeOldAnnouncements({ className, schoolName }) {
+	async removeOldAnnouncements({ className, schoolName }, maxDate = new Date()) {
 		try {
 			if (className && typeof className === 'string') {
 				const Class = await this.getClassByName(className, schoolName);
@@ -911,7 +913,7 @@ class DataBase {
 					const { announcements } = Class;
 
 					const actualAnnouncements = announcements.filter(
-						({ to }) => Date.now() - +to <= 24 * 60 * 60 * 1000,
+						({ to }) => getPureDate(maxDate).getTime() - getPureDate(to).getTime() >= 0,
 					);
 
 					await Class.updateOne({ announcements: actualAnnouncements });
