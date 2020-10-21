@@ -617,7 +617,7 @@ class DataBase {
 					const { homework } = Class;
 
 					const actualHomework = homework.filter(
-						({ to }) => getPureDate(maxDate).getTime() - getPureDate(to).getTime() >= 0,
+						({ to }) => getPureDate(maxDate).getTime() - getPureDate(to).getTime() <= 0,
 					);
 
 					await Class.updateOne({ homework: actualHomework });
@@ -911,7 +911,7 @@ class DataBase {
 					const { announcements } = Class;
 
 					const actualAnnouncements = announcements.filter(
-						({ to }) => getPureDate(maxDate).getTime() - getPureDate(to).getTime() >= 0,
+						({ to }) => getPureDate(maxDate).getTime() - getPureDate(to).getTime() <= 0,
 					);
 
 					await Class.updateOne({ announcements: actualAnnouncements });
