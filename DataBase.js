@@ -33,6 +33,18 @@ const isPartialOf = (object, instance) => {
 	}
 };
 
+const getPureDate = (date) => {
+	if (date && date instanceof Date) {
+		const year = date.getFullYear();
+		const month = date.getMonth();
+		const day = date.getDate();
+
+		return new Date(year, month, day);
+	} else {
+		throw new Error('Ожидалась дата, дано: ' + JSON.stringify(date));
+	}
+}
+
 //TODO Replace returns of false and null to errors or error codes
 class DataBase {
 	constructor(uri) {
@@ -596,7 +608,7 @@ class DataBase {
 			console.error(e);
 		}
 	}
-	async removeOldHomework({ className, schoolName }) {
+	async removeOldHomework({ className, schoolName }, maxDate = new Date()) {
 		try {
 			if (className && typeof className === 'string') {
 				const Class = await this.getClassByName(className, schoolName);
@@ -605,7 +617,7 @@ class DataBase {
 					const { homework } = Class;
 
 					const actualHomework = homework.filter(
-						({ to }) => Date.now() - +to <= 24 * 60 * 60 * 1000,
+						({ to }) => getPureDate(maxDate.getTime()).getTime() - getPureDate(to).getTime() >= 0,
 					);
 
 					await Class.updateOne({ homework: actualHomework });
