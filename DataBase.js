@@ -11,7 +11,6 @@ const {
 	dayInMilliseconds,
 } = require('./utils/functions');
 const mongoose = require('mongoose');
-const config = require('./config.json');
 const isObjectId = mongoose.Types.ObjectId.isValid;
 
 const isPartialOf = (object, instance) => {
@@ -650,7 +649,7 @@ class DataBase {
 				const notifiedStudentIds = findNotifiedStudents(
 					populatedClass.students,
 					currentDateForTest || new Date(),
-					config['REMIND_AFTER'],
+					24 * 60 * 60 * 1000,
 				).map(({ vkId }) => vkId);
 				const homework = populatedClass.homework.filter(({ to }) => checkIsToday(to, date));
 				notificationArray.push([notifiedStudentIds, homework]);

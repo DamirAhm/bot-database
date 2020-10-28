@@ -1,9 +1,6 @@
 const { createVkApi } = require('./apiCreator');
 const fetch = require('node-fetch');
-const config = require('../config.json');
 const FormData = require('form-data');
-const path = require('path');
-const fs = require('fs');
 
 class VK_API {
 	apiKey;
@@ -47,8 +44,8 @@ class VK_API {
 	async uploadPhotoToAlbum(fileReadStream) {
 		try {
 			const url = await this.getUploadServerUrl('photos', {
-				group_id: config['GROUP_ID'],
-				album_id: config['ALBUM_ID'],
+				group_id: this.groupId,
+				album_id: this.albumId,
 			});
 
 			if (url !== undefined) {
@@ -84,7 +81,7 @@ class VK_API {
 	async uploadDoc(fileReadStream, title) {
 		try {
 			const url = await this.getUploadServerUrl('docs', {
-				group_id: config['GROUP_ID'],
+				group_id: this.groupId,
 			});
 
 			if (url !== undefined) {
@@ -107,6 +104,7 @@ class VK_API {
 
 	async uploadFileToServer(formData, url) {
 		try {
+			// @ts-ignore
 			const response = await fetch(url, {
 				method: 'POST',
 				body: formData,
