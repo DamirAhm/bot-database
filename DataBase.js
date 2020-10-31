@@ -636,6 +636,49 @@ class DataBase {
 			throw e;
 		}
 	}
+	async togglePinHomework({ className, schoolName }, homeworkId) {
+		try {
+			const Class = await this.getClassByName(className, schoolName);
+
+			if (Class) {
+				const homework = await Class.homework.find(
+					({ _id }) => _id.toString() === homeworkId.toString(),
+				);
+
+				if (homework) {
+					homework.pinned = !homework.pinned;
+					await Class.save();
+
+					return true;
+				}
+			}
+
+			return false;
+		} catch (e) {
+			console.error(e);
+			if (e instanceof TypeError) throw e;
+
+			return false;
+		}
+	}
+	async unpinAllHomework({ className, schoolName }) {
+		try {
+			const Class = await this.getClassByName(className, schoolName);
+
+			if (Class) {
+				await Class.updateOne({ $set: { 'homework.$[].pinned': false } });
+
+				return true;
+			}
+
+			return false;
+		} catch (e) {
+			console.error(e);
+			if (e instanceof TypeError) throw e;
+
+			return false;
+		}
+	}
 
 	//TODO refactor returning data from array to object
 	async parseHomeworkToNotifications(currentDateForTest) {
@@ -928,6 +971,50 @@ class DataBase {
 				return [];
 			}
 			throw e;
+		}
+	}
+
+	async togglePinAnnouncement({ className, schoolName }, announcementId) {
+		try {
+			const Class = await this.getClassByName(className, schoolName);
+
+			if (Class) {
+				const announcement = await Class.announcements.find(
+					({ _id }) => _id === announcementId,
+				);
+
+				if (announcement) {
+					announcement.pinned = !announcement.pinned;
+					await Class.save();
+
+					return true;
+				}
+			}
+
+			return false;
+		} catch (e) {
+			console.error(e);
+			if (e instanceof TypeError) throw e;
+
+			return false;
+		}
+	}
+	async unpinAllAnnouncements({ className, schoolName }) {
+		try {
+			const Class = await this.getClassByName(className, schoolName);
+
+			if (Class) {
+				await Class.updateOne({ $set: { 'announcements.$[].pinned': false } });
+
+				return true;
+			}
+
+			return false;
+		} catch (e) {
+			console.error(e);
+			if (e instanceof TypeError) throw e;
+
+			return false;
 		}
 	}
 

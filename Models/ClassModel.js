@@ -10,7 +10,7 @@ const attachment = mongoose.Schema({
 		type: String,
 		validate: {
 			validator: (str) =>
-				/^(photo|doc|video|audio|link)[0-9]+(_[0-9]+)(_[a-z0-9])?/i.test(str),
+				/^(photo|doc|video|audio|link)-?[0-9]+(_[0-9]+)(_[a-z0-9])?/i.test(str),
 			message: 'url must be a valid vk attachment',
 		},
 		required: true,
@@ -63,21 +63,25 @@ const classSchema = mongoose.Schema({
 						message: 'Lesson must be one of existing',
 					},
 				},
-				text: {
-					required: true,
-					type: String,
-				},
+				text: String,
 				to: {
 					type: Date,
 					default: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
 				},
-				attachments: [attachment],
+				attachments: {
+					type: [attachment],
+					default: [],
+				},
 				createdBy: {
 					type: Number,
 					validate: {
 						validator: Number.isInteger,
 						message: 'Created by must be integer means vk id of user created it',
 					},
+				},
+				pinned: {
+					type: Boolean,
+					default: false,
 				},
 				_id: {
 					type: mongoose.Schema.ObjectId,
@@ -105,7 +109,10 @@ const classSchema = mongoose.Schema({
 		type: [
 			{
 				text: String,
-				attachments: [attachment],
+				attachments: {
+					type: [attachment],
+					default: [],
+				},
 				to: Date,
 				createdBy: {
 					type: Number,
@@ -113,6 +120,10 @@ const classSchema = mongoose.Schema({
 						validator: Number.isInteger,
 						message: 'Created by must be integer means vk id of user created it',
 					},
+				},
+				pinned: {
+					type: Boolean,
+					default: false,
 				},
 				_id: {
 					type: mongoose.Schema.Types.ObjectId,
