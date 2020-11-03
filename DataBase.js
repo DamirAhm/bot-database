@@ -402,19 +402,8 @@ class DataBase {
 									}
 								}
 								if (expirationDate) {
-									const date = new Date();
-
 									if (
-										this.validateDate(
-											expirationDate,
-											undefined,
-											new Date(
-												date.getFullYear(),
-												date.getMonth(),
-												date.getDate(),
-											),
-											24 * 60 * 60 * 1000,
-										)
+										this.validateDate(expirationDate, undefined, getTodayDate())
 									) {
 										newHomework.to = expirationDate;
 										await Class.updateOne({
@@ -803,7 +792,7 @@ class DataBase {
 		try {
 			if (className !== undefined && typeof className === 'string') {
 				if (this.validateContent(content).length === 0) {
-					if (this.validateDate(toDate)) {
+					if (this.validateDate(toDate, undefined, getTodayDate())) {
 						const Class = await this.getClassByName(className, schoolName);
 						if (Class) {
 							let parsedContent = {
@@ -1297,30 +1286,30 @@ class DataBase {
 			);
 		}
 	} //
-	validateDate(
-		date,
-		maxDate,
-		minDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-		d = 0,
-	) {
-		let flag = undefined;
+	validateDate(date, maxDate, minDate = getTodayDate()) {
+		try {
+			let flag = undefined;
 
-		if (date instanceof Date) {
-			if (maxDate && maxDate instanceof Date) {
-				flag = undefined ?? maxDate.getTime() - date.getTime() >= d;
+			if (date instanceof Date) {
+				if (maxDate && maxDate instanceof Date) {
+					flag = maxDate.getTime() - date.getTime() >= 0;
+				}
+				if (minDate && minDate instanceof Date) {
+					flag = date.getTime() - minDate.getTime() >= 0;
+				}
+				return flag ?? true;
+			} else if (typeof date === 'string') {
+				if (Date.parse(date)) {
+					return this.validateDate(new Date(Date.parse(date)), maxDate, minDate);
+				}
+				return false;
+			} else if (typeof date === 'number') {
+				return this.validateDate(new Date(date), maxDate, minDate);
+			} else {
+				return false;
 			}
-			if (minDate && minDate instanceof Date) {
-				flag = undefined ?? date.getTime() - minDate.getTime() >= d;
-			}
-			return flag ?? true;
-		} else if (typeof date === 'string') {
-			if (Date.parse(date)) {
-				return this.validateDate(new Date(Date.parse(date)), maxDate, minDate);
-			}
-			return false;
-		} else if (typeof date === 'number') {
-			return this.validateDate(new Date(date), maxDate, minDate);
-		} else {
+		} catch (e) {
+			console.log(e);
 			return false;
 		}
 	}
@@ -1331,3 +1320,7 @@ class DataBase {
 }
 
 module.exports.DataBase = DataBase;
+function getTodayDate() {
+	const date = new Date();
+	return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
