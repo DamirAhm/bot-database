@@ -64,13 +64,20 @@ const studentSchema = mongoose.Schema({
 	},
 });
 
+const fullNameRegExp = /^\w*\s\w*$/;
+const isValidFullName = (str) => fullNameRegExp.test(str);
+
 studentSchema
 	.virtual('firstName')
 	.get(function () {
 		return this.fullName.split(' ')[0];
 	})
 	.set(function (value) {
-		this.fullName = (this.fullName ?? '').replace(/^\w*/, value.toString());
+		if (isValidFullName) {
+			this.fullName = (this.fullName ?? '').replace(/^\w*/, value.toString());
+		} else {
+			this.fullName = value;
+		}
 	});
 
 studentSchema
@@ -79,7 +86,11 @@ studentSchema
 		return this.fullName.split(' ')[1];
 	})
 	.set(function (value) {
-		this.fullName = (this.fullName ?? '').replace(/\w*$/, value.toString());
+		if (isValidFullName(value)) {
+			this.fullName = (this.fullName ?? '').replace(/\w*$/, value.toString());
+		} else {
+			this.fullName += ` ${value}`;
+		}
 	});
 
 module.exports = mongoose.model('Student', studentSchema);
