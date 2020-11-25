@@ -1,9 +1,9 @@
 // @ts-nocheck
 const mongoose = require('mongoose');
 const uuid4 = require('uuid4');
-const { Lessons, isURL } = require('./utils');
+const { isURL } = require('./utils');
 
-const isLesson = (str) => Lessons.includes(str);
+const isLesson = (str) => /^[a-zа-я0-9]*$/i.test(str);
 
 const attachment = mongoose.Schema({
 	value: {
@@ -98,7 +98,7 @@ const classSchema = mongoose.Schema({
 					type: String,
 					validate: {
 						validator: isLesson,
-						message: 'Lesson must be one of existing',
+						message: 'Lesson must be a set of letters',
 					},
 				},
 			],
