@@ -24,10 +24,10 @@ const schoolSchema = new mongoose.Schema({
 });
 
 schoolSchema.virtual('city', {}).get(function () {
-	return this.name.split(':')[0];
+	return (this.name ?? '').split(':')[0];
 });
 schoolSchema.virtual('number').get(function () {
-	return this.name.split(':')[1];
+	return (this.name ?? '').split(':')[1];
 });
 
 module.exports = mongoose.model('School', schoolSchema);
