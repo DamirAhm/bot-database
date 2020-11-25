@@ -70,7 +70,7 @@ studentSchema
 		return this.fullName.split(' ')[0];
 	})
 	.set(function (value) {
-		this.fullName = this.fullName.replace(/^\w*/, value.toString());
+		this.fullName = (this.fullName ?? '').replace(/^\w*/, value.toString());
 	});
 
 studentSchema
@@ -79,7 +79,7 @@ studentSchema
 		return this.fullName.split(' ')[1];
 	})
 	.set(function (value) {
-		this.fullName = this.fullName.replace(/\w*$/, value.toString());
+		this.fullName = (this.fullName ?? '').replace(/\w*$/, value.toString());
 	});
 
 module.exports = mongoose.model('Student', studentSchema);
