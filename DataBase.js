@@ -691,15 +691,11 @@ class DataBase {
 	} //
 
 	//* Schedule
-	async setSchedule({ className, schoolName }, lessonsIndexesByDays, lessonList = Lessons) {
+	async setSchedule({ className, schoolName }, newSchedule) {
 		try {
 			if (className && typeof className === 'string') {
 				const Class = await this.getClassByName(className, schoolName);
 				if (Class) {
-					const newSchedule = lessonsIndexesToLessonsNames(
-						lessonList,
-						lessonsIndexesByDays,
-					);
 					await Class.updateOne({ schedule: newSchedule });
 					return true;
 				} else {
@@ -713,7 +709,7 @@ class DataBase {
 			console.log(e);
 			return false;
 		}
-	} //Устонавливает расписание (1: список предметов, 2: имя класса, 3: массив массивов индексов уроков где индекс соответствует уроку в массиве(1) по дням недели)
+	}
 
 	async changeDay({ className, schoolName }, dayIndex, newDay) {
 		try {
@@ -727,9 +723,7 @@ class DataBase {
 					if (
 						newDay &&
 						Array.isArray(newDay) &&
-						newDay.every(
-							(lesson) => typeof lesson === 'string' && Lessons.includes(lesson),
-						)
+						newDay.every((lesson) => typeof lesson === 'string')
 					) {
 						const Class = await this.getClassByName(className, schoolName);
 						if (Class) {
@@ -742,7 +736,7 @@ class DataBase {
 						}
 					} else {
 						throw new TypeError(
-							'new day must be array of lessons, but your day includes ' +
+							'new day must be array of strings, but your day includes ' +
 								newDay.filter((l) => !Lessons.includes(l)).join(','),
 						);
 					}
