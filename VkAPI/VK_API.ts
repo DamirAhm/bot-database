@@ -1,18 +1,78 @@
-const { createVkApi } = require('./apiCreator');
-const fetch = require('node-fetch');
-const FormData = require('form-data');
+import { createVkApi } from './apiCreator';
+import fetch from 'node-fetch';
+//@ts-ignore
+import FormData from 'form-data';
+import fs from "fs";
 
-class VK_API {
-	apiKey;
-	api;
-	constructor(key, groupId, albumId) {
+export interface getVkPhotoResponse {
+	items: IVKPhoto[]
+}
+export interface getUploadServerUrlResponse {
+	upload_url: string
+}
+
+function isPhotoResponse(response: unknown): response is getVkPhotoResponse {
+	if (typeof response === "object" && response != undefined) {
+		if ("items" in response) {
+			return true;
+		}
+	}
+
+	return false;
+}
+function isUploadServerUrlResponse(response: unknown): response is getUploadServerUrlResponse {
+	if (typeof response === "object" && response != undefined) {
+		if ("upload_url" in response) {
+			return true;
+		}
+	}
+
+	return false;
+}
+export interface IVKPhoto {
+	id: number
+	alubm_id: number
+	owner_id: number
+	user_id: number
+	text: string
+	date: number
+	sizes: IVKPhotoSize[]
+	width?: number
+	height?: number
+}
+export interface IVKPhotoSize {
+	type: SizeType
+	url: string
+	width: number
+	height: number
+}
+enum SizeType {
+	s,
+	m,
+	x,
+	o,
+	p,
+	q,
+	r,
+	y,
+	z,
+	w,
+}
+
+export default class VK_API {
+	apiKey: string;
+	groupId: number;
+	albumId: number;
+	api: ReturnType<typeof createVkApi>;
+
+	constructor(key: string, groupId: number, albumId: number) {
 		this.apiKey = key;
 		this.groupId = groupId;
 		this.albumId = albumId;
 		this.api = createVkApi(key);
 	}
 
-	async getPhotoUrl(attachment, album_id) {
+	async getPhotoUrl(attachment: string, album_id: number) {
 		try {
 			if (attachment) {
 				let url;
@@ -22,7 +82,13 @@ class VK_API {
 						owner_id,
 						photo_ids,
 						album_id: album_id,
-					}).then((photo) => photo.items[0].sizes[5].url);
+					}).then((photo: unknown) => {
+						if (isPhotoResponse(photo)) {
+							return photo.items[0].sizes[5].url
+						} else {
+							return "";
+						}
+					});
 				}
 
 				return url;
@@ -33,7 +99,7 @@ class VK_API {
 			console.error(e);
 		}
 	}
-	async getUser(userId) {
+	async getUser(userId: string) {
 		try {
 			return await this.api('users.get', { user_ids: userId });
 		} catch (e) {
@@ -41,7 +107,7 @@ class VK_API {
 		}
 	}
 
-	async uploadPhotoToAlbum(fileReadStream) {
+	async uploadPhotoToAlbum(fileReadStream: fs.ReadStream) {
 		try {
 			const url = await this.getUploadServerUrl('photos', {
 				group_id: this.groupId,
@@ -78,7 +144,7 @@ class VK_API {
 		}
 	}
 
-	async uploadDoc(fileReadStream, title) {
+	async uploadDoc(fileReadStream: fs.ReadStream, title: string) {
 		try {
 			const url = await this.getUploadServerUrl('docs', {
 				group_id: this.groupId,
@@ -102,7 +168,7 @@ class VK_API {
 		}
 	}
 
-	async uploadFileToServer(formData, url) {
+	async uploadFileToServer(formData: FormData, url: string) {
 		try {
 			// @ts-ignore
 			const response = await fetch(url, {
@@ -121,17 +187,19 @@ class VK_API {
 		}
 	}
 
-	async getUploadServerUrl(type, props) {
+	async getUploadServerUrl(type: string, props: { [key: string]: string | number }) {
 		try {
-			return await this.api(`${type}.getUploadServer`, props).then((res) => {
-				return res.upload_url;
+			return await this.api(`${type}.getUploadServer`, props).then((res: unknown) => {
+				if (isUploadServerUrlResponse(res)) {
+					return res.upload_url;
+				}
 			});
 		} catch (e) {
 			console.error(e);
 		}
 	}
 
-	async saveFile(type, uploadedFileObject) {
+	async saveFile(type: string, uploadedFileObject: { [key: string]: string | number }) {
 		try {
 			return await this.api(`${type}.save`, uploadedFileObject);
 		} catch (e) {
@@ -139,5 +207,3 @@ class VK_API {
 		}
 	}
 }
-
-module.exports = VK_API;

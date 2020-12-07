@@ -1,7 +1,6 @@
 # DataBase module for my bot project
 
 ## Installation
-
 ```sh
 $ npm i bot-database
 ```
@@ -11,4 +10,4 @@ $ npm i bot-database
 const { DataBase } from "bot-database";
 ```
 
-Use for your pleasure
+Use for your pleasure 😜
