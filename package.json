@@ -2,18 +2,29 @@
   "name": "bot-database",
   "version": "2.0.35",
   "description": "",
-  "main": "index.js",
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@types/jest": "^25.2.1",
-    "@types/node-fetch": "^2.5.7",
-    "jest": "^25.3.0",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "DamirAhm",
+  "license": "MIT",
+  "type": "module",
+  "peerDependencies": {
     "mongoose": "^5.9.9",
     "node-fetch": "^2.6.0",
     "uuid4": "^1.1.4"
   },
   "scripts": {
-    "test": "echo all works 😊"
+    "test": "echo all works 😊",
+    "declarations": "ttsc --emitDeclarationOnly",
+    "build": "tsc --build tsconfig.json && npm run declarations"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.7",
+    "@types/qs": "^6.9.5",
+    "@types/uuid": "^8.3.0",
+    "mongoose": "^5.9.9",
+    "node-fetch": "^2.6.0",
+    "ttypescript": "^1.5.12",
+    "typescript-transform-paths": "^2.1.0",
+    "uuid4": "^1.1.4"
   }
 }
