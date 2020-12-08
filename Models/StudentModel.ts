@@ -1,3 +1,4 @@
+import { IStudent, StudentDocument } from "bot-database";
 import mongoose from 'mongoose';
 import { Roles, checkValidTime } from './utils';
 

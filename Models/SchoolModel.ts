@@ -1,3 +1,4 @@
+import { ISchool, SchoolDocument } from "bot-database";
 import mongoose from 'mongoose';
 
 export const schoolSchema = new mongoose.Schema<ISchool>({

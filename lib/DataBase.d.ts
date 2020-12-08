@@ -1,5 +1,6 @@
 import { Roles } from "./Models/utils";
 import mongoose from 'mongoose';
+import { ClassDocument, IAnnouncement, IAttachment, IClassData, IContent, ICreateStudentParams, IHomework, ISettings, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from "bot-database";
 declare type ObjectId = mongoose.Types.ObjectId;
 export declare class DataBase {
     uri: string;

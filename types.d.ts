@@ -1,7 +1,7 @@
-import { Roles } from "Models/utils";
-import mongoose from 'mongoose';
+declare module "bot-database" {
+    import { Roles } from "Models/utils";
+    import mongoose from 'mongoose';
 
-declare global {
     export interface PopulatedClass extends Omit<ClassDocument, 'students'> {
         students: StudentDocument[]
     }

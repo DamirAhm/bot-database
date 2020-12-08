@@ -1,3 +1,4 @@
+import { IStudent, IContent, IHomework } from "bot-database";
 import mongoose from 'mongoose';
 export declare const dayInMilliseconds: number;
 export declare const findNextDayWithLesson: (schedule: string[][], lesson: string, currentWeekDay: number) => number;

@@ -10,6 +10,7 @@ import {
 	dayInMilliseconds,
 } from './utils/functions';
 import mongoose from 'mongoose';
+import { ClassDocument, IAnnouncement, IAttachment, IClassData, IContent, ICreateStudentParams, IHomework, ISettings, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from "bot-database";
 const isObjectId = mongoose.Types.ObjectId.isValid;
 
 const getPureDate = (date: Date) => {

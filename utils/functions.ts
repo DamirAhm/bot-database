@@ -1,3 +1,4 @@
+import { IStudent, IContent, IHomework } from "bot-database";
 import mongoose from 'mongoose';
 
 export const dayInMilliseconds = 24 * 60 * 60 * 1000;
