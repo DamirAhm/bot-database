@@ -25,8 +25,8 @@
         "lib/*"
       ]
     },
-    "typeRoots": [
-      "./*"
+    "types": [
+      "./"
     ],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
