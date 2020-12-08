@@ -1,6 +1,4 @@
-import * as mongoose from 'mongoose';
-import { IContent, IHomework } from "../Models/ClassModel";
-import { IStudent, StudentDocument } from "../Models/StudentModel";
+import mongoose from 'mongoose';
 
 export const dayInMilliseconds = 24 * 60 * 60 * 1000;
 

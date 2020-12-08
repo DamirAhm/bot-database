@@ -6,7 +6,6 @@
   "types": "lib/index.d.ts",
   "author": "DamirAhm",
   "license": "MIT",
-  "type": "module",
   "peerDependencies": {
     "mongoose": "^5.9.9",
     "node-fetch": "^2.6.0",

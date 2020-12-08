@@ -1,0 +1,7 @@
+*.ts
+*.d.ts
+
+/VkAPI
+/utils
+/Models
+/node_modules

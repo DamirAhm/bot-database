@@ -1,19 +1,5 @@
 import { Roles } from "./Models/utils";
-import { ISettings, PopulatedStudent, StudentDocument } from "./Models/StudentModel";
-import { PopulatedSchool, SchoolDocument } from "./Models/SchoolModel";
-import { ClassDocument, IAnnouncement, IAttachment, IContent, IHomework, PopulatedClass } from "./Models/ClassModel";
 import mongoose from 'mongoose';
-export interface ICreateStudentParams {
-    class_id: string | null;
-    firstName?: string;
-    lastName?: string;
-    registered?: boolean;
-    schoolName: string;
-}
-export interface IClassData {
-    classNameOrInstance: string | ClassDocument | PopulatedClass;
-    schoolName: string;
-}
 declare type ObjectId = mongoose.Types.ObjectId;
 export declare class DataBase {
     uri: string;
@@ -38,7 +24,7 @@ export declare class DataBase {
     createStudent(vkId: string, { class_id, firstName, lastName: secondName, registered, }: ICreateStudentParams): Promise<StudentDocument | null>;
     createClass(name: string, schoolName: string): Promise<ClassDocument | null>;
     createSchool(name: string): Promise<SchoolDocument>;
-    addHomework({ classNameOrInstance, schoolName }: IClassData, lesson: string, content: IContent, studentVkId: number, expirationDate?: Date): Promise<mongoose.Types.ObjectId | null | undefined>;
+    addHomework({ classNameOrInstance, schoolName }: IClassData, lesson: string, content: IContent, studentVkId: number, expirationDate?: Date): Promise<mongoose.Types.ObjectId | null>;
     removeHomework({ classNameOrInstance, schoolName }: IClassData, homeworkId: string | ObjectId): Promise<boolean>;
     getHomework({ classNameOrInstance, schoolName }: IClassData, date: Date): Promise<IHomework[]>;
     updateHomework({ classNameOrInstance, schoolName }: IClassData, homeworkId: string, updates: Partial<Omit<IHomework, '_id'>>): Promise<IHomework[] | null>;
@@ -50,7 +36,7 @@ export declare class DataBase {
     setSchedule({ classNameOrInstance, schoolName }: IClassData, newSchedule: string[][]): Promise<boolean>;
     changeDay({ classNameOrInstance, schoolName }: IClassData, dayIndex: number, newLessonsForDay: string[]): Promise<false | string[][]>;
     getSchedule({ classNameOrInstance, schoolName }: IClassData): Promise<string[][]>;
-    addAnnouncement({ classNameOrInstance, schoolName }: IClassData, content: IContent, toDate: Date | undefined, toAll: boolean | undefined, vkId: string): Promise<import("bson").ObjectId | null>;
+    addAnnouncement({ classNameOrInstance, schoolName }: IClassData, content: IContent, toDate: Date | undefined, toAll: boolean | undefined, vkId: number): Promise<mongoose.Types.ObjectId | null>;
     getAnnouncements({ classNameOrInstance, schoolName }: IClassData, date: Date): Promise<IAnnouncement[] | null>;
     removeAnnouncement({ classNameOrInstance, schoolName }: IClassData, announcementId: string | ObjectId): Promise<IAnnouncement[] | null>;
     updateAnnouncement({ classNameOrInstance, schoolName }: IClassData, announcementId: string | ObjectId, updates: Partial<Omit<IAnnouncement, '_id'>>): Promise<IAnnouncement[]>;

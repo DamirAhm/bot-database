@@ -1,40 +1,7 @@
-import * as mongoose from 'mongoose';
-import { StudentDocument } from "./StudentModel";
+import mongoose from 'mongoose';
 import { isURL } from './utils';
 
 const isLesson = (str: string) => /^[a-zа-я0-9]*$/i.test(str);
-
-export interface PopulatedClass extends Omit<ClassDocument, 'students'> {
-	students: StudentDocument[]
-}
-export interface ClassDocument extends IClass, mongoose.Document { };
-export interface IClass {
-	students: mongoose.Types.ObjectId[]
-	name: string
-	homework: IHomework[]
-	announcements: IAnnouncement[]
-	schedule: string[][]
-	schoolName: string
-}
-
-export interface IHomework extends IContent {
-	lesson: string
-}
-export interface IAnnouncement extends IContent { }
-export interface IContent {
-	text: string
-	to: Date
-	attachments: IAttachment[]
-	pinned: boolean
-	_id: mongoose.Types.ObjectId
-	createdBy?: number
-
-}
-export interface IAttachment {
-	value: string
-	url: string
-	album_id: number
-}
 
 const attachment = new mongoose.Schema({
 	value: {

@@ -1,14 +1,7 @@
 import { Roles, Lessons } from './Models/utils';
-import _Student, { ISettings, PopulatedStudent, StudentDocument } from './Models/StudentModel';
-import _School, { PopulatedSchool, SchoolDocument } from './Models/SchoolModel';
-import _Class, {
-	ClassDocument,
-	IAnnouncement,
-	IAttachment,
-	IContent,
-	IHomework,
-	PopulatedClass,
-} from './Models/ClassModel';
+import _Student from './Models/StudentModel';
+import _School from './Models/SchoolModel';
+import _Class from './Models/ClassModel';
 import {
 	findNextDayWithLesson,
 	findNextLessonDate,
@@ -30,18 +23,6 @@ const getPureDate = (date: Date) => {
 		throw new Error('Ожидалась дата, дано: ' + JSON.stringify(date));
 	}
 };
-
-export interface ICreateStudentParams {
-	class_id: string | null;
-	firstName?: string;
-	lastName?: string;
-	registered?: boolean;
-	schoolName: string;
-}
-export interface IClassData {
-	classNameOrInstance: string | ClassDocument | PopulatedClass;
-	schoolName: string;
-}
 
 function isClassPopulated(Document: ClassDocument | PopulatedClass): Document is PopulatedClass {
 	return typeof Document === 'object' && 'vkId' in Document.students[0];
@@ -338,11 +319,13 @@ export class DataBase {
 						text: content.text,
 						attachments: content.attachments,
 					};
-					const newHomework: Partial<IHomework> = {
+					const newHomework: IHomework = {
 						lesson,
-						...parsedContent,
 						_id: new mongoose.Types.ObjectId(),
 						createdBy: studentVkId,
+						to: new Date(),
+						pinned: false,
+						...parsedContent,
 					};
 
 					if (expirationDate) {
@@ -633,7 +616,7 @@ export class DataBase {
 		content: IContent,
 		toDate: Date = new Date(),
 		toAll: boolean = false,
-		vkId: string,
+		vkId: number,
 	) {
 		if (this.validateContent(content).length === 0) {
 			if (this.validateDate(toDate, undefined, getTodayDate())) {
@@ -649,11 +632,12 @@ export class DataBase {
 						text: content.text,
 						attachments: content.attachments,
 					};
-					const newAnnouncement = {
+					const newAnnouncement: IAnnouncement = {
 						to: toDate,
-						...parsedContent,
 						createdBy: vkId,
+						pinned: false,
 						_id: new mongoose.Types.ObjectId(),
+						...parsedContent,
 					};
 
 					if (toAll) {
@@ -969,11 +953,11 @@ export class DataBase {
 		}
 
 		if (PopulatedStudent) {
-			const Class: PopulatedClass = await this.populate(PopulatedStudent.class);
+			const Class: ClassDocument = PopulatedStudent.class;
 			if (!Class) return true;
 			await Class.updateOne({
 				students: Class.students.filter(
-					({ _id }) => _id.toString() !== PopulatedStudent?._id.toString(),
+					(_id) => _id.toString() !== PopulatedStudent?._id.toString(),
 				),
 			});
 			await PopulatedStudent.updateOne({ class: null });

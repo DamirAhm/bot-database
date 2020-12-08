@@ -1,6 +1,4 @@
-import * as mongoose from 'mongoose';
-import { IContent, IHomework } from "../Models/ClassModel";
-import { IStudent } from "../Models/StudentModel";
+import mongoose from 'mongoose';
 export declare const dayInMilliseconds: number;
 export declare const findNextDayWithLesson: (schedule: string[][], lesson: string, currentWeekDay: number) => number;
 export declare const findNextLessonDate: (nextLessonWeekDay: number, { currentDate }?: {
