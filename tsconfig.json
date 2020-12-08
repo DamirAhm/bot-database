@@ -22,7 +22,7 @@
     "sourceMap": true,
     "paths": {
       "@bot-database/*": [
-        "lib/*"
+        "lib/**/*"
       ]
     },
     "types": [
@@ -30,7 +30,7 @@
     ],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "declarationDir": "lib",
+    "declarationDir": "./lib",
     "plugins": [
       {
         "transform": "typescript-transform-paths"
