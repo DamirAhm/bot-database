@@ -10,18 +10,17 @@
   "peerDependencies": {
     "mongoose": "^5.9.9",
     "node-fetch": "^2.6.0",
-    "uuid4": "^1.1.4"
+    "uuid4": "^1.1.4",
+    "@types/node-fetch": "^2.5.7",
+    "@types/qs": "^6.9.5",
+    "@types/uuid": "^8.3.0"
   },
   "scripts": {
     "test": "echo all works 😊",
-    "declarations": "ttsc --emitDeclarationOnly",
-    "build": "tsc && npm run declarations",
+    "build": "tsc",
     "postinstall": "npm run build"
   },
   "devDependencies": {
-    "@types/node-fetch": "^2.5.7",
-    "@types/qs": "^6.9.5",
-    "@types/uuid": "^8.3.0",
     "mongoose": "^5.9.9",
     "node-fetch": "^2.6.0",
     "ttypescript": "^1.5.12",
