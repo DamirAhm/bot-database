@@ -15,12 +15,7 @@
   "scripts": {
     "test": "echo all works 😊",
     "declarations": "ttsc --emitDeclarationOnly",
-<<<<<<< HEAD
-    "build": "tsc --build tsconfig.json && npm run declarations",
-    "postinstall": "tsc --build"
-=======
     "build": "tsc && npm run declarations"
->>>>>>> Fixed typings
   },
   "devDependencies": {
     "@types/node-fetch": "^2.5.7",
