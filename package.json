@@ -15,7 +15,8 @@
   "scripts": {
     "test": "echo all works 😊",
     "declarations": "ttsc --emitDeclarationOnly",
-    "build": "tsc && npm run declarations"
+    "build": "tsc && npm run declarations",
+    "postinstall": "npm run build"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.5.7",
