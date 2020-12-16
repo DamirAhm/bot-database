@@ -16,6 +16,9 @@ import {
 	IAttachment,
 	IClassData,
 	IContent,
+	ICreateAnnouncement,
+	ICreateContent,
+	ICreateHomework,
 	ICreateStudentParams,
 	IHomework,
 	ISettings,
@@ -265,8 +268,8 @@ export class DataBase {
 		vkId: number,
 		{
 			class_id = null,
-			firstName = undefined,
-			lastName: secondName = undefined,
+			firstName = '',
+			lastName: secondName = '',
 			registered = false,
 		}: ICreateStudentParams,
 	) {
@@ -318,7 +321,7 @@ export class DataBase {
 	async addHomework(
 		{ classNameOrInstance, schoolName }: IClassData,
 		lesson: string,
-		content: IContent,
+		content: ICreateHomework,
 		studentVkId: number,
 		expirationDate?: Date,
 	) {
@@ -630,7 +633,7 @@ export class DataBase {
 	//* Announcements
 	async addAnnouncement(
 		{ classNameOrInstance, schoolName }: IClassData,
-		content: IContent,
+		content: ICreateAnnouncement,
 		toDate: Date = new Date(),
 		toAll: boolean = false,
 		vkId: number,
@@ -1052,7 +1055,7 @@ export class DataBase {
 			return document;
 		}
 	} //
-	validateContent(content: IContent) {
+	validateContent(content: ICreateContent) {
 		const errors: string[] = [];
 
 		if (

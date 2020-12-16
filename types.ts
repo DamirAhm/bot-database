@@ -33,6 +33,20 @@ export interface IAttachment {
 	album_id: number;
 }
 
+export interface ICreateContent {
+	text: string;
+	to?: Date;
+	attachments: IAttachment[];
+	pinned?: boolean;
+	_id?: mongoose.Types.ObjectId;
+	createdBy?: number;
+}
+
+export interface ICreateHomework extends ICreateContent {
+	lesson: string;
+}
+export interface ICreateAnnouncement extends ICreateContent {}
+
 export interface PopulatedSchool extends Omit<SchoolDocument, 'classes'> {
 	classes: ClassDocument[];
 }
@@ -61,15 +75,15 @@ export interface IStudent {
 export interface ISettings {
 	notificationTime: string;
 	notificationsEnabled: boolean;
-	daysForNotifications: number[];
+	daysForNotification: number[];
 }
 
 export interface ICreateStudentParams {
-	class_id: string | null;
-	firstName?: string;
-	lastName?: string;
-	registered?: boolean;
-	schoolName: string;
+	class_id?: string | null;
+	firstName: string;
+	lastName: string;
+	registered: boolean;
+	schoolName?: string;
 }
 export interface IClassData {
 	classNameOrInstance: string | ClassDocument | PopulatedClass;
