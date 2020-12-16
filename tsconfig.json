@@ -29,25 +29,9 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "declarationDir": "./lib",
-    "plugins": [
-      {
-        "transform": "typescript-transform-paths"
-      },
-      {
-        "transform": "typescript-transform-paths",
-        "afterDeclarations": true
-      }
-    ]
   },
   "exclude": [
     "lib/*",
     "node_modules/*"
-  ],
-  "include": [
-    "Models",
-    "VkApi",
-    "utils",
-    "DataBase.ts",
-    "index.ts"
   ]
 }
