@@ -1,4 +1,4 @@
-import { ISchool, SchoolDocument } from "bot-database";
+import { ISchool, SchoolDocument } from '../types';
 import mongoose from 'mongoose';
 
 export const schoolSchema = new mongoose.Schema<ISchool>({
@@ -31,4 +31,4 @@ schoolSchema.virtual('number').get(function () {
 	return (this.name ?? '').split(':')[1];
 });
 
-export default mongoose.model<SchoolDocument>("School", schoolSchema);
+export default mongoose.model<SchoolDocument>('School', schoolSchema);

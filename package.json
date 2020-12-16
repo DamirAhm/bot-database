@@ -4,7 +4,7 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "typings": "lib/index.d.ts",
+  "typings": "./lib/index.d.ts",
   "author": "DamirAhm",
   "license": "MIT",
   "peerDependencies": {
@@ -15,7 +15,8 @@
   "scripts": {
     "test": "echo all works 😊",
     "declarations": "ttsc --emitDeclarationOnly",
-    "build": "tsc --build tsconfig.json && npm run declarations"
+    "build": "tsc --build tsconfig.json && npm run declarations",
+    "postinstall": "tsc --build"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.5.7",

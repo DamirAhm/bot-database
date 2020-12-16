@@ -1,9 +1,13 @@
-import { IStudent, IContent, IHomework } from "bot-database";
+import { IStudent, IContent, IHomework } from '../types';
 import mongoose from 'mongoose';
 
 export const dayInMilliseconds = 24 * 60 * 60 * 1000;
 
-export const findNextDayWithLesson = (schedule: string[][], lesson: string, currentWeekDay: number) => {
+export const findNextDayWithLesson = (
+	schedule: string[][],
+	lesson: string,
+	currentWeekDay: number,
+) => {
 	let lastIndex = -1;
 	if (schedule.slice(currentWeekDay).find((e) => e.includes(lesson))) {
 		lastIndex =
@@ -16,7 +20,10 @@ export const findNextDayWithLesson = (schedule: string[][], lesson: string, curr
 	return lastIndex;
 };
 
-export const findNextLessonDate = (nextLessonWeekDay: number, { currentDate = new Date() } = {}): Date => {
+export const findNextLessonDate = (
+	nextLessonWeekDay: number,
+	{ currentDate = new Date() } = {},
+): Date => {
 	if (nextLessonWeekDay <= 7 && nextLessonWeekDay > 0) {
 		const weekDay = currentDate.getDay() || 7; //Чтобы воскресенье было 7 днем недели
 		const addition = nextLessonWeekDay <= weekDay ? 7 : 0; //Равно 7 если урок на следующей неделе
@@ -26,7 +33,7 @@ export const findNextLessonDate = (nextLessonWeekDay: number, { currentDate = ne
 
 		return new Date(currentDate.getFullYear(), month, date);
 	} else if (nextLessonWeekDay < 0) {
-		throw new Error("Next lesson week day must be in range from 0 to 6");
+		throw new Error('Next lesson week day must be in range from 0 to 6');
 	} else {
 		throw new TypeError('Week day must be less or equal to 7');
 	}
@@ -37,13 +44,19 @@ export const isObjectId = (id: string) => {
 	return mongoose.Types.ObjectId.isValid(id);
 };
 
-export const findNotifiedStudents = (students: IStudent[], notificationDate: Date, maxRemindFrequency: number) => {
+export const findNotifiedStudents = (
+	students: IStudent[],
+	notificationDate: Date,
+	maxRemindFrequency: number,
+) => {
 	return students.filter(({ settings: sets, lastHomeworkCheck }) => {
 		if (sets.notificationsEnabled) {
 			//Проверяет что уведомления включены
 			if (
 				notificationDate.getHours() === Number(sets.notificationTime.match(/^\d*/)?.[0]) &&
-				Math.abs(notificationDate.getMinutes() - Number(sets.notificationTime.match(/\d*$/))) <= 1
+				Math.abs(
+					notificationDate.getMinutes() - Number(sets.notificationTime.match(/\d*$/)),
+				) <= 1
 			) {
 				//Проверяет что время совпадает или почти
 				if (Number(notificationDate) - Number(lastHomeworkCheck) >= maxRemindFrequency) {
@@ -121,4 +134,3 @@ export const mapHomeworkByLesson = (homework: IHomework) => {
 		throw new TypeError('homework must be an array');
 	}
 };
-

@@ -10,7 +10,21 @@ import {
 	dayInMilliseconds,
 } from './utils/functions';
 import mongoose from 'mongoose';
-import { ClassDocument, IAnnouncement, IAttachment, IClassData, IContent, ICreateStudentParams, IHomework, ISettings, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from "bot-database";
+import {
+	ClassDocument,
+	IAnnouncement,
+	IAttachment,
+	IClassData,
+	IContent,
+	ICreateStudentParams,
+	IHomework,
+	ISettings,
+	PopulatedClass,
+	PopulatedSchool,
+	PopulatedStudent,
+	SchoolDocument,
+	StudentDocument,
+} from './types';
 const isObjectId = mongoose.Types.ObjectId.isValid;
 
 const getPureDate = (date: Date) => {
@@ -143,7 +157,7 @@ export class DataBase {
 			return classNameOrInstance.students;
 		}
 
-		let Class: PopulatedClass | ClassDocument | null;
+		let Class: ClassDocument | null;
 		if (typeof classNameOrInstance === 'string') {
 			Class = await this.getClassByName(classNameOrInstance, schoolName);
 		} else {
@@ -159,7 +173,9 @@ export class DataBase {
 		}
 	}
 
-	async getClassesForSchool(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool) {
+	async getClassesForSchool(
+		schoolNameOrInstance: string | SchoolDocument | PopulatedSchool,
+	): Promise<ClassDocument[]> {
 		if (typeof schoolNameOrInstance === 'string') {
 			return _Class.find({ schoolName: schoolNameOrInstance });
 		} else {
@@ -431,7 +447,7 @@ export class DataBase {
 		}
 	}
 	async getHomeworkByDate({ classNameOrInstance, schoolName }: IClassData, date: Date) {
-		let Class;
+		let Class: PopulatedClass | ClassDocument | null;
 		if (typeof classNameOrInstance === 'string') {
 			Class = await this.getClassByName(classNameOrInstance, schoolName);
 		} else {
@@ -533,7 +549,7 @@ export class DataBase {
 
 	//TODO refactor returning data from array to object
 	async parseHomeworkToNotifications(currentDateForTest: Date) {
-		const classes = await _Class.find({});
+		const classes: ClassDocument[] = await _Class.find({});
 		const notificationArray = []; //Массив массивов типа [[Массив вк айди учеников], [Массив дз]]
 		for (const cl of classes) {
 			const populatedClass = await this.populate(cl);
@@ -726,7 +742,7 @@ export class DataBase {
 			const updatedAnnouncements = Class.announcements.map((ch) =>
 				ch._id.toString() === announcementId.toString()
 					? //TODO test
-					{ ...ch, ...updates }
+					  { ...ch, ...updates }
 					: ch,
 			);
 
@@ -939,7 +955,9 @@ export class DataBase {
 		}
 	} //Добавляет ученика в класс
 
-	async removeStudentFromClass(vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent) {
+	async removeStudentFromClass(
+		vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent,
+	) {
 		let PopulatedStudent: PopulatedStudent | null = null;
 
 		if (typeof vkIdOrStudentInstance === 'number') {

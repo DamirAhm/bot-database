@@ -1,6 +1,6 @@
-import { Roles } from "./Models/utils";
+import { Roles } from './Models/utils';
 import mongoose from 'mongoose';
-import { ClassDocument, IAnnouncement, IAttachment, IClassData, IContent, ICreateStudentParams, IHomework, ISettings, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from "bot-database";
+import { ClassDocument, IAnnouncement, IAttachment, IClassData, IContent, ICreateStudentParams, IHomework, ISettings, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from './types';
 declare type ObjectId = mongoose.Types.ObjectId;
 export declare class DataBase {
     uri: string;
@@ -15,7 +15,7 @@ export declare class DataBase {
     getAllStudents(schoolName?: string): Promise<StudentDocument[]>;
     getAllClasses(schoolName?: string): Promise<ClassDocument[]>;
     getAllSchools(): Promise<SchoolDocument[]>;
-    getStudentsCount(classNameOrInstance: string | ClassDocument | PopulatedClass, schoolName: string): Promise<number>;
+    getStudentsCount(classNameOrInstance: string | ClassDocument | PopulatedClass, schoolName: string): Promise<any>;
     getStudentsFromClass(classNameOrInstance: string | ClassDocument | PopulatedClass, schoolName: string): Promise<StudentDocument[]>;
     getClassesForSchool(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool): Promise<ClassDocument[]>;
     getStudentsForSchool(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool): Promise<StudentDocument[]>;

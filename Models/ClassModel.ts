@@ -1,4 +1,4 @@
-import { IClass, ClassDocument } from "bot-database";
+import { IClass, ClassDocument } from '../types';
 import mongoose from 'mongoose';
 import { isURL } from './utils';
 

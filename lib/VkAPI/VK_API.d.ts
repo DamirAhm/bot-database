@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { createVkApi } from "./apiCreator";
+import { createVkApi } from './apiCreator';
 import FormData from 'form-data';
 import fs from "fs";
 export interface getVkPhotoResponse {
