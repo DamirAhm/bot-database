@@ -262,7 +262,7 @@ export class DataBase {
 
 	//! Creators
 	async createStudent(
-		vkId: string,
+		vkId: number,
 		{
 			class_id = null,
 			firstName = undefined,
