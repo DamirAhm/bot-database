@@ -84,7 +84,7 @@ studentSchema
 	});
 
 studentSchema
-	.virtual('secondName')
+	.virtual('lastName')
 	.get(function () {
 		//@ts-ignore
 		return this.fullName.split(' ')[1];

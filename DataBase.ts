@@ -269,11 +269,11 @@ export class DataBase {
 		{
 			class_id = null,
 			firstName = '',
-			lastName: secondName = '',
+			lastName = '',
 			registered = false,
 		}: ICreateStudentParams,
 	) {
-		let newStudentInfo = { vkId, firstName, secondName, registered };
+		let newStudentInfo = { vkId, firstName, lastName, registered };
 		const newStudent = new _Student(newStudentInfo);
 		if (class_id) {
 			const Class = await this.getClassBy_Id(class_id);

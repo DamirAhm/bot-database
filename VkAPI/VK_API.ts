@@ -2,18 +2,18 @@ import { createVkApi } from './apiCreator';
 import fetch from 'node-fetch';
 //@ts-ignore
 import FormData from 'form-data';
-import fs from "fs";
+import fs from 'fs';
 
 export interface getVkPhotoResponse {
-	items: IVKPhoto[]
+	items: IVKPhoto[];
 }
 export interface getUploadServerUrlResponse {
-	upload_url: string
+	upload_url: string;
 }
 
 function isPhotoResponse(response: unknown): response is getVkPhotoResponse {
-	if (typeof response === "object" && response != undefined) {
-		if ("items" in response) {
+	if (typeof response === 'object' && response != undefined) {
+		if ('items' in response) {
 			return true;
 		}
 	}
@@ -21,8 +21,8 @@ function isPhotoResponse(response: unknown): response is getVkPhotoResponse {
 	return false;
 }
 function isUploadServerUrlResponse(response: unknown): response is getUploadServerUrlResponse {
-	if (typeof response === "object" && response != undefined) {
-		if ("upload_url" in response) {
+	if (typeof response === 'object' && response != undefined) {
+		if ('upload_url' in response) {
 			return true;
 		}
 	}
@@ -30,21 +30,21 @@ function isUploadServerUrlResponse(response: unknown): response is getUploadServ
 	return false;
 }
 export interface IVKPhoto {
-	id: number
-	alubm_id: number
-	owner_id: number
-	user_id: number
-	text: string
-	date: number
-	sizes: IVKPhotoSize[]
-	width?: number
-	height?: number
+	id: number;
+	alubm_id: number;
+	owner_id: number;
+	user_id: number;
+	text: string;
+	date: number;
+	sizes: IVKPhotoSize[];
+	width?: number;
+	height?: number;
 }
 export interface IVKPhotoSize {
-	type: SizeType
-	url: string
-	width: number
-	height: number
+	type: SizeType;
+	url: string;
+	width: number;
+	height: number;
 }
 enum SizeType {
 	s,
@@ -84,9 +84,9 @@ export default class VK_API {
 						album_id: album_id,
 					}).then((photo: unknown) => {
 						if (isPhotoResponse(photo)) {
-							return photo.items[0].sizes[5].url
+							return photo.items[0].sizes[5].url;
 						} else {
-							return "";
+							return '';
 						}
 					});
 				}
