@@ -66,7 +66,7 @@ export interface IStudent {
 	vkId: number;
 	settings: ISettings;
 	lastHomeworkCheck: Date;
-	fullName: number;
+	fullName: string;
 	registered: boolean;
 	firstName: string;
 	lastName: string;
