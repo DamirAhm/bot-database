@@ -17,8 +17,7 @@
   },
   "scripts": {
     "test": "echo all works 😊",
-    "build": "tsc",
-    "postinstall": "npm run build"
+    "build": "tsc"
   },
   "devDependencies": {
     "mongoose": "^5.9.9",
