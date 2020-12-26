@@ -26,10 +26,10 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14
+      - run: tsc
+      - run: |
+        npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+        npm publish --ignore-scripts
       - name: Publish
-        run: tsc
-        run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-          npm publish --ignore-scripts
         env:
           NPM_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
