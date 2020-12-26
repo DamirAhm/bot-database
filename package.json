@@ -28,6 +28,7 @@
     "uuid4": "^1.1.4"
   },
   "exclude": [
-    "lib/types.js"
+    "lib/types.js",
+    ".github"
   ]
 }

@@ -14,22 +14,21 @@ jobs:
       - run: npm i -g typescript    
       - run: npm ci --ignore-scripts
       - run: npm run build --if-present
-        name: Build
         env:
           CI: true
   publish:
-    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Publish
+        uses: actions/setup-node@v1
         with:
           node-version: 14
+      - run: npm ci --ignore-scripts
       - run: tsc
       - run: |
-        npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-        npm publish --ignore-scripts
-      - name: Publish
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --ignore-scripts
         env:
           NPM_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
