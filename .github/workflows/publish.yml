@@ -27,6 +27,7 @@ jobs:
           node-version: 14
       - run: npm ci --ignore-scripts
       - run: tsc
+      - run: npm version patch
       - run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --ignore-scripts
