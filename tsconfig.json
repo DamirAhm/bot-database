@@ -10,7 +10,7 @@
     "allowJs": true,
     "checkJs": true,
     "declaration": true,
-    "outDir": "./lib",
+    "outDir": "build",
     "importHelpers": true,
     "isolatedModules": true,
     "strict": true,
@@ -23,15 +23,15 @@
     "sourceMap": false,
     "paths": {
       "@bot-database/*": [
-        "lib/*"
+        "build/*"
       ]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "declarationDir": "./lib",
+    "declarationDir": "build",
   },
   "exclude": [
-    "lib/*",
+    "build/*",
     "node_modules/*"
   ]
 }

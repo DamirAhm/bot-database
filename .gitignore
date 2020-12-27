@@ -1,6 +1,4 @@
 /node_modules
-/lib
-/lib/*
 
 .vscode 
 .idea

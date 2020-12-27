@@ -21,6 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Login with Git
+        uses: actions/checkout@v2
+      - run: git config --global user.email ${GIT_EMAIL}
+      - run: git config --global user.name ${GIT_EMAIL}
+        env: 
+          GIT_EMAIL: ${{secrets.GIT_EMAIL}}
+          GIT_NAME: ${{secrets.GIT_NAME}}
       - name: Publish
         uses: actions/setup-node@v1
         with:
