@@ -404,7 +404,7 @@ export class DataBase {
 			return false;
 		}
 	}
-	async getHomework({ classNameOrInstance, schoolName }: IClassData, date: Date) {
+	async getHomework({ classNameOrInstance, schoolName }: IClassData, date?: Date) {
 		let Class: PopulatedClass | ClassDocument | null;
 		if (typeof classNameOrInstance === 'string') {
 			Class = await this.getClassByName(classNameOrInstance, schoolName);
@@ -685,7 +685,7 @@ export class DataBase {
 		}
 	} //
 
-	async getAnnouncements({ classNameOrInstance, schoolName }: IClassData, date: Date) {
+	async getAnnouncements({ classNameOrInstance, schoolName }: IClassData, date?: Date) {
 		let Class: PopulatedClass | ClassDocument | null;
 		if (typeof classNameOrInstance === 'string') {
 			Class = await this.getClassByName(classNameOrInstance, schoolName);
@@ -742,16 +742,25 @@ export class DataBase {
 		}
 
 		if (Class) {
-			const updatedAnnouncements = Class.announcements.map((ch) =>
-				ch._id.toString() === announcementId.toString()
-					? //TODO test
-					  { ...ch, ...updates }
-					: ch,
+			const announcementToUpdate = Class.announcements.find(
+				({ _id }) => _id.toString() === announcementId.toString(),
 			);
 
-			await Class.updateOne({ announcements: updatedAnnouncements });
+			if (announcementToUpdate) {
+				let update: keyof typeof updates;
+				for (update in updates) {
+					if (updates.hasOwnProperty(update)) {
+						const updateValue = updates[update];
+						if (updateValue !== undefined) {
+							//@ts-ignore
+							announcementToUpdate[update] = updateValue;
+						}
+					}
+					await Class.save();
+				}
+			}
 
-			return updatedAnnouncements;
+			return Class.announcements;
 		} else {
 			return [];
 		}

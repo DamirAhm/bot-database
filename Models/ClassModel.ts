@@ -2,7 +2,7 @@ import { IClass, ClassDocument } from '../types';
 import mongoose from 'mongoose';
 import { isURL } from './utils';
 
-const isLesson = (str: string) => /^[a-zа-я0-9]*$/i.test(str);
+const isLesson = (str: string) => /^[a-zа-я0-9.! ]*$/i.test(str);
 
 const attachment = new mongoose.Schema({
 	value: {
@@ -59,7 +59,7 @@ const classSchema = new mongoose.Schema<IClass>({
 					type: String,
 					validate: {
 						validator: isLesson,
-						message: 'Lesson must be one of existing',
+						message: 'Lesson must be a set of letters, space or dot ',
 					},
 				},
 				text: String,
@@ -97,7 +97,7 @@ const classSchema = new mongoose.Schema<IClass>({
 					type: String,
 					validate: {
 						validator: isLesson,
-						message: 'Lesson must be a set of letters',
+						message: 'Lesson must be a set of letters, space or dot ',
 					},
 				},
 			],
