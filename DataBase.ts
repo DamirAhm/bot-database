@@ -436,8 +436,7 @@ export class DataBase {
 
 		if (Class) {
 			const updatedHomework = Class.homework.map((ch) =>
-				//TODO test
-				ch._id.toString() === homeworkId.toString() ? { ...ch, ...updates } : ch,
+				ch._id.toString() === homeworkId.toString() ? Object.assign(ch, updates) : ch,
 			);
 
 			await Class.updateOne({
@@ -742,25 +741,17 @@ export class DataBase {
 		}
 
 		if (Class) {
-			const announcementToUpdate = Class.announcements.find(
-				({ _id }) => _id.toString() === announcementId.toString(),
+			const updatedAnnouncements = Class.announcements.map((announcement) =>
+				announcement._id.toString() === announcementId.toString()
+					? Object.assign(announcement, updates)
+					: announcement,
 			);
 
-			if (announcementToUpdate) {
-				let update: keyof typeof updates;
-				for (update in updates) {
-					if (updates.hasOwnProperty(update)) {
-						const updateValue = updates[update];
-						if (updateValue !== undefined) {
-							//@ts-ignore
-							announcementToUpdate[update] = updateValue;
-						}
-					}
-					await Class.save();
-				}
-			}
+			await Class.updateOne({
+				announcements: updatedAnnouncements,
+			});
 
-			return Class.announcements;
+			return await this.getClassBy_Id(Class._id).then((cl) => cl?.announcements || null);
 		} else {
 			return [];
 		}
