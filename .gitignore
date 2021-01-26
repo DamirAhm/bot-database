@@ -1,10 +1,7 @@
 /node_modules
-<<<<<<< HEAD
-=======
 
 build
 /build
->>>>>>> 3.1.14
 
 .vscode 
 .idea
