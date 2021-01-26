@@ -15,8 +15,14 @@ export interface IClass {
 	schoolName: string;
 }
 
+export interface IUserPreferences {
+	notificationTime?: string;
+	notificationEnabled?: boolean;
+	daysForNotification?: number;
+}
 export interface IHomework extends IContent {
 	lesson: string;
+	userPreferences: IUserPreferences;
 }
 export interface IAnnouncement extends IContent {}
 export interface IContent {

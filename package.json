@@ -1,6 +1,6 @@
 {
   "name": "bot-database",
-  "version": "3.1.17-1",
+  "version": "3.1.17",
   "description": "",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -16,8 +16,8 @@
     "uuid4": "^1.1.4"
   },
   "scripts": {
-    "test": "echo all works 😊",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "mongoose": "^5.9.9",

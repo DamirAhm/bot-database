@@ -1,6 +1,8 @@
 import { ISchool, SchoolDocument } from '../types';
 import mongoose from 'mongoose';
 
+const isValidSchoolName = (str: string) => /^.*:\d*$/.test(str);
+
 export const schoolSchema = new mongoose.Schema<ISchool>({
 	classes: {
 		type: [
@@ -14,7 +16,7 @@ export const schoolSchema = new mongoose.Schema<ISchool>({
 	name: {
 		type: String,
 		valudate: {
-			validator: (str: string) => /^.*:\d*$/.test(str),
+			validator: isValidSchoolName,
 			message: 'School name must fit format',
 		},
 		required: true,

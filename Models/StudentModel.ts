@@ -2,6 +2,31 @@ import { IStudent, StudentDocument } from '../types';
 import mongoose from 'mongoose';
 import { Roles, checkValidTime } from './utils';
 
+const SettingsSchema = {
+	notificationsEnabled: {
+		type: Boolean,
+		default: true,
+	},
+	notificationTime: {
+		type: String,
+		default: '17:00',
+		validate: {
+			validator: checkValidTime,
+			message: 'Notification time should match template like 00:00',
+		},
+	},
+	daysForNotification: {
+		type: [Number],
+		default: [1],
+		validate: {
+			validator: (array: number[]) =>
+				array.every((number) => Number.isInteger(number) && number >= 0) &&
+				array.length > 0,
+			message: "Day index must be an integer and mustn't be empty",
+		},
+	},
+};
+
 const studentSchema = new mongoose.Schema<IStudent>({
 	class: {
 		type: mongoose.Types.ObjectId,
@@ -22,30 +47,7 @@ const studentSchema = new mongoose.Schema<IStudent>({
 			message: 'VkId must be integer',
 		},
 	},
-	settings: {
-		notificationsEnabled: {
-			type: Boolean,
-			default: true,
-		},
-		notificationTime: {
-			type: String,
-			default: '17:00',
-			validate: {
-				validator: checkValidTime,
-				message: 'Notification time should match template like 00:00',
-			},
-		},
-		daysForNotification: {
-			type: [Number],
-			default: [1],
-			validate: {
-				validator: (array: number[]) =>
-					array.every((number) => Number.isInteger(number) && number >= 0) &&
-					array.length > 0,
-				message: "Day index must be an integer and mustn't be empty",
-			},
-		},
-	},
+	settings: SettingsSchema,
 	lastHomeworkCheck: {
 		type: Date,
 		default: new Date(0),

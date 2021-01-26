@@ -1,4 +1,4 @@
-import { Roles, Lessons } from './Models/utils';
+import { Roles, Lessons, deeplyAssignObjects } from './Models/utils';
 import _Student from './Models/StudentModel';
 import _School from './Models/SchoolModel';
 import _Class from './Models/ClassModel';
@@ -345,6 +345,7 @@ export class DataBase {
 						createdBy: studentVkId,
 						to: new Date(),
 						pinned: false,
+						userPreferences: {},
 						...parsedContent,
 					};
 
@@ -436,7 +437,9 @@ export class DataBase {
 
 		if (Class) {
 			const updatedHomework = Class.homework.map((ch) =>
-				ch._id.toString() === homeworkId.toString() ? Object.assign(ch, updates) : ch,
+				ch._id.toString() === homeworkId.toString()
+					? deeplyAssignObjects(ch, updates as IHomework)
+					: ch,
 			);
 
 			await Class.updateOne({
@@ -743,7 +746,7 @@ export class DataBase {
 		if (Class) {
 			const updatedAnnouncements = Class.announcements.map((announcement) =>
 				announcement._id.toString() === announcementId.toString()
-					? Object.assign(announcement, updates)
+					? deeplyAssignObjects(announcement, updates as IAnnouncement)
 					: announcement,
 			);
 

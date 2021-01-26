@@ -1,8 +1,6 @@
 import { IClass, ClassDocument } from '../types';
 import mongoose from 'mongoose';
-import { isURL } from './utils';
-
-const isLesson = (str: string) => /^[a-zа-я0-9.! ]*$/i.test(str);
+import { checkValidTime, isLesson, isURL, isValidClassName } from './utils';
 
 const attachment = new mongoose.Schema({
 	value: {
@@ -27,6 +25,90 @@ const attachment = new mongoose.Schema({
 	},
 });
 
+const UserPreferencesSchema = {
+	notificationTime: {
+		type: String,
+		default: '17:00',
+		validate: {
+			validator: checkValidTime,
+			message: 'Notification time should match template like 00:00',
+		},
+	},
+	daysForNotification: {
+		type: [Number],
+		default: [1],
+		validate: {
+			validator: (array: number[]) =>
+				array.every((number) => Number.isInteger(number) && number >= 0) &&
+				array.length > 0,
+			message: "Day index must be an integer and mustn't be empty",
+		},
+	},
+	notificationEnabled: Boolean,
+};
+const HomeworkSchema = {
+	lesson: {
+		required: true,
+		type: String,
+		validate: {
+			validator: isLesson,
+			message: 'Lesson must be a set of letters, space or dot ',
+		},
+	},
+	text: String,
+	to: {
+		type: Date,
+		default: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+	},
+	attachments: {
+		type: [attachment],
+		default: [],
+	},
+	createdBy: {
+		type: Number,
+		validate: {
+			validator: Number.isInteger,
+			message: 'Created by must be integer means vk id of user created it',
+		},
+	},
+	pinned: {
+		type: Boolean,
+		default: false,
+	},
+	userPreferences: {
+		type: Map,
+		of: new mongoose.Schema(UserPreferencesSchema, { _id: false }),
+		default: {},
+	},
+	_id: {
+		type: mongoose.Types.ObjectId,
+		default: new mongoose.Types.ObjectId(),
+	},
+};
+const AnnouncementsSchema = {
+	text: String,
+	attachments: {
+		type: [attachment],
+		default: [],
+	},
+	to: Date,
+	createdBy: {
+		type: Number,
+		validate: {
+			validator: Number.isInteger,
+			message: 'Created by must be integer means vk id of user created it',
+		},
+	},
+	pinned: {
+		type: Boolean,
+		default: false,
+	},
+	_id: {
+		type: mongoose.Schema.Types.ObjectId,
+		default: new mongoose.Types.ObjectId(),
+	},
+};
+
 const classSchema = new mongoose.Schema<IClass>({
 	students: {
 		type: [
@@ -40,54 +122,13 @@ const classSchema = new mongoose.Schema<IClass>({
 	name: {
 		type: String,
 		validate: {
-			validator: (name: string) => {
-				if (/^\d{1,2}[a-zа-я]+$/i.test(name)) {
-					const [_, digit] = name.match(/^(\d{1,2})([a-zа-я]+)$/i) as RegExpMatchArray;
-					return +digit > 0 && +digit <= 11 && Number.isInteger(+digit);
-				}
-				return false;
-			},
+			validator: isValidClassName,
 			message: 'Class name must match digit + letter',
 		},
 		required: true,
 	},
 	homework: {
-		type: [
-			{
-				lesson: {
-					required: true,
-					type: String,
-					validate: {
-						validator: isLesson,
-						message: 'Lesson must be a set of letters, space or dot ',
-					},
-				},
-				text: String,
-				to: {
-					type: Date,
-					default: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-				},
-				attachments: {
-					type: [attachment],
-					default: [],
-				},
-				createdBy: {
-					type: Number,
-					validate: {
-						validator: Number.isInteger,
-						message: 'Created by must be integer means vk id of user created it',
-					},
-				},
-				pinned: {
-					type: Boolean,
-					default: false,
-				},
-				_id: {
-					type: mongoose.Types.ObjectId,
-					default: new mongoose.Types.ObjectId(),
-				},
-			},
-		],
+		type: [HomeworkSchema],
 		default: [],
 	},
 	schedule: {
@@ -102,34 +143,10 @@ const classSchema = new mongoose.Schema<IClass>({
 				},
 			],
 		],
-		default: [[], [], [], [], [], []],
+		default: Array.from({ length: 6 }, () => []),
 	},
 	announcements: {
-		type: [
-			{
-				text: String,
-				attachments: {
-					type: [attachment],
-					default: [],
-				},
-				to: Date,
-				createdBy: {
-					type: Number,
-					validate: {
-						validator: Number.isInteger,
-						message: 'Created by must be integer means vk id of user created it',
-					},
-				},
-				pinned: {
-					type: Boolean,
-					default: false,
-				},
-				_id: {
-					type: mongoose.Schema.Types.ObjectId,
-					default: new mongoose.Types.ObjectId(),
-				},
-			},
-		],
+		type: [AnnouncementsSchema],
 		default: [],
 	},
 	schoolName: {
