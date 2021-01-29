@@ -1,6 +1,6 @@
 {
   "name": "bot-database",
-  "version": "3.1.18-1",
+  "version": "3.1.18-2",
   "description": "",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -27,9 +27,5 @@
     "ttypescript": "^1.5.12",
     "typescript-transform-paths": "^2.1.0",
     "uuid4": "^1.1.4"
-  },
-  "include": [
-    "build",
-    "build/*"
-  ]
+  }
 }
