@@ -1,6 +1,6 @@
 {
   "name": "bot-database",
-  "version": "3.1.17",
+  "version": "3.1.18-1",
   "description": "",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -28,11 +28,8 @@
     "typescript-transform-paths": "^2.1.0",
     "uuid4": "^1.1.4"
   },
-  "exclude": [
-    "build/types.js",
-    ".github"
-  ],
   "include": [
-    "build"
+    "build",
+    "build/*"
   ]
 }
