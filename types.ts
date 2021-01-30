@@ -16,9 +16,9 @@ export interface IClass {
 }
 
 export interface IUserPreferences {
-	notificationTime?: string;
-	notificationEnabled?: boolean;
-	daysForNotification?: number;
+	notificationTime: string | null;
+	notificationEnabled: boolean | null;
+	daysForNotification: number[] | null;
 }
 export interface IHomework extends IContent {
 	lesson: string;
