@@ -22,7 +22,9 @@ export interface IUserPreferences {
 }
 export interface IHomework extends IContent {
 	lesson: string;
-	userPreferences: IUserPreferences;
+	userPreferences: {
+		[student_id: string]: IUserPreferences;
+	};
 }
 export interface IAnnouncement extends IContent {}
 export interface IContent {

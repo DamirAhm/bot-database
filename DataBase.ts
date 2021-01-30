@@ -335,8 +335,6 @@ export class DataBase {
 
 			if (Class) {
 				if (Class.schedule.flat().includes(lesson)) {
-					const Student = await this.getStudentByVkId(studentVkId);
-
 					let parsedContent = {
 						text: content.text,
 						attachments: content.attachments,
@@ -347,11 +345,7 @@ export class DataBase {
 						createdBy: studentVkId,
 						to: new Date(),
 						pinned: false,
-						userPreferences: {
-							daysForNotification: [1],
-							notificationEnabled: true,
-							notificationTime: Student?.settings.notificationTime || '16:00',
-						},
+						userPreferences: {},
 						...parsedContent,
 					};
 
