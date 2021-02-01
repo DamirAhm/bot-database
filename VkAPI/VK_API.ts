@@ -101,7 +101,15 @@ export default class VK_API {
 	}
 	async getUser(userId: string) {
 		try {
-			return await this.api('users.get', { user_ids: userId });
+			const users = await this.api('users.get', { user_ids: userId });
+
+			if (users && Array.isArray(users)) {
+				return users[0];
+			} else {
+				throw new Error(
+					'Bad responce from vk api (users.get)\n' + JSON.stringify(users, null, 2),
+				);
+			}
 		} catch (e) {
 			console.error(e);
 		}

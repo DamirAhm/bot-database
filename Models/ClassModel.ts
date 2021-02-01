@@ -44,11 +44,14 @@ const UserPreferencesSchema = {
 			message: "Day index must be an integer and mustn't be empty",
 		},
 	},
-	notificationEnabled: Boolean,
+	notificationEnabled: {
+		type: Boolean,
+		default: true,
+	},
+	default: {},
 };
 const HomeworkSchema = {
 	lesson: {
-		required: true,
 		type: String,
 		validate: {
 			validator: isLesson,
@@ -78,6 +81,9 @@ const HomeworkSchema = {
 	userPreferences: {
 		type: Map,
 		of: new mongoose.Schema(UserPreferencesSchema, { _id: false }),
+		get: (map: Map<string, any>) => Object.fromEntries(map),
+		set: (obj: Map<string, any> | object) =>
+			obj instanceof Map ? obj : new Map(Object.entries(obj)),
 		default: {},
 	},
 	_id: {

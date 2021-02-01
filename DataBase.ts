@@ -1,4 +1,4 @@
-import { Roles, Lessons, deeplyAssignObjects } from './Models/utils';
+import { Roles } from './Models/utils';
 import _Student from './Models/StudentModel';
 import _School from './Models/SchoolModel';
 import _Class from './Models/ClassModel';
@@ -8,6 +8,7 @@ import {
 	findNotifiedStudents,
 	checkIsToday,
 	dayInMilliseconds,
+	deeplyAssignObjects,
 } from './utils/functions';
 import mongoose from 'mongoose';
 import {

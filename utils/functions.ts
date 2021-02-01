@@ -134,3 +134,25 @@ export const mapHomeworkByLesson = (homework: IHomework) => {
 		throw new TypeError('homework must be an array');
 	}
 };
+
+export const deeplyAssignObjects = <T extends { [key: string]: any }>(objA: T, objB: T): T => {
+	let assignedObject: any = Object.assign(objA, {});
+	const keys = Array.from(new Set([...Object.keys(objA), ...Object.keys(objB)]));
+
+	for (let key of keys) {
+		if (
+			typeof objA[key] === 'object' &&
+			!Array.isArray(objA[key]) &&
+			typeof objB[key] === 'object' &&
+			!Array.isArray(objB[key])
+		) {
+			const assignedProperty = deeplyAssignObjects(objA[key], objB[key]);
+
+			assignedObject[key] = assignedProperty;
+		} else {
+			assignedObject[key] = objB[key] ?? objA[key];
+		}
+	}
+
+	return assignedObject;
+};
