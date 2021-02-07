@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 //@ts-ignore
 import FormData from 'form-data';
 import fs from 'fs';
+import { IVkUser } from 'types';
 
 export interface getVkPhotoResponse {
 	items: IVKPhoto[];
@@ -99,19 +100,22 @@ export default class VK_API {
 			console.error(e);
 		}
 	}
-	async getUser(userId: string) {
+	async getUser(userId: string): Promise<IVkUser | null> {
 		try {
-			const users = await this.api('users.get', { user_ids: userId });
+			const users = await this.api<IVkUser>('users.get', { user_ids: userId });
 
 			if (users && Array.isArray(users)) {
 				return users[0];
 			} else {
-				throw new Error(
+				console.log(
 					'Bad responce from vk api (users.get)\n' + JSON.stringify(users, null, 2),
 				);
+
+				return null;
 			}
 		} catch (e) {
 			console.error(e);
+			return null;
 		}
 	}
 

@@ -97,3 +97,12 @@ export interface IClassData {
 	classNameOrInstance: string | ClassDocument | PopulatedClass;
 	schoolName: string;
 }
+
+export interface IVkUser {
+	last_name: string;
+	first_name: string;
+	id: number;
+	deactivated?: string;
+	is_closed: boolean;
+	can_access_closed: boolean;
+}

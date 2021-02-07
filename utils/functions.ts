@@ -74,26 +74,18 @@ export const findNotifiedStudents = (
 
 export const lessonsIndexesToLessonsNames = (lessonList: string[], indexes: number[][]) => {
 	if (
-		Array.isArray(lessonList) &&
-		lessonList.length &&
-		lessonList.every((el) => typeof el === 'string')
+		Array.isArray(indexes) &&
+		indexes.length > 0 &&
+		indexes.every((lesson) => Array.isArray(lesson) && lesson.every(Number.isInteger)) //lessonList должен быть массивом массивов целых чисел
 	) {
-		if (
-			Array.isArray(indexes) &&
-			indexes.length > 0 &&
-			indexes.every((lesson) => Array.isArray(lesson) && lesson.every(Number.isInteger)) //lessonList должен быть массивом массивов целых чисел
-		) {
-			if (lessonList.length - 1 < Math.max(...indexes.flat())) {
-				throw new ReferenceError(
-					'Index in indexes array can`t be bigger than lesson list length',
-				);
-			}
-			return indexes.map((dayIdxs) => dayIdxs.map((idx) => lessonList[idx])); //превращает массив индексов в массив предметов
-		} else {
-			throw new TypeError('lessonsIndexesByDays must be array of arrays of integers');
+		if (lessonList.length - 1 < Math.max(...indexes.flat())) {
+			throw new ReferenceError(
+				'Index in indexes array can`t be bigger than lesson list length',
+			);
 		}
+		return indexes.map((dayIdxs) => dayIdxs.map((idx) => lessonList[idx])); //превращает массив индексов в массив предметов
 	} else {
-		throw new TypeError('LessonList must be array of strings');
+		throw new TypeError('lessonsIndexesByDays must be array of arrays of integers');
 	}
 };
 
@@ -105,14 +97,14 @@ export const checkIsToday = (date: Date, to = new Date()) => {
 	);
 };
 
-export const isPartialOf = (object: object, instance: object) => {
+export const isPartialOf = (object: object | string[], instance: object) => {
 	if (Array.isArray(object)) return Object.keys(instance).every((key) => object.includes(key));
-	if (typeof object === 'object')
+	else {
 		return (
 			Object.keys(instance).length !== 0 &&
 			Object.keys(instance).every((key) => object.hasOwnProperty(key))
 		);
-	throw new TypeError('object must be an object or an array of properties');
+	}
 };
 
 export const filterContentByDate = (content: IContent[], date: Date) => {
@@ -122,34 +114,50 @@ export const filterContentByDate = (content: IContent[], date: Date) => {
 			cont.to.getDate() === date.getDate(),
 	);
 };
-export const mapHomeworkByLesson = (homework: IHomework) => {
-	if (homework instanceof Array) {
-		return homework.reduce(
-			(acc, c) => (
-				acc.has(c.lesson) ? acc.get(c.lesson).push(c) : acc.set(c.lesson, [c]), acc
-			),
-			new Map(),
-		);
-	} else {
-		throw new TypeError('homework must be an array');
-	}
+export const mapHomeworkByLesson = (homework: IHomework[]) => {
+	return homework.reduce(
+		(acc, c) => (acc.has(c.lesson) ? acc.get(c.lesson).push(c) : acc.set(c.lesson, [c]), acc),
+		new Map(),
+	);
 };
 
-export const deeplyAssignObjects = <T extends { [key: string]: any }>(objA: T, objB: T): T => {
-	let assignedObject: any = Object.assign(objA, {});
+export const deeplyAssignObjects = <T extends Record<string, any>>(objA: T, objB: T): T => {
+	let assignedObject = objA;
 	const keys = Array.from(new Set([...Object.keys(objA), ...Object.keys(objB)]));
-
-	for (let key of keys) {
+	for (const key of keys) {
 		if (
-			typeof objA[key] === 'object' &&
-			!Array.isArray(objA[key]) &&
-			typeof objB[key] === 'object' &&
-			!Array.isArray(objB[key])
+			['[object Object]', '[object Map]'].includes(objA[key]?.toString()) &&
+			['[object Object]', '[object Map]'].includes(objB[key]?.toString())
 		) {
-			const assignedProperty = deeplyAssignObjects(objA[key], objB[key]);
-
-			assignedObject[key] = assignedProperty;
+			let assignedProperty;
+			if (objA[key] instanceof Map) {
+				if (objB[key] instanceof Map) {
+					assignedProperty = exports.deeplyAssignObjects(
+						Object.fromEntries(objA[key]),
+						Object.fromEntries(objB[key]),
+					);
+				} else {
+					assignedProperty = exports.deeplyAssignObjects(
+						Object.fromEntries(objA[key]),
+						objB[key],
+					);
+				}
+				//@ts-ignore
+				assignedObject[key] = new Map(Object.entries(assignedProperty));
+			} else {
+				if (objB[key] instanceof Map) {
+					assignedProperty = exports.deeplyAssignObjects(
+						objA[key],
+						Object.fromEntries(objB[key]),
+					);
+				} else {
+					assignedProperty = exports.deeplyAssignObjects(objA[key], objB[key]);
+				}
+				//@ts-ignore
+				assignedObject[key] = assignedProperty;
+			}
 		} else {
+			//@ts-ignore
 			assignedObject[key] = objB[key] ?? objA[key];
 		}
 	}

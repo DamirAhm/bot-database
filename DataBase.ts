@@ -322,7 +322,7 @@ export class DataBase {
 	async addHomework(
 		{ classNameOrInstance, schoolName }: IClassData,
 		lesson: string,
-		content: ICreateHomework,
+		content: ICreateContent,
 		studentVkId: number,
 		expirationDate?: Date,
 	) {
