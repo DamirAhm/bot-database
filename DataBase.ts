@@ -285,10 +285,8 @@ export class DataBase {
 						students: newStudent._id,
 					},
 				});
-				await newStudent.updateOne({
-					class: Class._id,
-					role: Class.students.length === 0 ? Roles.contributor : newStudent.role,
-				});
+				newStudent.class = Class._id;
+				newStudent.role = Class.students.length === 0 ? Roles.contributor : newStudent.role;
 			}
 		}
 		await newStudent.save();
