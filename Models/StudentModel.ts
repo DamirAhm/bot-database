@@ -27,7 +27,7 @@ const SettingsSchema = {
 	},
 };
 
-const studentSchema = new mongoose.Schema<IStudent>({
+const studentSchema = new mongoose.Schema<StudentDocument>({
 	class: {
 		type: mongoose.Types.ObjectId,
 		ref: 'Class',

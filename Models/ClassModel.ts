@@ -115,7 +115,7 @@ const AnnouncementsSchema = {
 	},
 };
 
-const classSchema = new mongoose.Schema<IClass>({
+const classSchema = new mongoose.Schema<ClassDocument>({
 	students: {
 		type: [
 			{

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 const isValidSchoolName = (str: string) => /^.*:\d*$/.test(str);
 
-export const schoolSchema = new mongoose.Schema<ISchool>({
+export const schoolSchema = new mongoose.Schema<SchoolDocument>({
 	classes: {
 		type: [
 			{
