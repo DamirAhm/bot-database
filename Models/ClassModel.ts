@@ -70,7 +70,7 @@ const HomeworkSchema = {
 	createdBy: {
 		type: Number,
 		validate: {
-			validator: Number.isInteger,
+			validator: isPositiveInteger,
 			message: 'Created by must be integer means vk id of user created it',
 		},
 	},
@@ -85,6 +85,14 @@ const HomeworkSchema = {
 		set: (obj: Map<string, any> | object) =>
 			obj instanceof Map ? obj : new Map(Object.entries(obj)),
 		default: {},
+	},
+	onlyFor: {
+		type: [Number],
+		validate: {
+			message: 'User vk Ids must be positive integer',
+			validator: (vkIds: number[]) => vkIds.every(isPositiveInteger),
+		},
+		default: [],
 	},
 	_id: {
 		type: mongoose.Types.ObjectId,
@@ -108,6 +116,14 @@ const AnnouncementsSchema = {
 	pinned: {
 		type: Boolean,
 		default: false,
+	},
+	onlyFor: {
+		type: [Number],
+		validate: {
+			message: 'User vk Ids must be positive integer',
+			validator: (vkIds: number[]) => vkIds.every(isPositiveInteger),
+		},
+		default: [],
 	},
 	_id: {
 		type: mongoose.Schema.Types.ObjectId,
@@ -163,3 +179,6 @@ const classSchema = new mongoose.Schema<ClassDocument>({
 });
 
 export default mongoose.model<ClassDocument>('Class', classSchema);
+function isPositiveInteger(n: number) {
+	return Number.isInteger(n) && n > 0;
+}

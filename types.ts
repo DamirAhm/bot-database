@@ -34,6 +34,7 @@ export interface IContent {
 	pinned: boolean;
 	_id: mongoose.Types.ObjectId;
 	createdBy?: number;
+	onlyFor?: number[];
 }
 export interface IAttachment {
 	value: string;
@@ -48,6 +49,7 @@ export interface ICreateContent {
 	pinned?: boolean;
 	_id?: mongoose.Types.ObjectId;
 	createdBy?: number;
+	onlyFor?: number[];
 }
 
 export interface ICreateHomework extends ICreateContent {
