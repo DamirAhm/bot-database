@@ -319,8 +319,7 @@ export class DataBase {
 	//* Homework
 	async addHomework(
 		{ classNameOrInstance, schoolName }: IClassData,
-		lesson: string,
-		content: ICreateContent,
+		content: ICreateHomework,
 		studentVkId: number,
 		expirationDate?: Date,
 	) {
@@ -333,19 +332,13 @@ export class DataBase {
 			}
 
 			if (Class) {
-				if (Class.schedule.flat().includes(lesson)) {
-					let parsedContent = {
-						text: content.text,
-						attachments: content.attachments,
-					};
+				if (Class.schedule.flat().includes(content.lesson)) {
 					const newHomework: IHomework = {
-						lesson,
 						_id: new mongoose.Types.ObjectId(),
 						createdBy: studentVkId,
-						to: new Date(),
 						pinned: false,
 						userPreferences: {},
-						...parsedContent,
+						...content,
 					};
 
 					if (expirationDate) {
@@ -363,7 +356,7 @@ export class DataBase {
 					} else {
 						const nextLessonWeekDay = findNextDayWithLesson(
 							Class.schedule,
-							lesson,
+							content.lesson,
 							new Date().getDay() || 7,
 						); // 1 - 7
 						const nextLessonDate = findNextLessonDate(nextLessonWeekDay);
@@ -649,16 +642,11 @@ export class DataBase {
 				}
 
 				if (Class) {
-					let parsedContent = {
-						text: content.text,
-						attachments: content.attachments,
-					};
 					const newAnnouncement: IAnnouncement = {
-						to: toDate,
 						createdBy: vkId,
 						pinned: false,
 						_id: new mongoose.Types.ObjectId(),
-						...parsedContent,
+						...content,
 					};
 
 					if (toAll) {
@@ -1059,7 +1047,7 @@ export class DataBase {
 	} //
 	validateContent(content: ICreateContent) {
 		const errors: string[] = [];
-
+		//TODO add validation for all content properties
 		if (
 			content.attachments.length > 0 &&
 			(!Array.isArray(content.attachments) ||
