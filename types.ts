@@ -44,10 +44,8 @@ export interface IAttachment {
 
 export interface ICreateContent {
 	text: string;
-	to: Date;
 	attachments: IAttachment[];
 	pinned?: boolean;
-	_id?: mongoose.Types.ObjectId;
 	createdBy?: number;
 	onlyFor?: number[];
 }

@@ -335,6 +335,7 @@ export class DataBase {
 				if (Class.schedule.flat().includes(content.lesson)) {
 					const newHomework: IHomework = {
 						_id: new mongoose.Types.ObjectId(),
+						to: new Date(),
 						createdBy: studentVkId,
 						pinned: false,
 						userPreferences: {},
@@ -644,6 +645,7 @@ export class DataBase {
 				if (Class) {
 					const newAnnouncement: IAnnouncement = {
 						createdBy: vkId,
+						to: new Date(),
 						pinned: false,
 						_id: new mongoose.Types.ObjectId(),
 						...content,
