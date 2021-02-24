@@ -1023,7 +1023,7 @@ export class DataBase {
 					}
 				}
 
-				return await this.addStudentToClass(PopulatedStudent, newClass.name, schoolName);
+				return await this.addStudentToClass(PopulatedStudent, newClass);
 			} else {
 				return false;
 			}
