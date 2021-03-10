@@ -23,6 +23,7 @@ export const Lessons = [
 	'Физкультура',
 	'Химия',
 ] as const;
+
 export const checkValidTime = (str: string) => {
 	return (
 		!isNaN(+str[0]) &&
@@ -53,8 +54,8 @@ export const daysOfWeek = [
 ] as const;
 
 export const isValidClassName = (name: string) => {
-	if (/(^\d{2})([A-Z]|[А-Я])/i.test(name)) {
-		const [_, digit] = name.match(/(^\d{2})([A-Z]|[А-Я])/i) as RegExpMatchArray;
+	if (/(^\d{1,2})([A-Z]|[А-Я])/i.test(name)) {
+		const [_, digit] = name.match(/(^\d{1,2})([A-Z]|[А-Я])/i) as RegExpMatchArray;
 		return +digit > 0 && +digit <= 11 && Number.isInteger(+digit);
 	}
 	return false;
