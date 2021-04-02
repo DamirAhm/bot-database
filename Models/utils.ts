@@ -24,18 +24,38 @@ export const Lessons = [
 	'Химия',
 ] as const;
 
+export function inRange(number: number, min: number, max: number) {
+	if (min ?? min > number) {
+		return false;
+	}
+	if (max ?? max < number) {
+		return false;
+	}
+
+	return true;
+}
+
+export const timeRegExp = /(\d{2}):(\d{2})/;
 export const checkValidTime = (str: string) => {
-	return (
-		!isNaN(+str[0]) &&
-		+str[0] >= 0 &&
-		!isNaN(+str[1]) &&
-		+str[1] >= 0 &&
-		str[2] === ':' &&
-		!isNaN(+str[3]) &&
-		+str[3] >= 0 &&
-		!isNaN(+str[4]) &&
-		+str[4] >= 0
-	);
+	if (timeRegExp.test(str)) {
+		//@ts-ignore
+		const [hours, minutes] = str
+			.match(timeRegExp)
+			.slice(1)
+			.map((n) => parseInt(n));
+		if (!isNaN(hours) && !isNaN(minutes) && inRange(hours, 0, 23) && inRange(minutes, 0, 59)) {
+			return true;
+		}
+	}
+
+	return false;
+};
+export const compareTimes = (a: string, b: string) => {
+	if (checkValidTime(a) && checkValidTime(b)) {
+		return a > b;
+	} else {
+		throw new Error('Times should be in format: 00:00');
+	}
 };
 
 export const isLesson = (str: string) => /^[a-zа-я0-9.! ]*$/i.test(str);
@@ -53,10 +73,19 @@ export const daysOfWeek = [
 	'Суббота',
 ] as const;
 
+export const classNameRegExp = /^(\d{1,2})([A-ZА-Я])$/i;
 export const isValidClassName = (name: string) => {
-	if (/(^\d{1,2})([A-Z]|[А-Я])/i.test(name)) {
-		const [_, digit] = name.match(/(^\d{1,2})([A-Z]|[А-Я])/i) as RegExpMatchArray;
-		return +digit > 0 && +digit <= 11 && Number.isInteger(+digit);
+	if (classNameRegExp.test(name)) {
+		//@ts-ignore
+		const digit = Number(name.match(classNameRegExp)[1]);
+		return inRange(digit, 1, 11) && Number.isInteger(digit);
 	}
 	return false;
+};
+
+export const getTimeFromDate = (date: Date) => {
+	const hours = date.getHours();
+	const minutes = date.getMinutes();
+
+	return `${hours}:${minutes}`;
 };

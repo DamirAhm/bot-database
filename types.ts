@@ -12,8 +12,17 @@ export interface IClass {
 	homework: IHomework[];
 	announcements: IAnnouncement[];
 	schedule: string[][];
+	callSchedule: callSchedule;
 	schoolName: string;
 }
+export type callSchedule = {
+	default: lessonCalls[];
+	exceptions: callSchedule['default'][];
+};
+export type lessonCalls = {
+	start: string;
+	end: string;
+};
 
 export interface IUserPreferences {
 	notificationTime: string | null;

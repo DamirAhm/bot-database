@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.deeplyAssignObjects = exports.mapHomeworkByLesson = exports.filterContentByDate = exports.isPartialOf = exports.checkIsToday = exports.lessonsIndexesToLessonsNames = exports.findNotifiedStudents = exports.isObjectId = exports.toObject = exports.findNextLessonDate = exports.findNextDayWithLesson = exports.dayInMilliseconds = void 0;
 const tslib_1 = require("tslib");
 const mongoose_1 = tslib_1.__importDefault(require("mongoose"));
 exports.dayInMilliseconds = 24 * 60 * 60 * 1000;
-exports.findNextDayWithLesson = (schedule, lesson, currentWeekDay) => {
+const findNextDayWithLesson = (schedule, lesson, currentWeekDay) => {
     let lastIndex = -1;
     if (schedule.slice(currentWeekDay).find((e) => e.includes(lesson))) {
         lastIndex =
@@ -16,7 +17,8 @@ exports.findNextDayWithLesson = (schedule, lesson, currentWeekDay) => {
     }
     return lastIndex;
 };
-exports.findNextLessonDate = (nextLessonWeekDay, { currentDate = new Date() } = {}) => {
+exports.findNextDayWithLesson = findNextDayWithLesson;
+const findNextLessonDate = (nextLessonWeekDay, { currentDate = new Date() } = {}) => {
     if (nextLessonWeekDay <= 7 && nextLessonWeekDay > 0) {
         const weekDay = currentDate.getDay() || 7; //Чтобы воскресенье было 7 днем недели
         const addition = nextLessonWeekDay <= weekDay ? 7 : 0; //Равно 7 если урок на следующей неделе
@@ -31,11 +33,14 @@ exports.findNextLessonDate = (nextLessonWeekDay, { currentDate = new Date() } = 
         throw new TypeError('Week day must be less or equal to 7');
     }
 };
-exports.toObject = (Document) => JSON.parse(JSON.stringify(Document));
-exports.isObjectId = (id) => {
+exports.findNextLessonDate = findNextLessonDate;
+const toObject = (Document) => JSON.parse(JSON.stringify(Document));
+exports.toObject = toObject;
+const isObjectId = (id) => {
     return mongoose_1.default.Types.ObjectId.isValid(id);
 };
-exports.findNotifiedStudents = (students, notificationDate, maxRemindFrequency) => {
+exports.isObjectId = isObjectId;
+const findNotifiedStudents = (students, notificationDate, maxRemindFrequency) => {
     return students.filter(({ settings: sets, lastHomeworkCheck }) => {
         if (sets.notificationsEnabled) {
             //Проверяет что уведомления включены
@@ -56,7 +61,8 @@ exports.findNotifiedStudents = (students, notificationDate, maxRemindFrequency) 
         }
     });
 };
-exports.lessonsIndexesToLessonsNames = (lessonList, indexes) => {
+exports.findNotifiedStudents = findNotifiedStudents;
+const lessonsIndexesToLessonsNames = (lessonList, indexes) => {
     if (Array.isArray(indexes) &&
         indexes.length > 0 &&
         indexes.every((lesson) => Array.isArray(lesson) && lesson.every(Number.isInteger)) //lessonList должен быть массивом массивов целых чисел
@@ -70,12 +76,14 @@ exports.lessonsIndexesToLessonsNames = (lessonList, indexes) => {
         throw new TypeError('lessonsIndexesByDays must be array of arrays of integers');
     }
 };
-exports.checkIsToday = (date, to = new Date()) => {
+exports.lessonsIndexesToLessonsNames = lessonsIndexesToLessonsNames;
+const checkIsToday = (date, to = new Date()) => {
     return (to.getDate() === date.getDate() &&
         date.getMonth() === to.getMonth() &&
         date.getFullYear() === to.getFullYear());
 };
-exports.isPartialOf = (object, instance) => {
+exports.checkIsToday = checkIsToday;
+const isPartialOf = (object, instance) => {
     if (Array.isArray(object))
         return Object.keys(instance).every((key) => object.includes(key));
     else {
@@ -83,14 +91,17 @@ exports.isPartialOf = (object, instance) => {
             Object.keys(instance).every((key) => object.hasOwnProperty(key)));
     }
 };
-exports.filterContentByDate = (content, date) => {
+exports.isPartialOf = isPartialOf;
+const filterContentByDate = (content, date) => {
     return content.filter((cont) => Math.abs(cont.to.getTime() - date.getTime()) <= exports.dayInMilliseconds &&
         cont.to.getDate() === date.getDate());
 };
-exports.mapHomeworkByLesson = (homework) => {
+exports.filterContentByDate = filterContentByDate;
+const mapHomeworkByLesson = (homework) => {
     return homework.reduce((acc, c) => (acc.has(c.lesson) ? acc.get(c.lesson).push(c) : acc.set(c.lesson, [c]), acc), new Map());
 };
-exports.deeplyAssignObjects = (objA, objB) => {
+exports.mapHomeworkByLesson = mapHomeworkByLesson;
+const deeplyAssignObjects = (objA, objB) => {
     let assignedObject = objA;
     const keys = Array.from(new Set([...Object.keys(objA), ...Object.keys(objB)]));
     for (const key of keys) {
@@ -125,3 +136,4 @@ exports.deeplyAssignObjects = (objA, objB) => {
     }
     return assignedObject;
 };
+exports.deeplyAssignObjects = deeplyAssignObjects;

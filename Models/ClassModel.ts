@@ -1,8 +1,8 @@
 import { IClass, ClassDocument } from '../types';
 import mongoose from 'mongoose';
-import { checkValidTime, isLesson, isURL, isValidClassName } from './utils';
+import { checkValidTime, inRange, isLesson, isURL, isValidClassName } from './utils';
 
-const attachment = new mongoose.Schema({
+const attachment = {
 	value: {
 		type: String,
 		validate: {
@@ -23,8 +23,7 @@ const attachment = new mongoose.Schema({
 	album_id: {
 		type: Number,
 	},
-});
-
+};
 const UserPreferencesSchema = {
 	notificationTime: {
 		type: String,
@@ -131,6 +130,60 @@ const AnnouncementsSchema = {
 	},
 };
 
+const lessonCallsSchema = {
+	start: {
+		type: String,
+		required: true,
+		validate: {
+			message: "Start must be a valid string in format '00:00'",
+			validator: checkValidTime,
+		},
+	},
+	end: {
+		type: String,
+		required: true,
+		validate: {
+			message: "End must be a valid string in format '00:00'",
+			validator: checkValidTime,
+		},
+	},
+};
+const callScheduleSchema = {
+	default: {
+		type: [lessonCallsSchema],
+		default: [],
+		validate: {
+			message: 'Times in array must be sorted',
+			validator: (arr: string[]) => {
+				const sortedArr = arr.sort();
+
+				return arr.every((el, i) => sortedArr[i] === el);
+			},
+		},
+	},
+	exceptions: {
+		type: [
+			{
+				type: [lessonCallsSchema],
+				default: [],
+				validate: {
+					message: 'Times in array must be sorted',
+					validator: (arr: string[]) => {
+						const sortedArr = arr.sort();
+
+						return arr.every((el, i) => sortedArr[i] === el);
+					},
+				},
+			},
+		],
+		default: [[], [], [], [], [], []],
+		validate: {
+			message: 'Exceptions array must be a length of 6',
+			validate: (arr: any[]) => inRange(arr.length, 0, 6),
+		},
+	},
+};
+
 const classSchema = new mongoose.Schema<ClassDocument>({
 	students: {
 		type: [
@@ -166,6 +219,10 @@ const classSchema = new mongoose.Schema<ClassDocument>({
 			],
 		],
 		default: Array.from({ length: 6 }, () => []),
+	},
+	callSchedule: {
+		type: callScheduleSchema,
+		default: {},
 	},
 	announcements: {
 		type: [AnnouncementsSchema],

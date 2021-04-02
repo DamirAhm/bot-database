@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getTimeFromDate = exports.isValidClassName = exports.classNameRegExp = exports.daysOfWeek = exports.isURL = exports.isLesson = exports.compareTimes = exports.checkValidTime = exports.timeRegExp = exports.inRange = exports.Lessons = exports.Roles = void 0;
 var Roles;
 (function (Roles) {
     Roles["student"] = "STUDENT";
@@ -26,20 +27,45 @@ exports.Lessons = [
     'Физкультура',
     'Химия',
 ];
-exports.checkValidTime = (str) => {
-    return (!isNaN(+str[0]) &&
-        +str[0] >= 0 &&
-        !isNaN(+str[1]) &&
-        +str[1] >= 0 &&
-        str[2] === ':' &&
-        !isNaN(+str[3]) &&
-        +str[3] >= 0 &&
-        !isNaN(+str[4]) &&
-        +str[4] >= 0);
+function inRange(number, min, max) {
+    if (min ?? min > number) {
+        return false;
+    }
+    if (max ?? max < number) {
+        return false;
+    }
+    return true;
+}
+exports.inRange = inRange;
+exports.timeRegExp = /(\d{2}):(\d{2})/;
+const checkValidTime = (str) => {
+    if (exports.timeRegExp.test(str)) {
+        //@ts-ignore
+        const [hours, minutes] = str
+            .match(exports.timeRegExp)
+            .slice(1)
+            .map((n) => parseInt(n));
+        if (!isNaN(hours) && !isNaN(minutes) && inRange(hours, 0, 23) && inRange(minutes, 0, 59)) {
+            return true;
+        }
+    }
+    return false;
 };
-exports.isLesson = (str) => /^[a-zа-я0-9.! ]*$/i.test(str);
+exports.checkValidTime = checkValidTime;
+const compareTimes = (a, b) => {
+    if (exports.checkValidTime(a) && exports.checkValidTime(b)) {
+        return a > b;
+    }
+    else {
+        throw new Error('Times should be in format: 00:00');
+    }
+};
+exports.compareTimes = compareTimes;
+const isLesson = (str) => /^[a-zа-я0-9.! ]*$/i.test(str);
+exports.isLesson = isLesson;
 const urlRegExp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/;
-exports.isURL = (str) => urlRegExp.test(str);
+const isURL = (str) => urlRegExp.test(str);
+exports.isURL = isURL;
 exports.daysOfWeek = [
     'Понедельник',
     'Вторник',
@@ -48,10 +74,19 @@ exports.daysOfWeek = [
     'Пятница',
     'Суббота',
 ];
-exports.isValidClassName = (name) => {
-    if (/(^\d{1,2})([A-Z]|[А-Я])/i.test(name)) {
-        const [_, digit] = name.match(/(^\d{1,2})([A-Z]|[А-Я])/i);
-        return +digit > 0 && +digit <= 11 && Number.isInteger(+digit);
+exports.classNameRegExp = /^(\d{1,2})([A-ZА-Я])$/i;
+const isValidClassName = (name) => {
+    if (exports.classNameRegExp.test(name)) {
+        //@ts-ignore
+        const digit = Number(name.match(exports.classNameRegExp)[1]);
+        return inRange(digit, 1, 11) && Number.isInteger(digit);
     }
     return false;
 };
+exports.isValidClassName = isValidClassName;
+const getTimeFromDate = (date) => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    return `${hours}:${minutes}`;
+};
+exports.getTimeFromDate = getTimeFromDate;

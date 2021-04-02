@@ -1,4 +1,4 @@
-import { Roles } from './Models/utils';
+import { compareTimes, getTimeFromDate, inRange, Roles } from './Models/utils';
 import _Student from './Models/StudentModel';
 import _School from './Models/SchoolModel';
 import _Class from './Models/ClassModel';
@@ -23,6 +23,7 @@ import {
 	ICreateStudentParams,
 	IHomework,
 	ISettings,
+	lessonCalls,
 	PopulatedClass,
 	PopulatedSchool,
 	PopulatedStudent,
@@ -188,8 +189,7 @@ export class DataBase {
 	}
 
 	async getStudentsForSchool(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool) {
-		//Any because ts is dumb and doesn't want to understand that /|\ type is OK for overloads
-		const Classes = await this.getClassesForSchool(schoolNameOrInstance as any);
+		const Classes = await this.getClassesForSchool(schoolNameOrInstance);
 
 		if (Classes) {
 			const PopulatedClasses = await Promise.all(
@@ -318,18 +318,13 @@ export class DataBase {
 
 	//* Homework
 	async addHomework(
-		{ classNameOrInstance, schoolName }: IClassData,
+		classData: IClassData,
 		content: ICreateHomework,
 		studentVkId: number,
 		expirationDate?: Date,
 	) {
 		if (this.validateContent(content).length === 0) {
-			let Class: PopulatedClass | ClassDocument | null;
-			if (typeof classNameOrInstance === 'string') {
-				Class = await this.getClassByName(classNameOrInstance, schoolName);
-			} else {
-				Class = classNameOrInstance;
-			}
+			const Class = await this.getClassByClassData(classData);
 
 			if (Class) {
 				if (Class.schedule.flat().includes(content.lesson)) {
@@ -378,16 +373,8 @@ export class DataBase {
 		}
 	} //Добавляет жомашнее задание в класс
 
-	async removeHomework(
-		{ classNameOrInstance, schoolName }: IClassData,
-		homeworkId: string | ObjectId,
-	) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async removeHomework(classData: IClassData, homeworkId: string | ObjectId) {
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			await Class.updateOne({
@@ -398,13 +385,8 @@ export class DataBase {
 			return false;
 		}
 	}
-	async getHomework({ classNameOrInstance, schoolName }: IClassData, date?: Date) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async getHomework(classData: IClassData, date?: Date) {
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			if (date) {
@@ -417,16 +399,11 @@ export class DataBase {
 		}
 	} //
 	async updateHomework(
-		{ classNameOrInstance, schoolName }: IClassData,
+		classData: IClassData,
 		homeworkId: string,
 		updates: Partial<Omit<IHomework, '_id'>>,
 	) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			const updatedHomework = Class.homework.map((ch) =>
@@ -444,13 +421,8 @@ export class DataBase {
 			return [];
 		}
 	}
-	async getHomeworkByDate({ classNameOrInstance, schoolName }: IClassData, date: Date) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async getHomeworkByDate(classData: IClassData, date: Date) {
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			const { homework } = Class;
@@ -463,16 +435,8 @@ export class DataBase {
 			return [];
 		}
 	}
-	async removeOldHomework(
-		{ classNameOrInstance, schoolName }: IClassData,
-		maxDate: Date = new Date(),
-	) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async removeOldHomework(classData: IClassData, maxDate: Date = new Date()) {
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			const { homework } = Class;
@@ -488,20 +452,12 @@ export class DataBase {
 			return [];
 		}
 	}
-	async togglePinHomework(
-		{ classNameOrInstance, schoolName }: IClassData,
-		homeworkId: string | ObjectId,
-	) {
+	async togglePinHomework(classData: IClassData, homeworkId: string | ObjectId) {
 		try {
-			let Class: PopulatedClass | ClassDocument | null;
-			if (typeof classNameOrInstance === 'string') {
-				Class = await this.getClassByName(classNameOrInstance, schoolName);
-			} else {
-				Class = classNameOrInstance;
-			}
+			const Class = await this.getClassByClassData(classData);
 
 			if (Class) {
-				const homework = await Class.homework.find(
+				const homework = Class.homework.find(
 					({ _id }) => _id.toString() === homeworkId.toString(),
 				);
 
@@ -521,14 +477,9 @@ export class DataBase {
 			return false;
 		}
 	}
-	async unpinAllHomework({ classNameOrInstance, schoolName }: IClassData) {
+	async unpinAllHomework(classData: IClassData) {
 		try {
-			let Class: PopulatedClass | ClassDocument | null;
-			if (typeof classNameOrInstance === 'string') {
-				Class = await this.getClassByName(classNameOrInstance, schoolName);
-			} else {
-				Class = classNameOrInstance;
-			}
+			const Class = await this.getClassByClassData(classData);
 
 			if (Class) {
 				await Class.updateOne({ $set: { 'homework.$[].pinned': false } });
@@ -549,31 +500,31 @@ export class DataBase {
 	async parseHomeworkToNotifications(currentDateForTest: Date) {
 		const classes: ClassDocument[] = await _Class.find({});
 		const notificationArray = []; //Массив массивов типа [[Массив вк айди учеников], [Массив дз]]
+
 		for (const cl of classes) {
 			const populatedClass = await this.populate(cl);
+
 			if (populatedClass.homework.length && populatedClass.students.length) {
 				const date = currentDateForTest || Date();
 				date.setDate(date.getDate() + 1); // Берем дз на некст день
+
 				const notifiedStudentIds = findNotifiedStudents(
 					populatedClass.students,
 					currentDateForTest || new Date(),
 					24 * 60 * 60 * 1000,
 				).map(({ vkId }) => vkId);
+
 				const homework = populatedClass.homework.filter(({ to }) => checkIsToday(to, date));
 				notificationArray.push([notifiedStudentIds, homework]);
 			}
 		}
+
 		return notificationArray;
 	} //
 
 	//* Schedule
-	async setSchedule({ classNameOrInstance, schoolName }: IClassData, newSchedule: string[][]) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async setSchedule(classData: IClassData, newSchedule: string[][]) {
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			await Class.updateOne({ schedule: newSchedule });
@@ -583,18 +534,9 @@ export class DataBase {
 		}
 	}
 
-	async changeDay(
-		{ classNameOrInstance, schoolName }: IClassData,
-		dayIndex: number,
-		newLessonsForDay: string[],
-	) {
+	async changeDay(classData: IClassData, dayIndex: number, newLessonsForDay: string[]) {
 		if (dayIndex <= 5 && dayIndex >= 0) {
-			let Class: PopulatedClass | ClassDocument | null;
-			if (typeof classNameOrInstance === 'string') {
-				Class = await this.getClassByName(classNameOrInstance, schoolName);
-			} else {
-				Class = classNameOrInstance;
-			}
+			const Class = await this.getClassByClassData(classData);
 
 			if (Class) {
 				const schedule = [...Class.schedule];
@@ -610,14 +552,8 @@ export class DataBase {
 			);
 		}
 	}
-	async getSchedule({ classNameOrInstance, schoolName }: IClassData) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
-
+	async getSchedule(classData: IClassData) {
+		const Class = await this.getClassByClassData(classData);
 		if (Class) {
 			return Class.schedule;
 		} else {
@@ -625,9 +561,75 @@ export class DataBase {
 		}
 	}
 
+	//* Call Schedule
+	async getCallCheduleForDay(classData: IClassData, dayIndex: number) {
+		try {
+			let Class = await this.getClassByClassData(classData);
+
+			if (Class) {
+				if (inRange(dayIndex, 0, 5)) {
+					if (Class.callSchedule.exceptions[dayIndex].length > 0) {
+						return Class.callSchedule.exceptions[dayIndex];
+					} else {
+						return Class.callSchedule.default;
+					}
+				} else {
+					throw new Error('Day index must be in range 0 to 5, got: ' + dayIndex);
+				}
+			} else {
+				return null;
+			}
+		} catch (e) {
+			console.error(e);
+			return null;
+		}
+	}
+	async addCallScheduleException(
+		classData: IClassData,
+		dayIndex: number,
+		schedule: lessonCalls[],
+	) {
+		try {
+			const Class = await this.getClassByClassData(classData);
+
+			if (Class) {
+				if (inRange(dayIndex, 0, 5)) {
+					Class.callSchedule.exceptions[dayIndex] = schedule;
+					await Class.save();
+
+					return true;
+				} else {
+					throw new Error('Day index must be in range 0 to 5, got: ' + dayIndex);
+				}
+			} else {
+				return false;
+			}
+		} catch (e) {
+			console.error(e);
+			return false;
+		}
+	}
+	getLessonAtSpecificTime(callSchedule: lessonCalls[], date: Date) {
+		const lessonEnds = callSchedule.map(({ end }) => end);
+		const time = getTimeFromDate(date);
+
+		let index = 0;
+
+		while (compareTimes(time, lessonEnds[index])) index++;
+
+		return callSchedule[index];
+	}
+	getNextCallTime(callSchedule: lessonCalls[], date: Date) {
+		const currentLesson = this.getLessonAtSpecificTime(callSchedule, date);
+		const currentTime = getTimeFromDate(date);
+
+		if (compareTimes(currentLesson.start, currentTime)) return currentLesson.start;
+		else return currentLesson.end;
+	}
+
 	//* Announcements
 	async addAnnouncement(
-		{ classNameOrInstance, schoolName }: IClassData,
+		classData: IClassData,
 		content: ICreateAnnouncement,
 		toDate: Date = new Date(),
 		toAll: boolean = false,
@@ -635,12 +637,7 @@ export class DataBase {
 	) {
 		if (this.validateContent(content).length === 0) {
 			if (this.validateDate(toDate, undefined, getTodayDate())) {
-				let Class: PopulatedClass | ClassDocument | null;
-				if (typeof classNameOrInstance === 'string') {
-					Class = await this.getClassByName(classNameOrInstance, schoolName);
-				} else {
-					Class = classNameOrInstance;
-				}
+				const Class = await this.getClassByClassData(classData);
 
 				if (Class) {
 					const newAnnouncement: IAnnouncement = {
@@ -676,13 +673,8 @@ export class DataBase {
 		}
 	} //
 
-	async getAnnouncements({ classNameOrInstance, schoolName }: IClassData, date?: Date) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async getAnnouncements(classData: IClassData, date?: Date) {
+		let Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			if (date) {
@@ -695,16 +687,8 @@ export class DataBase {
 		}
 	} //
 
-	async removeAnnouncement(
-		{ classNameOrInstance, schoolName }: IClassData,
-		announcementId: string | ObjectId,
-	) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async removeAnnouncement(classData: IClassData, announcementId: string | ObjectId) {
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			const announcements = Class.announcements;
@@ -721,16 +705,11 @@ export class DataBase {
 	}
 
 	async updateAnnouncement(
-		{ classNameOrInstance, schoolName }: IClassData,
+		classData: IClassData,
 		announcementId: string | ObjectId,
 		updates: Partial<Omit<IAnnouncement, '_id'>>,
 	) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			const updatedAnnouncements = Class.announcements.map((announcement) =>
@@ -749,16 +728,8 @@ export class DataBase {
 		}
 	}
 
-	async removeOldAnnouncements(
-		{ classNameOrInstance, schoolName }: IClassData,
-		maxDate: Date = new Date(),
-	) {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName);
-		} else {
-			Class = classNameOrInstance;
-		}
+	async removeOldAnnouncements(classData: IClassData, maxDate: Date = new Date()) {
+		const Class = await this.getClassByClassData(classData);
 
 		if (Class) {
 			const { announcements } = Class;
@@ -775,22 +746,12 @@ export class DataBase {
 		}
 	}
 
-	async togglePinAnnouncement(
-		{ classNameOrInstance, schoolName }: IClassData,
-		announcementId: string | ObjectId,
-	) {
+	async togglePinAnnouncement(classData: IClassData, announcementId: string | ObjectId) {
 		try {
-			let Class: PopulatedClass | ClassDocument | null;
-			if (typeof classNameOrInstance === 'string') {
-				Class = await this.getClassByName(classNameOrInstance, schoolName);
-			} else {
-				Class = classNameOrInstance;
-			}
+			const Class = await this.getClassByClassData(classData);
 
 			if (Class) {
-				const announcement = await Class.announcements.find(
-					({ _id }) => _id === announcementId,
-				);
+				const announcement = Class.announcements.find(({ _id }) => _id === announcementId);
 
 				if (announcement) {
 					announcement.pinned = !announcement.pinned;
@@ -808,14 +769,9 @@ export class DataBase {
 			return false;
 		}
 	}
-	async unpinAllAnnouncements({ classNameOrInstance, schoolName }: IClassData) {
+	async unpinAllAnnouncements(classData: IClassData) {
 		try {
-			let Class: PopulatedClass | ClassDocument | null;
-			if (typeof classNameOrInstance === 'string') {
-				Class = await this.getClassByName(classNameOrInstance, schoolName);
-			} else {
-				Class = classNameOrInstance;
-			}
+			let Class = await this.getClassByClassData(classData);
 
 			if (Class) {
 				await Class.updateOne({ $set: { 'announcements.$[].pinned': false } });
@@ -839,12 +795,7 @@ export class DataBase {
 		vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent,
 		diffObject: Partial<ISettings>,
 	) {
-		let Student: PopulatedStudent | StudentDocument | null;
-		if (typeof vkIdOrStudentInstance === 'number') {
-			Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-		} else {
-			Student = vkIdOrStudentInstance;
-		}
+		const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
 
 		if (Student) {
 			await Student.updateOne({ settings: { ...Student.settings, ...diffObject } });
@@ -857,12 +808,7 @@ export class DataBase {
 		vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent,
 		newCheckDate: Date,
 	) {
-		let Student: PopulatedStudent | StudentDocument | null;
-		if (typeof vkIdOrStudentInstance === 'number') {
-			Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-		} else {
-			Student = vkIdOrStudentInstance;
-		}
+		const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
 
 		if (Student) {
 			await Student.updateOne({
@@ -875,17 +821,9 @@ export class DataBase {
 	}
 
 	//* Roles utils
-	async getRole(id: number | ObjectId) {
+	async getRole(vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent) {
 		try {
-			let Student;
-
-			if (typeof id === 'number') {
-				Student = await _Student.findOne({ vkId: id });
-			} else if (isObjectId(id)) {
-				Student = await _Student.findById(id);
-			} else {
-				throw new TypeError(`Id must be a number or an objectId, got ${id}`);
-			}
+			const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
 
 			if (Student) {
 				return Student.role;
@@ -900,12 +838,8 @@ export class DataBase {
 	async backStudentToInitialRole(
 		vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent,
 	) {
-		let Student: PopulatedStudent | StudentDocument | null;
-		if (typeof vkIdOrStudentInstance === 'number') {
-			Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-		} else {
-			Student = vkIdOrStudentInstance;
-		}
+		const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
+
 		if (Student) {
 			await Student.updateOne({ role: Roles.student });
 			return true;
@@ -920,18 +854,12 @@ export class DataBase {
 		classNameOrInstance: string | ClassDocument | PopulatedClass,
 		schoolName?: string,
 	): Promise<boolean> {
-		let Class: PopulatedClass | ClassDocument | null;
-		if (typeof classNameOrInstance === 'string') {
-			Class = await this.getClassByName(classNameOrInstance, schoolName || '');
-		} else {
-			Class = classNameOrInstance;
-		}
-		let Student: PopulatedStudent | StudentDocument | null;
-		if (typeof vkIdOrStudentInstance === 'number') {
-			Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-		} else {
-			Student = vkIdOrStudentInstance;
-		}
+		const Class = await this.getClassByClassData({
+			classNameOrInstance,
+			schoolName: schoolName ?? '',
+		});
+
+		const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
 
 		if (Class && Student) {
 			await Class.updateOne({
@@ -953,32 +881,24 @@ export class DataBase {
 	async removeStudentFromClass(
 		vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent,
 	) {
-		let PopulatedStudent: PopulatedStudent | null = null;
+		const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
 
-		if (typeof vkIdOrStudentInstance === 'number') {
-			const Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-			if (Student) {
-				PopulatedStudent = await this.populate(Student);
-			}
-		} else if (isStudentPopulated(vkIdOrStudentInstance)) {
-			PopulatedStudent = vkIdOrStudentInstance;
-		} else {
-			PopulatedStudent = await this.populate(vkIdOrStudentInstance);
-		}
+		if (!Student) return false;
+		const PopulatedStudent = isStudentPopulated(Student)
+			? Student
+			: await this.populate(Student);
 
-		if (PopulatedStudent) {
-			const Class: ClassDocument = PopulatedStudent.class;
-			if (!Class) return true;
-			await Class.updateOne({
-				students: Class.students.filter(
-					(_id) => _id.toString() !== PopulatedStudent?._id.toString(),
-				),
-			});
-			await PopulatedStudent.updateOne({ class: null });
-			return true;
-		} else {
-			return false;
-		}
+		const Class: ClassDocument = PopulatedStudent.class;
+		if (!Class) return true;
+
+		await Class.updateOne({
+			students: Class.students.filter(
+				(_id) => _id.toString() !== PopulatedStudent?._id.toString(),
+			),
+		});
+		await PopulatedStudent.updateOne({ class: null });
+
+		return true;
 	} //Удаляет ученика из класса
 
 	async changeClass(
@@ -986,47 +906,29 @@ export class DataBase {
 		newClassNameOrInstance: string | ClassDocument | PopulatedClass,
 		schoolName?: string,
 	) {
-		let PopulatedStudent: PopulatedStudent | null;
+		const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
 
-		if (typeof vkIdOrStudentInstance === 'number') {
-			const Student = await this.getStudentByVkId(vkIdOrStudentInstance);
+		const newClass = await this.getClassByClassData({
+			classNameOrInstance: newClassNameOrInstance,
+			schoolName: schoolName ?? '',
+		});
+		if (!(newClass && Student)) return false;
 
-			if (Student) {
-				PopulatedStudent = await this.populate(Student);
-			} else {
-				PopulatedStudent = null;
-			}
-		} else if (isStudentPopulated(vkIdOrStudentInstance)) {
-			PopulatedStudent = vkIdOrStudentInstance;
-		} else {
-			PopulatedStudent = await this.populate(vkIdOrStudentInstance);
-		}
-		let newClass: PopulatedClass | ClassDocument | null;
-		if (typeof newClassNameOrInstance === 'string') {
-			newClass = await this.getClassByName(newClassNameOrInstance, schoolName || '');
-		} else if (isClassPopulated(newClassNameOrInstance)) {
-			newClass = newClassNameOrInstance;
-		} else {
-			newClass = newClassNameOrInstance;
-		}
+		const PopulatedStudent = isStudentPopulated(Student)
+			? Student
+			: await this.populate(Student);
 
-		if (PopulatedStudent !== null) {
-			if (newClass !== null) {
-				if (PopulatedStudent.class !== null && PopulatedStudent.class !== undefined) {
-					if (PopulatedStudent.class.name !== newClassNameOrInstance) {
-						const removed = await this.removeStudentFromClass(PopulatedStudent);
-						if (!removed) {
-							return false;
-						}
-					} else {
-						return true;
-					}
+		if (PopulatedStudent.class !== null && PopulatedStudent.class !== undefined) {
+			if (PopulatedStudent.class.name !== newClass.name) {
+				const removed = await this.removeStudentFromClass(PopulatedStudent);
+				if (!removed) {
+					return false;
 				}
-
-				return await this.addStudentToClass(PopulatedStudent, newClass);
 			} else {
-				return false;
+				return true;
 			}
+
+			return await this.addStudentToClass(PopulatedStudent, newClass);
 		} else {
 			return false;
 		}
@@ -1095,6 +997,32 @@ export class DataBase {
 		}
 
 		return false;
+	}
+
+	async getClassByClassData({ classNameOrInstance, schoolName }: IClassData) {
+		let Class: PopulatedClass | ClassDocument | null;
+		if (typeof classNameOrInstance === 'string') {
+			if (typeof schoolName === 'string') {
+				Class = await this.getClassByName(classNameOrInstance, schoolName);
+			} else {
+				throw new Error('School name must be a string if class name is provided');
+			}
+		} else {
+			Class = classNameOrInstance;
+		}
+
+		return Class;
+	}
+	async getStudentByStudentData(
+		vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent,
+	) {
+		let Student: PopulatedStudent | StudentDocument | null;
+		if (typeof vkIdOrStudentInstance === 'number') {
+			Student = await this.getStudentByVkId(vkIdOrStudentInstance);
+		} else {
+			Student = vkIdOrStudentInstance;
+		}
+		return Student;
 	}
 
 	connect(...args: any[]) {

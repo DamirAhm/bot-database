@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DataBase = void 0;
 const tslib_1 = require("tslib");
 const utils_1 = require("./Models/utils");
 const StudentModel_1 = tslib_1.__importDefault(require("./Models/StudentModel"));
@@ -130,7 +131,6 @@ class DataBase {
         }
     }
     async getStudentsForSchool(schoolNameOrInstance) {
-        //Any because ts is dumb and doesn't want to understand that /|\ type is OK for overloads
         const Classes = await this.getClassesForSchool(schoolNameOrInstance);
         if (Classes) {
             const PopulatedClasses = await Promise.all(Classes.map((Class) => this.populate(Class)));
@@ -228,15 +228,9 @@ class DataBase {
     }
     //! Classes
     //* Homework
-    async addHomework({ classNameOrInstance, schoolName }, content, studentVkId, expirationDate) {
+    async addHomework(classData, content, studentVkId, expirationDate) {
         if (this.validateContent(content).length === 0) {
-            let Class;
-            if (typeof classNameOrInstance === 'string') {
-                Class = await this.getClassByName(classNameOrInstance, schoolName);
-            }
-            else {
-                Class = classNameOrInstance;
-            }
+            const Class = await this.getClassByClassData(classData);
             if (Class) {
                 if (Class.schedule.flat().includes(content.lesson)) {
                     const newHomework = {
@@ -281,14 +275,8 @@ class DataBase {
             throw new Error(JSON.stringify(this.validateContent(content)));
         }
     } //Добавляет жомашнее задание в класс
-    async removeHomework({ classNameOrInstance, schoolName }, homeworkId) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async removeHomework(classData, homeworkId) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             await Class.updateOne({
                 homework: Class.homework.filter((hw) => hw._id.toString() !== homeworkId),
@@ -299,14 +287,8 @@ class DataBase {
             return false;
         }
     }
-    async getHomework({ classNameOrInstance, schoolName }, date) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async getHomework(classData, date) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             if (date) {
                 return Class.homework.filter(({ to }) => functions_1.checkIsToday(date, to));
@@ -319,14 +301,8 @@ class DataBase {
             return [];
         }
     } //
-    async updateHomework({ classNameOrInstance, schoolName }, homeworkId, updates) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async updateHomework(classData, homeworkId, updates) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             const updatedHomework = Class.homework.map((ch) => ch._id.toString() === homeworkId.toString()
                 ? functions_1.deeplyAssignObjects(ch, updates)
@@ -340,14 +316,8 @@ class DataBase {
             return [];
         }
     }
-    async getHomeworkByDate({ classNameOrInstance, schoolName }, date) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async getHomeworkByDate(classData, date) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             const { homework } = Class;
             return homework?.filter((hw) => Math.abs(hw.to.getTime() - date.getTime()) <= functions_1.dayInMilliseconds &&
@@ -357,14 +327,8 @@ class DataBase {
             return [];
         }
     }
-    async removeOldHomework({ classNameOrInstance, schoolName }, maxDate = new Date()) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async removeOldHomework(classData, maxDate = new Date()) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             const { homework } = Class;
             const actualHomework = homework.filter(({ to }) => getPureDate(maxDate).getTime() - getPureDate(to).getTime() <= 0);
@@ -375,17 +339,11 @@ class DataBase {
             return [];
         }
     }
-    async togglePinHomework({ classNameOrInstance, schoolName }, homeworkId) {
+    async togglePinHomework(classData, homeworkId) {
         try {
-            let Class;
-            if (typeof classNameOrInstance === 'string') {
-                Class = await this.getClassByName(classNameOrInstance, schoolName);
-            }
-            else {
-                Class = classNameOrInstance;
-            }
+            const Class = await this.getClassByClassData(classData);
             if (Class) {
-                const homework = await Class.homework.find(({ _id }) => _id.toString() === homeworkId.toString());
+                const homework = Class.homework.find(({ _id }) => _id.toString() === homeworkId.toString());
                 if (homework) {
                     homework.pinned = !homework.pinned;
                     await Class.save();
@@ -401,15 +359,9 @@ class DataBase {
             return false;
         }
     }
-    async unpinAllHomework({ classNameOrInstance, schoolName }) {
+    async unpinAllHomework(classData) {
         try {
-            let Class;
-            if (typeof classNameOrInstance === 'string') {
-                Class = await this.getClassByName(classNameOrInstance, schoolName);
-            }
-            else {
-                Class = classNameOrInstance;
-            }
+            const Class = await this.getClassByClassData(classData);
             if (Class) {
                 await Class.updateOne({ $set: { 'homework.$[].pinned': false } });
                 return true;
@@ -440,14 +392,8 @@ class DataBase {
         return notificationArray;
     } //
     //* Schedule
-    async setSchedule({ classNameOrInstance, schoolName }, newSchedule) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async setSchedule(classData, newSchedule) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             await Class.updateOne({ schedule: newSchedule });
             return true;
@@ -456,15 +402,9 @@ class DataBase {
             return false;
         }
     }
-    async changeDay({ classNameOrInstance, schoolName }, dayIndex, newLessonsForDay) {
+    async changeDay(classData, dayIndex, newLessonsForDay) {
         if (dayIndex <= 5 && dayIndex >= 0) {
-            let Class;
-            if (typeof classNameOrInstance === 'string') {
-                Class = await this.getClassByName(classNameOrInstance, schoolName);
-            }
-            else {
-                Class = classNameOrInstance;
-            }
+            const Class = await this.getClassByClassData(classData);
             if (Class) {
                 const schedule = [...Class.schedule];
                 schedule[dayIndex] = newLessonsForDay;
@@ -479,14 +419,8 @@ class DataBase {
             throw new TypeError(`day index must be number less than 6 and greater than 0, got ${dayIndex}`);
         }
     }
-    async getSchedule({ classNameOrInstance, schoolName }) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async getSchedule(classData) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             return Class.schedule;
         }
@@ -494,17 +428,75 @@ class DataBase {
             return [];
         }
     }
-    //* Announcements
-    async addAnnouncement({ classNameOrInstance, schoolName }, content, toDate = new Date(), toAll = false, vkId) {
-        if (this.validateContent(content).length === 0) {
-            if (this.validateDate(toDate, undefined, getTodayDate())) {
-                let Class;
-                if (typeof classNameOrInstance === 'string') {
-                    Class = await this.getClassByName(classNameOrInstance, schoolName);
+    //* Call Schedule
+    async getCallCheduleForDay(classData, dayIndex) {
+        try {
+            let Class = await this.getClassByClassData(classData);
+            if (Class) {
+                if (utils_1.inRange(dayIndex, 0, 5)) {
+                    if (Class.callSchedule.exceptions[dayIndex].length > 0) {
+                        return Class.callSchedule.exceptions[dayIndex];
+                    }
+                    else {
+                        return Class.callSchedule.default;
+                    }
                 }
                 else {
-                    Class = classNameOrInstance;
+                    throw new Error('Day index must be in range 0 to 5, got: ' + dayIndex);
                 }
+            }
+            else {
+                return null;
+            }
+        }
+        catch (e) {
+            console.error(e);
+            return null;
+        }
+    }
+    async addCallScheduleException(classData, dayIndex, schedule) {
+        try {
+            const Class = await this.getClassByClassData(classData);
+            if (Class) {
+                if (utils_1.inRange(dayIndex, 0, 5)) {
+                    Class.callSchedule.exceptions[dayIndex] = schedule;
+                    await Class.save();
+                    return true;
+                }
+                else {
+                    throw new Error('Day index must be in range 0 to 5, got: ' + dayIndex);
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        catch (e) {
+            console.error(e);
+            return false;
+        }
+    }
+    getLessonAtSpecificTime(callSchedule, date) {
+        const lessonEnds = callSchedule.map(({ end }) => end);
+        const time = utils_1.getTimeFromDate(date);
+        let index = 0;
+        while (utils_1.compareTimes(time, lessonEnds[index]))
+            index++;
+        return callSchedule[index];
+    }
+    getNextCallTime(callSchedule, date) {
+        const currentLesson = this.getLessonAtSpecificTime(callSchedule, date);
+        const currentTime = utils_1.getTimeFromDate(date);
+        if (utils_1.compareTimes(currentLesson.start, currentTime))
+            return currentLesson.start;
+        else
+            return currentLesson.end;
+    }
+    //* Announcements
+    async addAnnouncement(classData, content, toDate = new Date(), toAll = false, vkId) {
+        if (this.validateContent(content).length === 0) {
+            if (this.validateDate(toDate, undefined, getTodayDate())) {
+                const Class = await this.getClassByClassData(classData);
                 if (Class) {
                     const newAnnouncement = {
                         createdBy: vkId,
@@ -541,14 +533,8 @@ class DataBase {
             throw new TypeError(JSON.stringify(this.validateContent(content)));
         }
     } //
-    async getAnnouncements({ classNameOrInstance, schoolName }, date) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async getAnnouncements(classData, date) {
+        let Class = await this.getClassByClassData(classData);
         if (Class) {
             if (date) {
                 return Class.announcements.filter((ch) => functions_1.checkIsToday(ch.to, date));
@@ -561,14 +547,8 @@ class DataBase {
             return null;
         }
     } //
-    async removeAnnouncement({ classNameOrInstance, schoolName }, announcementId) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async removeAnnouncement(classData, announcementId) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             const announcements = Class.announcements;
             const updatedChanges = announcements.filter((ch) => ch._id.toString() !== announcementId.toString());
@@ -579,14 +559,8 @@ class DataBase {
             return null;
         }
     }
-    async updateAnnouncement({ classNameOrInstance, schoolName }, announcementId, updates) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async updateAnnouncement(classData, announcementId, updates) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             const updatedAnnouncements = Class.announcements.map((announcement) => announcement._id.toString() === announcementId.toString()
                 ? functions_1.deeplyAssignObjects(announcement, updates)
@@ -600,14 +574,8 @@ class DataBase {
             return [];
         }
     }
-    async removeOldAnnouncements({ classNameOrInstance, schoolName }, maxDate = new Date()) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName);
-        }
-        else {
-            Class = classNameOrInstance;
-        }
+    async removeOldAnnouncements(classData, maxDate = new Date()) {
+        const Class = await this.getClassByClassData(classData);
         if (Class) {
             const { announcements } = Class;
             const actualAnnouncements = announcements.filter(({ to }) => getPureDate(maxDate).getTime() - getPureDate(to).getTime() <= 0);
@@ -618,17 +586,11 @@ class DataBase {
             return [];
         }
     }
-    async togglePinAnnouncement({ classNameOrInstance, schoolName }, announcementId) {
+    async togglePinAnnouncement(classData, announcementId) {
         try {
-            let Class;
-            if (typeof classNameOrInstance === 'string') {
-                Class = await this.getClassByName(classNameOrInstance, schoolName);
-            }
-            else {
-                Class = classNameOrInstance;
-            }
+            const Class = await this.getClassByClassData(classData);
             if (Class) {
-                const announcement = await Class.announcements.find(({ _id }) => _id === announcementId);
+                const announcement = Class.announcements.find(({ _id }) => _id === announcementId);
                 if (announcement) {
                     announcement.pinned = !announcement.pinned;
                     await Class.save();
@@ -644,15 +606,9 @@ class DataBase {
             return false;
         }
     }
-    async unpinAllAnnouncements({ classNameOrInstance, schoolName }) {
+    async unpinAllAnnouncements(classData) {
         try {
-            let Class;
-            if (typeof classNameOrInstance === 'string') {
-                Class = await this.getClassByName(classNameOrInstance, schoolName);
-            }
-            else {
-                Class = classNameOrInstance;
-            }
+            let Class = await this.getClassByClassData(classData);
             if (Class) {
                 await Class.updateOne({ $set: { 'announcements.$[].pinned': false } });
                 return true;
@@ -669,13 +625,7 @@ class DataBase {
     //! Students
     //* Settings
     async changeSettings(vkIdOrStudentInstance, diffObject) {
-        let Student;
-        if (typeof vkIdOrStudentInstance === 'number') {
-            Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-        }
-        else {
-            Student = vkIdOrStudentInstance;
-        }
+        const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
         if (Student) {
             await Student.updateOne({ settings: { ...Student.settings, ...diffObject } });
             return true;
@@ -685,13 +635,7 @@ class DataBase {
         }
     }
     async changeLastHomeworkCheckDate(vkIdOrStudentInstance, newCheckDate) {
-        let Student;
-        if (typeof vkIdOrStudentInstance === 'number') {
-            Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-        }
-        else {
-            Student = vkIdOrStudentInstance;
-        }
+        const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
         if (Student) {
             await Student.updateOne({
                 lastHomeworkCheck: newCheckDate,
@@ -703,18 +647,9 @@ class DataBase {
         }
     }
     //* Roles utils
-    async getRole(id) {
+    async getRole(vkIdOrStudentInstance) {
         try {
-            let Student;
-            if (typeof id === 'number') {
-                Student = await StudentModel_1.default.findOne({ vkId: id });
-            }
-            else if (isObjectId(id)) {
-                Student = await StudentModel_1.default.findById(id);
-            }
-            else {
-                throw new TypeError(`Id must be a number or an objectId, got ${id}`);
-            }
+            const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
             if (Student) {
                 return Student.role;
             }
@@ -729,13 +664,7 @@ class DataBase {
         }
     }
     async backStudentToInitialRole(vkIdOrStudentInstance) {
-        let Student;
-        if (typeof vkIdOrStudentInstance === 'number') {
-            Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-        }
-        else {
-            Student = vkIdOrStudentInstance;
-        }
+        const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
         if (Student) {
             await Student.updateOne({ role: utils_1.Roles.student });
             return true;
@@ -746,20 +675,11 @@ class DataBase {
     } //Возвращает редактора к роли ученика
     //* Interactions
     async addStudentToClass(vkIdOrStudentInstance, classNameOrInstance, schoolName) {
-        let Class;
-        if (typeof classNameOrInstance === 'string') {
-            Class = await this.getClassByName(classNameOrInstance, schoolName || '');
-        }
-        else {
-            Class = classNameOrInstance;
-        }
-        let Student;
-        if (typeof vkIdOrStudentInstance === 'number') {
-            Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-        }
-        else {
-            Student = vkIdOrStudentInstance;
-        }
+        const Class = await this.getClassByClassData({
+            classNameOrInstance,
+            schoolName: schoolName ?? '',
+        });
+        const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
         if (Class && Student) {
             await Class.updateOne({
                 $addToSet: { students: Student._id },
@@ -777,78 +697,43 @@ class DataBase {
         }
     } //Добавляет ученика в класс
     async removeStudentFromClass(vkIdOrStudentInstance) {
-        let PopulatedStudent = null;
-        if (typeof vkIdOrStudentInstance === 'number') {
-            const Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-            if (Student) {
-                PopulatedStudent = await this.populate(Student);
-            }
-        }
-        else if (isStudentPopulated(vkIdOrStudentInstance)) {
-            PopulatedStudent = vkIdOrStudentInstance;
-        }
-        else {
-            PopulatedStudent = await this.populate(vkIdOrStudentInstance);
-        }
-        if (PopulatedStudent) {
-            const Class = PopulatedStudent.class;
-            if (!Class)
-                return true;
-            await Class.updateOne({
-                students: Class.students.filter((_id) => _id.toString() !== PopulatedStudent?._id.toString()),
-            });
-            await PopulatedStudent.updateOne({ class: null });
-            return true;
-        }
-        else {
+        const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
+        if (!Student)
             return false;
-        }
+        const PopulatedStudent = isStudentPopulated(Student)
+            ? Student
+            : await this.populate(Student);
+        const Class = PopulatedStudent.class;
+        if (!Class)
+            return true;
+        await Class.updateOne({
+            students: Class.students.filter((_id) => _id.toString() !== PopulatedStudent?._id.toString()),
+        });
+        await PopulatedStudent.updateOne({ class: null });
+        return true;
     } //Удаляет ученика из класса
     async changeClass(vkIdOrStudentInstance, newClassNameOrInstance, schoolName) {
-        let PopulatedStudent;
-        if (typeof vkIdOrStudentInstance === 'number') {
-            const Student = await this.getStudentByVkId(vkIdOrStudentInstance);
-            if (Student) {
-                PopulatedStudent = await this.populate(Student);
-            }
-            else {
-                PopulatedStudent = null;
-            }
-        }
-        else if (isStudentPopulated(vkIdOrStudentInstance)) {
-            PopulatedStudent = vkIdOrStudentInstance;
-        }
-        else {
-            PopulatedStudent = await this.populate(vkIdOrStudentInstance);
-        }
-        let newClass;
-        if (typeof newClassNameOrInstance === 'string') {
-            newClass = await this.getClassByName(newClassNameOrInstance, schoolName || '');
-        }
-        else if (isClassPopulated(newClassNameOrInstance)) {
-            newClass = newClassNameOrInstance;
-        }
-        else {
-            newClass = newClassNameOrInstance;
-        }
-        if (PopulatedStudent !== null) {
-            if (newClass !== null) {
-                if (PopulatedStudent.class !== null && PopulatedStudent.class !== undefined) {
-                    if (PopulatedStudent.class.name !== newClassNameOrInstance) {
-                        const removed = await this.removeStudentFromClass(PopulatedStudent);
-                        if (!removed) {
-                            return false;
-                        }
-                    }
-                    else {
-                        return true;
-                    }
+        const Student = await this.getStudentByStudentData(vkIdOrStudentInstance);
+        const newClass = await this.getClassByClassData({
+            classNameOrInstance: newClassNameOrInstance,
+            schoolName: schoolName ?? '',
+        });
+        if (!(newClass && Student))
+            return false;
+        const PopulatedStudent = isStudentPopulated(Student)
+            ? Student
+            : await this.populate(Student);
+        if (PopulatedStudent.class !== null && PopulatedStudent.class !== undefined) {
+            if (PopulatedStudent.class.name !== newClass.name) {
+                const removed = await this.removeStudentFromClass(PopulatedStudent);
+                if (!removed) {
+                    return false;
                 }
-                return await this.addStudentToClass(PopulatedStudent, newClass);
             }
             else {
-                return false;
+                return true;
             }
+            return await this.addStudentToClass(PopulatedStudent, newClass);
         }
         else {
             return false;
@@ -907,6 +792,31 @@ class DataBase {
             return this.validateDate(new Date(date), maxDate, minDate);
         }
         return false;
+    }
+    async getClassByClassData({ classNameOrInstance, schoolName }) {
+        let Class;
+        if (typeof classNameOrInstance === 'string') {
+            if (typeof schoolName === 'string') {
+                Class = await this.getClassByName(classNameOrInstance, schoolName);
+            }
+            else {
+                throw new Error('School name must be a string if class name is provided');
+            }
+        }
+        else {
+            Class = classNameOrInstance;
+        }
+        return Class;
+    }
+    async getStudentByStudentData(vkIdOrStudentInstance) {
+        let Student;
+        if (typeof vkIdOrStudentInstance === 'number') {
+            Student = await this.getStudentByVkId(vkIdOrStudentInstance);
+        }
+        else {
+            Student = vkIdOrStudentInstance;
+        }
+        return Student;
     }
     connect(...args) {
         mongoose_1.default.connect(this.uri, ...args);

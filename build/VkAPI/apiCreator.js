@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createVkApi = void 0;
 const tslib_1 = require("tslib");
 const qs_1 = tslib_1.__importDefault(require("qs"));
 const https_1 = tslib_1.__importDefault(require("https"));
-exports.createVkApi = (token) => {
+const createVkApi = (token) => {
     return (method, pars) => {
         pars.v = pars.v || '5.103';
         return new Promise((resolve, reject) => {
@@ -32,3 +33,4 @@ exports.createVkApi = (token) => {
         });
     };
 };
+exports.createVkApi = createVkApi;

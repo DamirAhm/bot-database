@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const mongoose_1 = tslib_1.__importDefault(require("mongoose"));
 const utils_1 = require("./utils");
-const attachment = new mongoose_1.default.Schema({
+const attachment = {
     value: {
         type: String,
         validate: {
@@ -23,7 +23,7 @@ const attachment = new mongoose_1.default.Schema({
     album_id: {
         type: Number,
     },
-});
+};
 const UserPreferencesSchema = {
     notificationTime: {
         type: String,
@@ -127,6 +127,57 @@ const AnnouncementsSchema = {
         default: new mongoose_1.default.Types.ObjectId(),
     },
 };
+const lessonCallsSchema = {
+    start: {
+        type: String,
+        required: true,
+        validate: {
+            message: "Start must be a valid string in format '00:00'",
+            validator: utils_1.checkValidTime,
+        },
+    },
+    end: {
+        type: String,
+        required: true,
+        validate: {
+            message: "End must be a valid string in format '00:00'",
+            validator: utils_1.checkValidTime,
+        },
+    },
+};
+const callScheduleSchema = {
+    default: {
+        type: [lessonCallsSchema],
+        default: [],
+        validate: {
+            message: 'Times in array must be sorted',
+            validator: (arr) => {
+                const sortedArr = arr.sort();
+                return arr.every((el, i) => sortedArr[i] === el);
+            },
+        },
+    },
+    exceptions: {
+        type: [
+            {
+                type: [lessonCallsSchema],
+                default: [],
+                validate: {
+                    message: 'Times in array must be sorted',
+                    validator: (arr) => {
+                        const sortedArr = arr.sort();
+                        return arr.every((el, i) => sortedArr[i] === el);
+                    },
+                },
+            },
+        ],
+        default: [[], [], [], [], [], []],
+        validate: {
+            message: 'Exceptions array must be a length of 6',
+            validate: (arr) => utils_1.inRange(arr.length, 0, 6),
+        },
+    },
+};
 const classSchema = new mongoose_1.default.Schema({
     students: {
         type: [
@@ -162,6 +213,10 @@ const classSchema = new mongoose_1.default.Schema({
             ],
         ],
         default: Array.from({ length: 6 }, () => []),
+    },
+    callSchedule: {
+        type: callScheduleSchema,
+        default: {},
     },
     announcements: {
         type: [AnnouncementsSchema],
