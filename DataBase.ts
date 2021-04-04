@@ -563,18 +563,23 @@ export class DataBase {
 	}
 
 	//* Call Schedule
-	async getCallSchedule(schoolName: string): Promise<callSchedule | null> {
-		const School = await this.getSchoolByName(schoolName);
+	async getCallSchedule(
+		schoolNameOrInstance: string | SchoolDocument | PopulatedSchool,
+	): Promise<callSchedule | null> {
+		const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
 
 		if (School) {
-			return School?.callSchedule;
+			return School.callSchedule;
 		} else {
 			return null;
 		}
 	}
-	async getCallCheduleForDay(schoolName: string, dayIndex: number) {
+	async getCallCheduleForDay(
+		schoolNameOrInstance: string | SchoolDocument | PopulatedSchool,
+		dayIndex: number,
+	) {
 		try {
-			const School = await this.getSchoolByName(schoolName);
+			const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
 
 			if (School) {
 				if (inRange(dayIndex, 1, 6)) {
@@ -595,9 +600,13 @@ export class DataBase {
 			return null;
 		}
 	}
-	async addCallScheduleException(schoolName: string, dayIndex: number, schedule: lessonCall[]) {
+	async addCallScheduleException(
+		schoolNameOrInstance: string | SchoolDocument | PopulatedSchool,
+		dayIndex: number,
+		schedule: lessonCall[],
+	) {
 		try {
-			const School = await this.getSchoolByName(schoolName);
+			const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
 
 			if (School) {
 				if (inRange(dayIndex, 1, 6)) {
@@ -617,8 +626,11 @@ export class DataBase {
 			return false;
 		}
 	}
-	async changeDefaultCallSchedule(schoolName: string, schedule: lessonCall[]) {
-		const School = await this.getSchoolByName(schoolName);
+	async changeDefaultCallSchedule(
+		schoolNameOrInstance: string | SchoolDocument | PopulatedSchool,
+		schedule: lessonCall[],
+	) {
+		const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
 
 		if (School) {
 			School.callSchedule.defaultSchedule = schedule;
@@ -1043,6 +1055,16 @@ export class DataBase {
 			Student = vkIdOrStudentInstance;
 		}
 		return Student;
+	}
+	async getSchoolBySchoolData(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool) {
+		let School: SchoolDocument | PopulatedSchool | null;
+		if (typeof schoolNameOrInstance === 'string') {
+			School = await this.getSchoolByName(schoolNameOrInstance);
+		} else {
+			School = schoolNameOrInstance;
+		}
+
+		return School;
 	}
 
 	connect(...args: any[]) {

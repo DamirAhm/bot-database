@@ -37,10 +37,10 @@ export declare class DataBase {
     setSchedule(classData: IClassData, newSchedule: string[][]): Promise<boolean>;
     changeDay(classData: IClassData, dayIndex: number, newLessonsForDay: string[]): Promise<false | string[][]>;
     getSchedule(classData: IClassData): Promise<string[][]>;
-    getCallSchedule(schoolName: string): Promise<callSchedule | null>;
-    getCallCheduleForDay(schoolName: string, dayIndex: number): Promise<lessonCall[] | null>;
-    addCallScheduleException(schoolName: string, dayIndex: number, schedule: lessonCall[]): Promise<boolean>;
-    changeDefaultCallSchedule(schoolName: string, schedule: lessonCall[]): Promise<boolean>;
+    getCallSchedule(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool): Promise<callSchedule | null>;
+    getCallCheduleForDay(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool, dayIndex: number): Promise<lessonCall[] | null>;
+    addCallScheduleException(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool, dayIndex: number, schedule: lessonCall[]): Promise<boolean>;
+    changeDefaultCallSchedule(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool, schedule: lessonCall[]): Promise<boolean>;
     getLessonAtSpecificTime(callSchedule: lessonCall[], date: Date): lessonCall;
     getNextCallTime(callSchedule: lessonCall[], date: Date): string;
     addAnnouncement(classData: IClassData, content: ICreateAnnouncement, toDate: Date | undefined, toAll: boolean | undefined, vkId: number): Promise<mongoose.Types.ObjectId | null>;
@@ -65,6 +65,7 @@ export declare class DataBase {
     validateDate(date: Date | string | number, maxDate?: Date, minDate?: Date): boolean;
     getClassByClassData({ classNameOrInstance, schoolName }: IClassData): Promise<ClassDocument | PopulatedClass | null>;
     getStudentByStudentData(vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent): Promise<StudentDocument | PopulatedStudent | null>;
+    getSchoolBySchoolData(schoolNameOrInstance: string | SchoolDocument | PopulatedSchool): Promise<SchoolDocument | PopulatedSchool | null>;
     connect(...args: any[]): void;
 }
 export {};

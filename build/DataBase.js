@@ -428,18 +428,18 @@ class DataBase {
         }
     }
     //* Call Schedule
-    async getCallSchedule(schoolName) {
-        const School = await this.getSchoolByName(schoolName);
+    async getCallSchedule(schoolNameOrInstance) {
+        const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
         if (School) {
-            return School?.callSchedule;
+            return School.callSchedule;
         }
         else {
             return null;
         }
     }
-    async getCallCheduleForDay(schoolName, dayIndex) {
+    async getCallCheduleForDay(schoolNameOrInstance, dayIndex) {
         try {
-            const School = await this.getSchoolByName(schoolName);
+            const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
             if (School) {
                 if (utils_1.inRange(dayIndex, 1, 6)) {
                     const { exceptions, defaultSchedule } = School.callSchedule;
@@ -463,9 +463,9 @@ class DataBase {
             return null;
         }
     }
-    async addCallScheduleException(schoolName, dayIndex, schedule) {
+    async addCallScheduleException(schoolNameOrInstance, dayIndex, schedule) {
         try {
-            const School = await this.getSchoolByName(schoolName);
+            const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
             if (School) {
                 if (utils_1.inRange(dayIndex, 1, 6)) {
                     const { exceptions } = School.callSchedule;
@@ -486,8 +486,8 @@ class DataBase {
             return false;
         }
     }
-    async changeDefaultCallSchedule(schoolName, schedule) {
-        const School = await this.getSchoolByName(schoolName);
+    async changeDefaultCallSchedule(schoolNameOrInstance, schedule) {
+        const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
         if (School) {
             School.callSchedule.defaultSchedule = schedule;
             await School.save();
@@ -838,6 +838,16 @@ class DataBase {
             Student = vkIdOrStudentInstance;
         }
         return Student;
+    }
+    async getSchoolBySchoolData(schoolNameOrInstance) {
+        let School;
+        if (typeof schoolNameOrInstance === 'string') {
+            School = await this.getSchoolByName(schoolNameOrInstance);
+        }
+        else {
+            School = schoolNameOrInstance;
+        }
+        return School;
     }
     connect(...args) {
         mongoose_1.default.connect(this.uri, ...args);
