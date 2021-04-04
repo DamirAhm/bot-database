@@ -12,6 +12,7 @@ import {
 } from './utils/functions';
 import mongoose from 'mongoose';
 import {
+	callSchedule,
 	ClassDocument,
 	IAnnouncement,
 	IAttachment,
@@ -562,7 +563,7 @@ export class DataBase {
 	}
 
 	//* Call Schedule
-	async getCallSchedule(schoolName: string) {
+	async getCallSchedule(schoolName: string): Promise<callSchedule | null> {
 		const School = await this.getSchoolByName(schoolName);
 
 		if (School) {
@@ -579,7 +580,7 @@ export class DataBase {
 				if (inRange(dayIndex, 1, 6)) {
 					const { exceptions, defaultSchedule } = School.callSchedule;
 					if (exceptions.length > 0) {
-						return exceptions;
+						return exceptions[dayIndex - 1];
 					} else {
 						return defaultSchedule;
 					}
