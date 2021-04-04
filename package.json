@@ -1,6 +1,6 @@
 {
   "name": "bot-database",
-  "version": "3.4.3",
+  "version": "3.4.3-2",
   "description": "",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",

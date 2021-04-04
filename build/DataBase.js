@@ -501,7 +501,7 @@ class DataBase {
         const lessonEnds = callSchedule.map(({ end }) => end);
         const time = utils_1.getTimeFromDate(date);
         let index = 0;
-        while (utils_1.compareTimes(time, lessonEnds[index]))
+        while (utils_1.compareTimes(time, lessonEnds[index]) && index < lessonEnds.length - 1)
             index++;
         return callSchedule[index];
     }

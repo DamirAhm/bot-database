@@ -55,7 +55,7 @@ export const compareTimes = (a: string, b: string) => {
 	if (checkValidTime(a) && checkValidTime(b)) {
 		return a > b;
 	} else {
-		throw new Error('Times should be in format: 00:00');
+		throw new Error('Times should be in format 00:00, got: ' + `${a} and ${b}`);
 	}
 };
 

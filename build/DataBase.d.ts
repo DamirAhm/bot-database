@@ -33,7 +33,7 @@ export declare class DataBase {
     removeOldHomework(classData: IClassData, maxDate?: Date): Promise<IHomework[]>;
     togglePinHomework(classData: IClassData, homeworkId: string | ObjectId): Promise<boolean>;
     unpinAllHomework(classData: IClassData): Promise<boolean>;
-    parseHomeworkToNotifications(currentDateForTest: Date): Promise<(number[] | IHomework[])[][]>;
+    parseHomeworkToNotifications(currentDateForTest: Date): Promise<(IHomework[] | number[])[][]>;
     setSchedule(classData: IClassData, newSchedule: string[][]): Promise<boolean>;
     changeDay(classData: IClassData, dayIndex: number, newLessonsForDay: string[]): Promise<false | string[][]>;
     getSchedule(classData: IClassData): Promise<string[][]>;
@@ -63,7 +63,7 @@ export declare class DataBase {
     validateContent(content: ICreateContent): string[];
     validateAttachment(attachment: IAttachment): boolean;
     validateDate(date: Date | string | number, maxDate?: Date, minDate?: Date): boolean;
-    getClassByClassData({ classNameOrInstance, schoolName }: IClassData): Promise<PopulatedClass | ClassDocument | null>;
+    getClassByClassData({ classNameOrInstance, schoolName }: IClassData): Promise<ClassDocument | PopulatedClass | null>;
     getStudentByStudentData(vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent): Promise<StudentDocument | PopulatedStudent | null>;
     connect(...args: any[]): void;
 }

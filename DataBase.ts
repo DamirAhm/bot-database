@@ -635,7 +635,7 @@ export class DataBase {
 
 		let index = 0;
 
-		while (compareTimes(time, lessonEnds[index])) index++;
+		while (compareTimes(time, lessonEnds[index]) && index < lessonEnds.length - 1) index++;
 
 		return callSchedule[index];
 	}

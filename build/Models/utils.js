@@ -55,7 +55,7 @@ exports.compareTimes = (a, b) => {
         return a > b;
     }
     else {
-        throw new Error('Times should be in format: 00:00');
+        throw new Error('Times should be in format 00:00, got: ' + `${a} and ${b}`);
     }
 };
 exports.isLesson = (str) => /^[a-zа-я0-9.! ]*$/i.test(str);
