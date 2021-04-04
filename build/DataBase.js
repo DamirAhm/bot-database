@@ -444,7 +444,7 @@ class DataBase {
                 if (utils_1.inRange(dayIndex, 1, 6)) {
                     const { exceptions, defaultSchedule } = School.callSchedule;
                     if (exceptions.length > 0) {
-                        return exceptions;
+                        return exceptions[dayIndex - 1];
                     }
                     else {
                         return defaultSchedule;

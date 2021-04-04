@@ -1,6 +1,6 @@
 import { Roles } from './Models/utils';
 import mongoose from 'mongoose';
-import { ClassDocument, IAnnouncement, IAttachment, IClassData, ICreateAnnouncement, ICreateContent, ICreateHomework, ICreateStudentParams, IHomework, ISettings, lessonCall, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from './types';
+import { callSchedule, ClassDocument, IAnnouncement, IAttachment, IClassData, ICreateAnnouncement, ICreateContent, ICreateHomework, ICreateStudentParams, IHomework, ISettings, lessonCall, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from './types';
 declare type ObjectId = mongoose.Types.ObjectId;
 export declare class DataBase {
     uri: string;
@@ -33,12 +33,12 @@ export declare class DataBase {
     removeOldHomework(classData: IClassData, maxDate?: Date): Promise<IHomework[]>;
     togglePinHomework(classData: IClassData, homeworkId: string | ObjectId): Promise<boolean>;
     unpinAllHomework(classData: IClassData): Promise<boolean>;
-    parseHomeworkToNotifications(currentDateForTest: Date): Promise<(IHomework[] | number[])[][]>;
+    parseHomeworkToNotifications(currentDateForTest: Date): Promise<(number[] | IHomework[])[][]>;
     setSchedule(classData: IClassData, newSchedule: string[][]): Promise<boolean>;
     changeDay(classData: IClassData, dayIndex: number, newLessonsForDay: string[]): Promise<false | string[][]>;
     getSchedule(classData: IClassData): Promise<string[][]>;
-    getCallSchedule(schoolName: string): Promise<import("./types").callSchedule | null>;
-    getCallCheduleForDay(schoolName: string, dayIndex: number): Promise<lessonCall[] | lessonCall[][] | null>;
+    getCallSchedule(schoolName: string): Promise<callSchedule | null>;
+    getCallCheduleForDay(schoolName: string, dayIndex: number): Promise<lessonCall[] | null>;
     addCallScheduleException(schoolName: string, dayIndex: number, schedule: lessonCall[]): Promise<boolean>;
     changeDefaultCallSchedule(schoolName: string, schedule: lessonCall[]): Promise<boolean>;
     getLessonAtSpecificTime(callSchedule: lessonCall[], date: Date): lessonCall;
@@ -63,7 +63,7 @@ export declare class DataBase {
     validateContent(content: ICreateContent): string[];
     validateAttachment(attachment: IAttachment): boolean;
     validateDate(date: Date | string | number, maxDate?: Date, minDate?: Date): boolean;
-    getClassByClassData({ classNameOrInstance, schoolName }: IClassData): Promise<ClassDocument | PopulatedClass | null>;
+    getClassByClassData({ classNameOrInstance, schoolName }: IClassData): Promise<PopulatedClass | ClassDocument | null>;
     getStudentByStudentData(vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent): Promise<StudentDocument | PopulatedStudent | null>;
     connect(...args: any[]): void;
 }

@@ -25,17 +25,18 @@ export const Lessons = [
 ] as const;
 
 export function inRange(number: number, min: number, max: number) {
-	if (min ?? min > number) {
+	if (min === undefined && min > number) {
 		return false;
 	}
-	if (max ?? max < number) {
+
+	if (max === undefined && max < number) {
 		return false;
 	}
 
 	return true;
 }
 
-export const timeRegExp = /(\d{2}):(\d{2})/;
+export const timeRegExp = /([0-9]{2}):([0-9]{2})/;
 export const checkValidTime = (str: string) => {
 	if (timeRegExp.test(str)) {
 		//@ts-ignore
@@ -84,8 +85,7 @@ export const isValidClassName = (name: string) => {
 };
 
 export const getTimeFromDate = (date: Date) => {
-	const hours = date.getHours();
-	const minutes = date.getMinutes();
-
+	const hours = String(date.getHours()).padStart(2, '0');
+	const minutes = String(date.getMinutes()).padStart(2, '0');
 	return `${hours}:${minutes}`;
 };

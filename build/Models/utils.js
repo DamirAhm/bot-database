@@ -27,16 +27,16 @@ exports.Lessons = [
     'Химия',
 ];
 function inRange(number, min, max) {
-    if (min ?? min > number) {
+    if (min === undefined && min > number) {
         return false;
     }
-    if (max ?? max < number) {
+    if (max === undefined && max < number) {
         return false;
     }
     return true;
 }
 exports.inRange = inRange;
-exports.timeRegExp = /(\d{2}):(\d{2})/;
+exports.timeRegExp = /([0-9]{2}):([0-9]{2})/;
 exports.checkValidTime = (str) => {
     if (exports.timeRegExp.test(str)) {
         //@ts-ignore
@@ -79,7 +79,7 @@ exports.isValidClassName = (name) => {
     return false;
 };
 exports.getTimeFromDate = (date) => {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 };
