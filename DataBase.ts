@@ -23,7 +23,7 @@ import {
 	ICreateStudentParams,
 	IHomework,
 	ISettings,
-	lessonCalls,
+	lessonCall,
 	PopulatedClass,
 	PopulatedSchool,
 	PopulatedStudent,
@@ -562,25 +562,26 @@ export class DataBase {
 	}
 
 	//* Call Schedule
-	async getCallSchedule(classData: IClassData) {
-		const Class = await this.getClassByClassData(classData);
+	async getCallSchedule(schoolName: string) {
+		const School = await this.getSchoolByName(schoolName);
 
-		if (Class) {
-			return Class?.callSchedule;
+		if (School) {
+			return School?.callSchedule;
 		} else {
 			return null;
 		}
 	}
-	async getCallCheduleForDay(classData: IClassData, dayIndex: number) {
+	async getCallCheduleForDay(schoolName: string, dayIndex: number) {
 		try {
-			let Class = await this.getClassByClassData(classData);
+			const School = await this.getSchoolByName(schoolName);
 
-			if (Class) {
-				if (inRange(dayIndex, 0, 5)) {
-					if (Class.callSchedule.exceptions[dayIndex].length > 0) {
-						return Class.callSchedule.exceptions[dayIndex];
+			if (School) {
+				if (inRange(dayIndex, 1, 6)) {
+					const { exceptions, defaultSchedule } = School.callSchedule;
+					if (exceptions.length > 0) {
+						return exceptions;
 					} else {
-						return Class.callSchedule.default;
+						return defaultSchedule;
 					}
 				} else {
 					throw new Error('Day index must be in range 0 to 5, got: ' + dayIndex);
@@ -593,18 +594,15 @@ export class DataBase {
 			return null;
 		}
 	}
-	async addCallScheduleException(
-		classData: IClassData,
-		dayIndex: number,
-		schedule: lessonCalls[],
-	) {
+	async addCallScheduleException(schoolName: string, dayIndex: number, schedule: lessonCall[]) {
 		try {
-			const Class = await this.getClassByClassData(classData);
+			const School = await this.getSchoolByName(schoolName);
 
-			if (Class) {
-				if (inRange(dayIndex, 0, 5)) {
-					Class.callSchedule.exceptions[dayIndex] = schedule;
-					await Class.save();
+			if (School) {
+				if (inRange(dayIndex, 1, 6)) {
+					const { exceptions } = School.callSchedule;
+					exceptions[dayIndex - 1] = schedule;
+					await School.save();
 
 					return true;
 				} else {
@@ -618,7 +616,19 @@ export class DataBase {
 			return false;
 		}
 	}
-	getLessonAtSpecificTime(callSchedule: lessonCalls[], date: Date) {
+	async changeDefaultCallSchedule(schoolName: string, schedule: lessonCall[]) {
+		const School = await this.getSchoolByName(schoolName);
+
+		if (School) {
+			School.callSchedule.defaultSchedule = schedule;
+
+			await School.save();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	getLessonAtSpecificTime(callSchedule: lessonCall[], date: Date) {
 		const lessonEnds = callSchedule.map(({ end }) => end);
 		const time = getTimeFromDate(date);
 
@@ -628,7 +638,7 @@ export class DataBase {
 
 		return callSchedule[index];
 	}
-	getNextCallTime(callSchedule: lessonCalls[], date: Date) {
+	getNextCallTime(callSchedule: lessonCall[], date: Date) {
 		const currentLesson = this.getLessonAtSpecificTime(callSchedule, date);
 		const currentTime = getTimeFromDate(date);
 

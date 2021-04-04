@@ -1,6 +1,6 @@
 import { Roles } from './Models/utils';
 import mongoose from 'mongoose';
-import { ClassDocument, IAnnouncement, IAttachment, IClassData, ICreateAnnouncement, ICreateContent, ICreateHomework, ICreateStudentParams, IHomework, ISettings, lessonCalls, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from './types';
+import { ClassDocument, IAnnouncement, IAttachment, IClassData, ICreateAnnouncement, ICreateContent, ICreateHomework, ICreateStudentParams, IHomework, ISettings, lessonCall, PopulatedClass, PopulatedSchool, PopulatedStudent, SchoolDocument, StudentDocument } from './types';
 declare type ObjectId = mongoose.Types.ObjectId;
 export declare class DataBase {
     uri: string;
@@ -33,14 +33,16 @@ export declare class DataBase {
     removeOldHomework(classData: IClassData, maxDate?: Date): Promise<IHomework[]>;
     togglePinHomework(classData: IClassData, homeworkId: string | ObjectId): Promise<boolean>;
     unpinAllHomework(classData: IClassData): Promise<boolean>;
-    parseHomeworkToNotifications(currentDateForTest: Date): Promise<(number[] | IHomework[])[][]>;
+    parseHomeworkToNotifications(currentDateForTest: Date): Promise<(IHomework[] | number[])[][]>;
     setSchedule(classData: IClassData, newSchedule: string[][]): Promise<boolean>;
     changeDay(classData: IClassData, dayIndex: number, newLessonsForDay: string[]): Promise<false | string[][]>;
     getSchedule(classData: IClassData): Promise<string[][]>;
-    getCallCheduleForDay(classData: IClassData, dayIndex: number): Promise<lessonCalls[] | null>;
-    addCallScheduleException(classData: IClassData, dayIndex: number, schedule: lessonCalls[]): Promise<boolean>;
-    getLessonAtSpecificTime(callSchedule: lessonCalls[], date: Date): lessonCalls;
-    getNextCallTime(callSchedule: lessonCalls[], date: Date): string;
+    getCallSchedule(schoolName: string): Promise<import("./types").callSchedule | null>;
+    getCallCheduleForDay(schoolName: string, dayIndex: number): Promise<lessonCall[] | lessonCall[][] | null>;
+    addCallScheduleException(schoolName: string, dayIndex: number, schedule: lessonCall[]): Promise<boolean>;
+    changeDefaultCallSchedule(schoolName: string, schedule: lessonCall[]): Promise<boolean>;
+    getLessonAtSpecificTime(callSchedule: lessonCall[], date: Date): lessonCall;
+    getNextCallTime(callSchedule: lessonCall[], date: Date): string;
     addAnnouncement(classData: IClassData, content: ICreateAnnouncement, toDate: Date | undefined, toAll: boolean | undefined, vkId: number): Promise<mongoose.Types.ObjectId | null>;
     getAnnouncements(classData: IClassData, date?: Date): Promise<IAnnouncement[] | null>;
     removeAnnouncement(classData: IClassData, announcementId: string | ObjectId): Promise<IAnnouncement[] | null>;
@@ -61,7 +63,7 @@ export declare class DataBase {
     validateContent(content: ICreateContent): string[];
     validateAttachment(attachment: IAttachment): boolean;
     validateDate(date: Date | string | number, maxDate?: Date, minDate?: Date): boolean;
-    getClassByClassData({ classNameOrInstance, schoolName }: IClassData): Promise<PopulatedClass | ClassDocument | null>;
+    getClassByClassData({ classNameOrInstance, schoolName }: IClassData): Promise<ClassDocument | PopulatedClass | null>;
     getStudentByStudentData(vkIdOrStudentInstance: number | StudentDocument | PopulatedStudent): Promise<StudentDocument | PopulatedStudent | null>;
     connect(...args: any[]): void;
 }

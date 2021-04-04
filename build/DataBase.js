@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DataBase = void 0;
 const tslib_1 = require("tslib");
 const utils_1 = require("./Models/utils");
 const StudentModel_1 = tslib_1.__importDefault(require("./Models/StudentModel"));
@@ -429,16 +428,26 @@ class DataBase {
         }
     }
     //* Call Schedule
-    async getCallCheduleForDay(classData, dayIndex) {
+    async getCallSchedule(schoolName) {
+        const School = await this.getSchoolByName(schoolName);
+        if (School) {
+            return School?.callSchedule;
+        }
+        else {
+            return null;
+        }
+    }
+    async getCallCheduleForDay(schoolName, dayIndex) {
         try {
-            let Class = await this.getClassByClassData(classData);
-            if (Class) {
-                if (utils_1.inRange(dayIndex, 0, 5)) {
-                    if (Class.callSchedule.exceptions[dayIndex].length > 0) {
-                        return Class.callSchedule.exceptions[dayIndex];
+            const School = await this.getSchoolByName(schoolName);
+            if (School) {
+                if (utils_1.inRange(dayIndex, 1, 6)) {
+                    const { exceptions, defaultSchedule } = School.callSchedule;
+                    if (exceptions.length > 0) {
+                        return exceptions;
                     }
                     else {
-                        return Class.callSchedule.default;
+                        return defaultSchedule;
                     }
                 }
                 else {
@@ -454,13 +463,14 @@ class DataBase {
             return null;
         }
     }
-    async addCallScheduleException(classData, dayIndex, schedule) {
+    async addCallScheduleException(schoolName, dayIndex, schedule) {
         try {
-            const Class = await this.getClassByClassData(classData);
-            if (Class) {
-                if (utils_1.inRange(dayIndex, 0, 5)) {
-                    Class.callSchedule.exceptions[dayIndex] = schedule;
-                    await Class.save();
+            const School = await this.getSchoolByName(schoolName);
+            if (School) {
+                if (utils_1.inRange(dayIndex, 1, 6)) {
+                    const { exceptions } = School.callSchedule;
+                    exceptions[dayIndex - 1] = schedule;
+                    await School.save();
                     return true;
                 }
                 else {
@@ -473,6 +483,17 @@ class DataBase {
         }
         catch (e) {
             console.error(e);
+            return false;
+        }
+    }
+    async changeDefaultCallSchedule(schoolName, schedule) {
+        const School = await this.getSchoolByName(schoolName);
+        if (School) {
+            School.callSchedule.defaultSchedule = schedule;
+            await School.save();
+            return true;
+        }
+        else {
             return false;
         }
     }

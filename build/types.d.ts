@@ -11,14 +11,13 @@ export interface IClass {
     homework: IHomework[];
     announcements: IAnnouncement[];
     schedule: string[][];
-    callSchedule: callSchedule;
     schoolName: string;
 }
 export declare type callSchedule = {
-    default: lessonCalls[];
-    exceptions: callSchedule['default'][];
+    defaultSchedule: lessonCall[];
+    exceptions: callSchedule['defaultSchedule'][];
 };
-export declare type lessonCalls = {
+export declare type lessonCall = {
     start: string;
     end: string;
 };
@@ -68,6 +67,7 @@ export interface SchoolDocument extends ISchool, mongoose.Document {
 }
 export interface ISchool {
     classes: mongoose.Types.ObjectId[];
+    callSchedule: callSchedule;
     name: string;
 }
 export interface PopulatedStudent extends Omit<StudentDocument, 'class'> {

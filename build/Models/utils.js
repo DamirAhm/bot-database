@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTimeFromDate = exports.isValidClassName = exports.classNameRegExp = exports.daysOfWeek = exports.isURL = exports.isLesson = exports.compareTimes = exports.checkValidTime = exports.timeRegExp = exports.inRange = exports.Lessons = exports.Roles = void 0;
 var Roles;
 (function (Roles) {
     Roles["student"] = "STUDENT";
@@ -38,7 +37,7 @@ function inRange(number, min, max) {
 }
 exports.inRange = inRange;
 exports.timeRegExp = /(\d{2}):(\d{2})/;
-const checkValidTime = (str) => {
+exports.checkValidTime = (str) => {
     if (exports.timeRegExp.test(str)) {
         //@ts-ignore
         const [hours, minutes] = str
@@ -51,8 +50,7 @@ const checkValidTime = (str) => {
     }
     return false;
 };
-exports.checkValidTime = checkValidTime;
-const compareTimes = (a, b) => {
+exports.compareTimes = (a, b) => {
     if (exports.checkValidTime(a) && exports.checkValidTime(b)) {
         return a > b;
     }
@@ -60,12 +58,9 @@ const compareTimes = (a, b) => {
         throw new Error('Times should be in format: 00:00');
     }
 };
-exports.compareTimes = compareTimes;
-const isLesson = (str) => /^[a-zа-я0-9.! ]*$/i.test(str);
-exports.isLesson = isLesson;
+exports.isLesson = (str) => /^[a-zа-я0-9.! ]*$/i.test(str);
 const urlRegExp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/;
-const isURL = (str) => urlRegExp.test(str);
-exports.isURL = isURL;
+exports.isURL = (str) => urlRegExp.test(str);
 exports.daysOfWeek = [
     'Понедельник',
     'Вторник',
@@ -75,7 +70,7 @@ exports.daysOfWeek = [
     'Суббота',
 ];
 exports.classNameRegExp = /^(\d{1,2})([A-ZА-Я])$/i;
-const isValidClassName = (name) => {
+exports.isValidClassName = (name) => {
     if (exports.classNameRegExp.test(name)) {
         //@ts-ignore
         const digit = Number(name.match(exports.classNameRegExp)[1]);
@@ -83,10 +78,8 @@ const isValidClassName = (name) => {
     }
     return false;
 };
-exports.isValidClassName = isValidClassName;
-const getTimeFromDate = (date) => {
+exports.getTimeFromDate = (date) => {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     return `${hours}:${minutes}`;
 };
-exports.getTimeFromDate = getTimeFromDate;
