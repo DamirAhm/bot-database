@@ -562,6 +562,15 @@ export class DataBase {
 	}
 
 	//* Call Schedule
+	async getCallSchedule(classData: IClassData) {
+		const Class = await this.getClassByClassData(classData);
+
+		if (Class) {
+			return Class?.callSchedule;
+		} else {
+			return null;
+		}
+	}
 	async getCallCheduleForDay(classData: IClassData, dayIndex: number) {
 		try {
 			let Class = await this.getClassByClassData(classData);
