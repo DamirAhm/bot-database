@@ -319,7 +319,7 @@ class DataBase {
         const Class = await this.getClassByClassData(classData);
         if (Class) {
             const { homework } = Class;
-            return homework?.filter((hw) => Math.abs(hw.to.getTime() - date.getTime()) <= functions_1.dayInMilliseconds &&
+            return homework?.filter((hw) => Math.abs(hw.to.getTime() - date.getTime()) < functions_1.dayInMilliseconds &&
                 hw.to.getDate() === date.getDate());
         }
         else {
@@ -441,9 +441,9 @@ class DataBase {
         try {
             const School = await this.getSchoolBySchoolData(schoolNameOrInstance);
             if (School) {
-                if (utils_1.inRange(dayIndex, 1, 6)) {
+                if (utils_1.inRange(dayIndex, 1, 7)) {
                     const { exceptions, defaultSchedule } = School.callSchedule;
-                    if (exceptions.length > 0) {
+                    if (exceptions[dayIndex - 1].length > 0 && dayIndex !== 7) {
                         return exceptions[dayIndex - 1];
                     }
                     else {
@@ -451,7 +451,7 @@ class DataBase {
                     }
                 }
                 else {
-                    throw new Error('Day index must be in range 0 to 5, got: ' + dayIndex);
+                    throw new Error('Day index must be in range 1 to 7, got: ' + dayIndex);
                 }
             }
             else {

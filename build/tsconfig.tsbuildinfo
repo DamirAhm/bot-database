@@ -374,7 +374,7 @@
         "signature": "745f5301b027bd9a266504c086c9ab5bc0f0fd54b3eedc64a901cdce2c92aa1f"
       },
       "../DataBase.ts": {
-        "version": "f50a108b5aef7af7cc31b01a72fdd708eea74c0d6ca9fd92cea02daaae880548",
+        "version": "f906ce3b583163d01b18df11370b30e3a377b1cb20a32088c3d259381cfde0b8",
         "signature": "d4b45a1d9ac7f4b8bf0c5c54e56c696bbe5e94a8bd704b1d2653081a72f4fa4a"
       },
       "../qs.d.ts": {
@@ -1734,6 +1734,7 @@
       "../node_modules/@types/bson/index.d.ts",
       "../node_modules/@types/mongodb/index.d.ts",
       "../node_modules/mongoose/index.d.ts",
+      "../types.ts",
       "../Models/StudentModel.ts",
       "../Models/SchoolModel.ts",
       "../Models/ClassModel.ts",
@@ -1743,6 +1744,8 @@
       "../node-fetch.d.ts",
       "../node_modules/form-data/index.d.ts",
       "../VkAPI/VK_API.ts",
+      "../index.ts",
+      "../test.js",
       "../uuid4.d.ts",
       "../node_modules/@types/node-fetch/externals.d.ts",
       "../node_modules/@types/node-fetch/index.d.ts",
@@ -1752,10 +1755,7 @@
       "../../../../../node_modules/@types/mongodb/index.d.ts",
       "../../../../../node_modules/@types/mongoose/index.d.ts",
       "../../../../../node_modules/@types/zen-observable/index.d.ts",
-      "../DataBase.ts",
-      "../types.ts",
-      "../index.ts",
-      "../test.js"
+      "../DataBase.ts"
     ]
   },
   "version": "3.8.3"
