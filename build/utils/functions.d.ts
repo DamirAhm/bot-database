@@ -11,6 +11,6 @@ export declare const findNotifiedStudents: (students: IStudent[], notificationDa
 export declare const lessonsIndexesToLessonsNames: (lessonList: string[], indexes: number[][]) => string[][];
 export declare const checkIsToday: (date: Date, to?: Date) => boolean;
 export declare const isPartialOf: (object: object | string[], instance: object) => boolean;
-export declare const filterContentByDate: (content: IContent[], date: Date) => IContent[];
+export declare const filterContentByDate: <T extends IContent>(content: T[], date: Date) => T[];
 export declare const mapHomeworkByLesson: (homework: IHomework[]) => Map<any, any>;
 export declare const deeplyAssignObjects: <T extends Record<string, any>>(objA: T, objB: T) => T;

@@ -106,8 +106,7 @@ export const isPartialOf = (object: object | string[], instance: object) => {
 		);
 	}
 };
-
-export const filterContentByDate = (content: IContent[], date: Date) => {
+export const filterContentByDate = <T extends IContent>(content: T[], date: Date) => {
 	return content.filter(
 		(cont) =>
 			Math.abs(cont.to.getTime() - date.getTime()) <= dayInMilliseconds &&

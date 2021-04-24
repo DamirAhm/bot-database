@@ -36,7 +36,7 @@ export function inRange(number: number, min: number, max: number) {
 	return true;
 }
 
-export const timeRegExp = /([0-9]{2}):([0-9]{2})/;
+export const timeRegExp = /([0-9]{1,2}):([0-9]{2})/;
 export const checkValidTime = (str: string) => {
 	if (timeRegExp.test(str)) {
 		//@ts-ignore
